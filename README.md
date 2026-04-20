@@ -228,9 +228,23 @@ Für jeden der 6 Artefakttypen eine dedizierte Feldkomponente mit typengerechtem
 
 ---
 
-## Noch ausstehend (Sprint 1, Schritte 9–10)
+### Schritt 9 — Artefaktstatus und Soft Delete (D4, D5) ✅
 
-- **Schritt 9** — Artefaktstatus (D4) + Soft Delete (D5)
+**D4 — Statusverwaltung:**
+- `ArtifactHeader` — zeigt Typ-Label + `ArtifactStatusBadge` + Quick-Status-Button
+- Quick-Status-Toggle: ein Klick wechselt DRAFT → IN_REVIEW → DONE → DRAFT (zyklisch), schreibt sofort eine neue Version, invalidiert SWR-Cache im Baum und Detail
+- Status-Button zeigt nächsten Zielstatus als Label an
+
+**D5 — Soft Delete:**
+- `DELETE /api/projects/:id/artifacts/:aid` — setzt `deleted: true`, physisch bleibt der Eintrag erhalten
+- Löschen-Icon im `ArtifactHeader` öffnet `ConfirmDialog` mit Artefakt-Titel
+- Nach Bestätigung: SWR-Cache invalidiert, Redirect auf leeren Explorer, Tree-Refresh
+- Alle Standardabfragen filtern bereits `deleted: false` — gelöschte Artefakte tauchen nicht mehr auf
+
+---
+
+## Noch ausstehend (Sprint 1, Schritt 10)
+
 - **Schritt 10** — Explorer-Baum: Gruppierung (C3) + Navigation (C2)
 
 ## Geplant (Sprint 2–4)

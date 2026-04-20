@@ -96,3 +96,28 @@ export async function PATCH(request, { params }) {
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
 }
+
+// DELETE /api/projects/:id/artifacts/:aid — soft delete (sets deleted: true)
+export async function DELETE(request, { params }) {
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
+  const { projectId, artifactId } = await params;
+  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
+  if (accessErr) return accessErr;
+
+  const { response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
+  if (artifactErr) return artifactErr;
+
+  try {
+    await prisma.artifact.update({
+      where: { id: artifactId },
+      data: { deleted: true },
+    });
+
+    return successResponse({ deleted: true });
+  } catch (error) {
+    console.error("[DELETE artifact]", error);
+    return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+  }
+}

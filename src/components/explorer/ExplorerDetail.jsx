@@ -5,13 +5,14 @@ import useSWR from "swr";
 import { FileText, AlertCircle } from "lucide-react";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 import ArtifactForm from "@/components/artifacts/ArtifactForm.jsx";
+import ArtifactHeader from "@/components/artifacts/ArtifactHeader.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
 
 const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
 
 function EmptyHint() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 text-gray-400 px-8 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center text-gray-400">
       <FileText className="h-12 w-12" />
       <div>
         <p className="text-sm font-medium text-gray-600">Kein Artefakt ausgewählt</p>
@@ -39,7 +40,7 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
 
   if (error || !artifact) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-gray-400">
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
         <AlertCircle className="h-8 w-8 text-red-400" />
         <p className="text-sm text-red-600">Artefakt konnte nicht geladen werden</p>
       </div>
@@ -48,16 +49,18 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto p-6">
-      <div className="mb-4">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-          {ARTIFACT_TYPE_LABELS[artifact.type] ?? artifact.type}
-        </span>
-      </div>
-      <ArtifactForm
+      <ArtifactHeader
         artifact={artifact}
         projectId={projectId}
-        onSaved={(updated) => mutate(updated, false)}
+        onStatusChange={(updated) => mutate(updated, false)}
       />
+      <div className="mt-5 flex-1">
+        <ArtifactForm
+          artifact={artifact}
+          projectId={projectId}
+          onSaved={(updated) => mutate(updated, false)}
+        />
+      </div>
     </div>
   );
 }
