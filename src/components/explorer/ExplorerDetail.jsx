@@ -1,44 +1,86 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { FileText } from "lucide-react";
+import useSWR from "swr";
+import { FileText, AlertCircle } from "lucide-react";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
+import ArtifactForm from "@/components/artifacts/ArtifactForm.jsx";
+import Spinner from "@/components/ui/Spinner.jsx";
+
+const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
+
+function EmptyHint() {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 text-gray-400 px-8 text-center">
+      <FileText className="h-12 w-12" />
+      <div>
+        <p className="text-sm font-medium text-gray-600">Kein Artefakt ausgewählt</p>
+        <p className="mt-1 text-xs text-gray-400">
+          Wähle ein Artefakt aus dem Baum oder klicke auf + um ein neues anzulegen.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ArtifactDetailPanel({ artifactId, projectId }) {
+  const { data: artifact, error, isLoading, mutate } = useSWR(
+    `/api/projects/${projectId}/artifacts/${artifactId}`,
+    fetcher
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Spinner className="h-6 w-6 text-blue-500" />
+      </div>
+    );
+  }
+
+  if (error || !artifact) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-gray-400">
+        <AlertCircle className="h-8 w-8 text-red-400" />
+        <p className="text-sm text-red-600">Artefakt konnte nicht geladen werden</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col overflow-y-auto p-6">
+      <div className="mb-4">
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          {ARTIFACT_TYPE_LABELS[artifact.type] ?? artifact.type}
+        </span>
+      </div>
+      <ArtifactForm
+        artifact={artifact}
+        projectId={projectId}
+        onSaved={(updated) => mutate(updated, false)}
+      />
+    </div>
+  );
+}
+
+function NewArtifactPanel({ type, projectId }) {
+  return (
+    <div className="flex flex-1 flex-col overflow-y-auto p-6">
+      <div className="mb-4">
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          Neue {ARTIFACT_TYPE_LABELS[type] ?? type}
+        </span>
+      </div>
+      <ArtifactForm type={type} projectId={projectId} />
+    </div>
+  );
+}
 
 export default function ExplorerDetail({ projectId }) {
   const searchParams = useSearchParams();
   const artifactId = searchParams.get("artifact");
   const newType = searchParams.get("new");
 
-  if (newType) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-gray-400">
-        <FileText className="h-10 w-10" />
-        <p className="text-sm font-medium text-gray-600">
-          Neue {ARTIFACT_TYPE_LABELS[newType]} anlegen
-        </p>
-        <p className="text-xs text-gray-400">
-          Artefakt-Formular kommt in Schritt 7
-        </p>
-      </div>
-    );
-  }
-
-  if (!artifactId) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-gray-400">
-        <FileText className="h-10 w-10" />
-        <p className="text-sm">Wähle ein Artefakt aus dem Baum aus</p>
-        <p className="text-xs">oder lege über das + ein neues an</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-2 text-gray-400">
-      <FileText className="h-10 w-10" />
-      <p className="text-sm text-gray-600 font-medium">Artefakt geladen</p>
-      <p className="font-mono text-xs text-gray-400">{artifactId}</p>
-      <p className="text-xs text-gray-400">Detail-Formular kommt in Schritt 7</p>
-    </div>
-  );
+  if (newType) return <NewArtifactPanel type={newType} projectId={projectId} />;
+  if (artifactId) return <ArtifactDetailPanel artifactId={artifactId} projectId={projectId} />;
+  return <EmptyHint />;
 }

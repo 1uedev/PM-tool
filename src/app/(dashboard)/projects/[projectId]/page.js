@@ -4,9 +4,8 @@ import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
 import Link from "next/link";
 import { Settings } from "lucide-react";
-import { Suspense } from "react";
 import Button from "@/components/ui/Button.jsx";
-import ExplorerTree from "@/components/explorer/ExplorerTree.jsx";
+import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
 
 export async function generateMetadata({ params }) {
@@ -69,17 +68,16 @@ export default async function ProjectPage({ params }) {
             </span>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <Suspense fallback={<div className="p-4 text-xs text-gray-400">Lädt…</div>}>
-              <ExplorerTree artifacts={artifacts} projectId={projectId} />
-            </Suspense>
+            <ExplorerTreeClient
+              projectId={projectId}
+              initialArtifacts={artifacts}
+            />
           </div>
         </aside>
 
         {/* Right: Detail */}
         <main className="flex flex-1 flex-col overflow-hidden bg-gray-50">
-          <Suspense fallback={null}>
-            <ExplorerDetail projectId={projectId} />
-          </Suspense>
+          <ExplorerDetail projectId={projectId} />
         </main>
       </div>
     </div>
