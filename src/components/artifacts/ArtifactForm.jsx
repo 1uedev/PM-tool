@@ -4,7 +4,8 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { mutate } from "swr";
 import { ARTIFACT_STATUS_LABELS, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
-import { ARTIFACT_FIELD_DEFS, getDefaultFields } from "@/lib/artifactFields.js";
+import { getDefaultFields } from "@/lib/artifactFields.js";
+import { FIELD_COMPONENTS } from "@/components/artifacts/fields/index.js";
 import Input from "@/components/ui/Input.jsx";
 import Select from "@/components/ui/Select.jsx";
 import Button from "@/components/ui/Button.jsx";
@@ -18,23 +19,20 @@ const STATUS_OPTIONS = Object.entries(ARTIFACT_STATUS_LABELS).map(([value, label
 export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
   const router = useRouter();
   const isEdit = !!artifact;
+  const artifactType = type ?? artifact?.type;
 
   const [title, setTitle] = useState(artifact?.title ?? "");
   const [status, setStatus] = useState(artifact?.status ?? "DRAFT");
   const [fields, setFields] = useState(
-    artifact?.fields ?? getDefaultFields(type ?? artifact?.type)
+    artifact?.fields ?? getDefaultFields(artifactType)
   );
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [globalError, setGlobalError] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const artifactType = type ?? artifact?.type;
-  const fieldDefs = ARTIFACT_FIELD_DEFS[artifactType] ?? [];
-
-  function setField(key, value) {
+  function handleFieldChange(key, value) {
     setFields((f) => ({ ...f, [key]: value }));
-    setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
   const validate = useCallback(() => {
@@ -79,7 +77,6 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         return;
       }
 
-      // Invalidate artifact list so tree refreshes
       mutate(`/api/projects/${projectId}/artifacts`);
 
       if (isEdit) {
@@ -87,7 +84,6 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         setTimeout(() => setSaved(false), 2000);
         onSaved?.(json.data);
       } else {
-        // Navigate to the newly created artifact
         const params = new URLSearchParams();
         params.set("artifact", json.data.id);
         router.push(`/projects/${projectId}?${params.toString()}`);
@@ -100,15 +96,20 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
     }
   }
 
+  const FieldsComponent = FIELD_COMPONENTS[artifactType];
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 h-full" noValidate>
-      {/* Header row: title + status */}
+      {/* Header: title + status */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex-1">
           <Input
             label="Titel"
             value={title}
-            onChange={(e) => { setTitle(e.target.value); setErrors((err) => ({ ...err, title: undefined })); }}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setErrors((err) => ({ ...err, title: undefined }));
+            }}
             error={errors.title}
             placeholder={`${ARTIFACT_TYPE_LABELS[artifactType] ?? "Artefakt"} benennen…`}
             autoFocus={!isEdit}
@@ -130,28 +131,15 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         </div>
       )}
 
-      {/* Type-specific fields */}
-      <div className="flex flex-col gap-4 flex-1">
-        {fieldDefs.map((def) => (
-          <div key={def.key} className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">{def.label}</label>
-            {def.multiline ? (
-              <textarea
-                value={fields[def.key] ?? ""}
-                onChange={(e) => setField(def.key, e.target.value)}
-                rows={def.rows ?? 3}
-                placeholder={def.placeholder}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y"
-              />
-            ) : (
-              <Input
-                value={fields[def.key] ?? ""}
-                onChange={(e) => setField(def.key, e.target.value)}
-                placeholder={def.placeholder}
-              />
-            )}
-          </div>
-        ))}
+      {/* Type-specific field component */}
+      <div className="flex-1">
+        {FieldsComponent ? (
+          <FieldsComponent fields={fields} onChange={handleFieldChange} />
+        ) : (
+          <p className="text-sm text-gray-400 italic">
+            Keine Felder für Typ „{artifactType}" definiert.
+          </p>
+        )}
       </div>
 
       {/* Actions */}
@@ -167,11 +155,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
           <span className="text-sm text-green-600 font-medium">✓ Gespeichert</span>
         )}
         {!isEdit && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.back()}
-          >
+          <Button type="button" variant="secondary" onClick={() => router.back()}>
             Abbrechen
           </Button>
         )}

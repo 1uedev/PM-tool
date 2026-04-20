@@ -209,9 +209,27 @@ Zwei-Spalten-Layout für `/projects/:id`:
 
 ---
 
-## Noch ausstehend (Sprint 1, Schritte 8–10)
+### Schritt 8 — Typ-spezifische Feldkomponenten (D3) ✅
 
-- **Schritt 8** — Typ-spezifische Feldkomponenten (D3) für alle 6 Typen
+Für jeden der 6 Artefakttypen eine dedizierte Feldkomponente mit typengerechtem UX:
+
+| Komponente | Besonderheit |
+|---|---|
+| `UserPersonaFields` | Name, Ziele, Pain Points, Kontext als beschriftete Felder |
+| `ProblemHypothesisFields` | Visueller Trenner zwischen Problem-Teil und Hypothese-Teil |
+| `ProductVisionFields` | Einzeiler in hervorgehobenem blauen Kasten |
+| `UseCaseFields` | Akteur + Ziel nebeneinander, Ablauf in Mono-Textarea |
+| `UserStoryFields` | Klassisches „Als … möchte ich … damit …"-Format mit verbundener Darstellung |
+| `FunctionalRequirementFields` | Akzeptanzkriterien in Mono-Textarea mit Hinweis-Text |
+
+- `FieldHelpers.jsx` — gemeinsame Primitive: `FieldLabel`, `FieldInput`, `FieldTextarea`, `FieldGroup`, `SectionDivider`
+- `fields/index.js` — `FIELD_COMPONENTS`-Map für dynamisches Rendering nach Typ
+- `ArtifactForm` — generischer Renderer entfernt, nutzt jetzt `FIELD_COMPONENTS[artifactType]`
+
+---
+
+## Noch ausstehend (Sprint 1, Schritte 9–10)
+
 - **Schritt 9** — Artefaktstatus (D4) + Soft Delete (D5)
 - **Schritt 10** — Explorer-Baum: Gruppierung (C3) + Navigation (C2)
 
