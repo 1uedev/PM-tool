@@ -1,5 +1,5 @@
 // Shared field primitives used by all type-specific field components.
-// Each component receives: { fields, onChange }
+// Each component receives: { fields, onChange, disabled }
 // onChange: (key: string, value: string) => void
 
 export function FieldLabel({ children, hint }) {
@@ -11,28 +11,32 @@ export function FieldLabel({ children, hint }) {
   );
 }
 
-export function FieldTextarea({ fieldKey, fields, onChange, placeholder, rows = 3, className = "" }) {
+export function FieldTextarea({ fieldKey, fields, onChange, placeholder, rows = 3, className = "", disabled = false }) {
   return (
     <textarea
       value={fields[fieldKey] ?? ""}
       onChange={(e) => onChange(fieldKey, e.target.value)}
       placeholder={placeholder}
       rows={rows}
+      disabled={disabled}
       className={`w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors
-        focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y ${className}`}
+        focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y
+        disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 ${className}`}
     />
   );
 }
 
-export function FieldInput({ fieldKey, fields, onChange, placeholder, className = "" }) {
+export function FieldInput({ fieldKey, fields, onChange, placeholder, className = "", disabled = false }) {
   return (
     <input
       type="text"
       value={fields[fieldKey] ?? ""}
       onChange={(e) => onChange(fieldKey, e.target.value)}
       placeholder={placeholder}
+      disabled={disabled}
       className={`w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors
-        focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${className}`}
+        focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+        disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 ${className}`}
     />
   );
 }

@@ -1,6 +1,6 @@
 import { FieldGroup, FieldLabel, FieldInput, FieldTextarea } from "./FieldHelpers.jsx";
 
-export default function UseCaseFields({ fields, onChange }) {
+export default function UseCaseFields({ fields, onChange, disabled }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Actor + Goal side by side */}
@@ -12,6 +12,7 @@ export default function UseCaseFields({ fields, onChange }) {
             fields={fields}
             onChange={onChange}
             placeholder="z. B. Hausbesitzer"
+            disabled={disabled}
           />
         </FieldGroup>
         <FieldGroup>
@@ -21,6 +22,7 @@ export default function UseCaseFields({ fields, onChange }) {
             fields={fields}
             onChange={onChange}
             placeholder="z. B. Gerät per Sprache steuern"
+            disabled={disabled}
           />
         </FieldGroup>
       </div>
@@ -33,6 +35,7 @@ export default function UseCaseFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="z. B. Nutzer ist eingeloggt. Gerät ist mit der App verbunden."
           rows={2}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -45,6 +48,7 @@ export default function UseCaseFields({ fields, onChange }) {
           placeholder={"1. Nutzer öffnet die App\n2. Nutzer navigiert zu Geräten\n3. System zeigt verbundene Geräte\n4. …"}
           rows={7}
           className="font-mono text-xs"
+          disabled={disabled}
         />
       </FieldGroup>
     </div>

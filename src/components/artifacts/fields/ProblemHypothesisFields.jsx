@@ -1,6 +1,6 @@
 import { FieldGroup, FieldLabel, FieldInput, FieldTextarea, SectionDivider } from "./FieldHelpers.jsx";
 
-export default function ProblemHypothesisFields({ fields, onChange }) {
+export default function ProblemHypothesisFields({ fields, onChange, disabled }) {
   return (
     <div className="flex flex-col gap-5">
       <FieldGroup>
@@ -11,6 +11,7 @@ export default function ProblemHypothesisFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Beschreibe das Problem so konkret wie möglich…"
           rows={4}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -21,6 +22,7 @@ export default function ProblemHypothesisFields({ fields, onChange }) {
           fields={fields}
           onChange={onChange}
           placeholder="z. B. Technikaffine Hausbesitzer mit mehreren Smart-Home-Geräten"
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -34,6 +36,7 @@ export default function ProblemHypothesisFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Wir glauben, dass… / Eine einheitliche Lösung würde…"
           rows={3}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -45,6 +48,7 @@ export default function ProblemHypothesisFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Nutzerinterviews, A/B-Tests, Prototyp-Tests…"
           rows={3}
+          disabled={disabled}
         />
       </FieldGroup>
     </div>

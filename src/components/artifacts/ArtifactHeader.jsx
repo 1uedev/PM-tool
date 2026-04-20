@@ -8,6 +8,7 @@ import { ARTIFACT_TYPE_LABELS, ARTIFACT_STATUS, ARTIFACT_STATUS_LABELS } from "@
 import ArtifactStatusBadge from "./ArtifactStatusBadge.jsx";
 import ConfirmDialog from "@/components/ui/ConfirmDialog.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
+import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
 
 // Status transition order
 const STATUS_FLOW = [
@@ -25,6 +26,8 @@ const STATUS_NEXT_LABEL = {
 export default function ArtifactHeader({ artifact, projectId, onStatusChange }) {
   const router = useRouter();
   const pathname = usePathname();
+  const role = useProjectRole();
+  const canEdit = hasRole(role, "EDITOR");
 
   const [statusLoading, setStatusLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -82,37 +85,39 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
           <ArtifactStatusBadge status={artifact.status} />
         </div>
 
-        {/* Right: actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Quick status toggle */}
-          <button
-            onClick={handleStatusChange}
-            disabled={statusLoading}
-            title={STATUS_NEXT_LABEL[artifact.status]}
-            className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
-          >
-            {statusLoading ? (
-              <Spinner className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
-            )}
-            {ARTIFACT_STATUS_LABELS[nextStatus]}
-          </button>
+        {/* Right: actions — only for EDITOR+ */}
+        {canEdit && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Quick status toggle */}
+            <button
+              onClick={handleStatusChange}
+              disabled={statusLoading}
+              title={STATUS_NEXT_LABEL[artifact.status]}
+              className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+            >
+              {statusLoading ? (
+                <Spinner className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+              {ARTIFACT_STATUS_LABELS[nextStatus]}
+            </button>
 
-          {/* Delete */}
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={deleteLoading}
-            title="Artefakt löschen"
-            className="rounded-lg border border-gray-200 bg-white p-1.5 text-gray-400 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-          >
-            {deleteLoading ? (
-              <Spinner className="h-4 w-4" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-          </button>
-        </div>
+            {/* Delete */}
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={deleteLoading}
+              title="Artefakt löschen"
+              className="rounded-lg border border-gray-200 bg-white p-1.5 text-gray-400 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+            >
+              {deleteLoading ? (
+                <Spinner className="h-4 w-4" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

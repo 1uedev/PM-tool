@@ -1,6 +1,6 @@
 import { FieldGroup, FieldLabel, FieldTextarea } from "./FieldHelpers.jsx";
 
-export default function ProductVisionFields({ fields, onChange }) {
+export default function ProductVisionFields({ fields, onChange, disabled }) {
   return (
     <div className="flex flex-col gap-5">
       {/* One-liner prominent */}
@@ -12,8 +12,10 @@ export default function ProductVisionFields({ fields, onChange }) {
             onChange={(e) => onChange("oneLiner", e.target.value)}
             placeholder="Für [Zielgruppe], die [Problem], ist [Produkt] ein [Kategorie], das [Nutzen]. Im Gegensatz zu [Alternative] bietet es [Differenzierung]."
             rows={3}
+            disabled={disabled}
             className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-medium outline-none transition-colors
-              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none"
+              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none
+              disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50"
           />
         </FieldGroup>
       </div>
@@ -26,6 +28,7 @@ export default function ProductVisionFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Beschreibe die primären Nutzergruppen…"
           rows={3}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -37,6 +40,7 @@ export default function ProductVisionFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Das Produkt ermöglicht… / Nutzer profitieren von…"
           rows={4}
+          disabled={disabled}
         />
       </FieldGroup>
     </div>

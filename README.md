@@ -301,10 +301,37 @@ Alle 10 Schritte von Sprint 1 sind implementiert.
 
 ---
 
-## Geplant (Sprint 2 Fortsetzung)
+---
 
-- Rollenbasierte Zugriffsprüfung (L1) — VIEWER/EDITOR/OWNER
-- Tenant-/Projektisolation (L2) absichern
+### Schritt 3 — Rollenbasierte Zugriffsprüfung (L1, L2) ✅
+
+**Konzept:** VIEWER = Lesezugriff, EDITOR = Bearbeiten, OWNER = Projekteinstellungen
+
+**`ProjectRoleContext`** (`src/lib/ProjectRoleContext.js`):
+- React Context mit `ProjectRoleProvider` + `useProjectRole()` Hook
+- `hasRole(userRole, requiredRole)` prüft Rollenhierarchie (VIEWER < EDITOR < OWNER)
+
+**Frontend-Anpassungen:**
+| Komponente | VIEWER | EDITOR | OWNER |
+|---|---|---|---|
+| Settings-Button | versteckt | versteckt | sichtbar |
+| `+`-Button im Baum | versteckt | sichtbar | sichtbar |
+| Status-Toggle + Löschen | versteckt | sichtbar | sichtbar |
+| Formular-Felder | disabled | editierbar | editierbar |
+| Speichern-Button | versteckt | sichtbar | sichtbar |
+| Relation hinzufügen/löschen | versteckt | sichtbar | sichtbar |
+| Kommentieren | möglich | möglich | möglich |
+
+**Backend:** Bereits in `requireProjectAccess()` implementiert — alle Schreib-Endpoints erfordern EDITOR+, Projektverwaltung erfordert OWNER.
+
+---
+
+## Sprint 2 abgeschlossen ✅
+
+## Geplant (Sprint 3–4)
+
+- **Sprint 3**: KI-Vorschläge, Versionshistorie, Fortschrittsansicht
+- **Sprint 4**: Volltextsuche, Tags, Board View, Hardening
 
 ## Geplant (Sprint 3–4)
 

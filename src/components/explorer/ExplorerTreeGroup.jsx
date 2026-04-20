@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronRight, Plus } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDirtyForm } from "@/lib/DirtyFormContext.js";
+import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
 import ExplorerTreeItem from "./ExplorerTreeItem.jsx";
 import ConfirmDialog from "@/components/ui/ConfirmDialog.jsx";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
@@ -15,6 +16,8 @@ export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isDirty, setDirty } = useDirtyForm();
+  const role = useProjectRole();
+  const canEdit = hasRole(role, "EDITOR");
 
   function navigateToNew() {
     const params = new URLSearchParams(searchParams);
@@ -54,13 +57,15 @@ export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
             </span>
             <span className="text-xs text-gray-400">({artifacts.length})</span>
           </div>
-          <button
-            onClick={handleNew}
-            title={`Neue ${ARTIFACT_TYPE_LABELS[type]} anlegen`}
-            className="rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-200"
-          >
-            <Plus className="h-3.5 w-3.5 text-gray-500" />
-          </button>
+          {canEdit && (
+            <button
+              onClick={handleNew}
+              title={`Neue ${ARTIFACT_TYPE_LABELS[type]} anlegen`}
+              className="rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-200"
+            >
+              <Plus className="h-3.5 w-3.5 text-gray-500" />
+            </button>
+          )}
         </button>
 
         {open && (

@@ -1,6 +1,6 @@
 import { FieldGroup, FieldLabel, FieldTextarea } from "./FieldHelpers.jsx";
 
-export default function FunctionalRequirementFields({ fields, onChange }) {
+export default function FunctionalRequirementFields({ fields, onChange, disabled }) {
   return (
     <div className="flex flex-col gap-5">
       <FieldGroup>
@@ -11,6 +11,7 @@ export default function FunctionalRequirementFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Das System muss… / Die Anwendung soll…"
           rows={4}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -25,6 +26,7 @@ export default function FunctionalRequirementFields({ fields, onChange }) {
           placeholder={"- Kriterium 1 (messbar, konkret)\n- Kriterium 2\n- Kriterium 3\n…"}
           rows={6}
           className="font-mono text-xs"
+          disabled={disabled}
         />
         <p className="text-xs text-gray-400">
           Tipp: Ein Kriterium pro Zeile, beginnend mit „-". Jedes Kriterium sollte messbar und testbar sein.

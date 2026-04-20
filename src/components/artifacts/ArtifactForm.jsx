@@ -7,6 +7,7 @@ import { ARTIFACT_STATUS_LABELS, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js
 import { getDefaultFields } from "@/lib/artifactFields.js";
 import { FIELD_COMPONENTS } from "@/components/artifacts/fields/index.js";
 import { useDirtyForm } from "@/lib/DirtyFormContext.js";
+import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
 import Input from "@/components/ui/Input.jsx";
 import Select from "@/components/ui/Select.jsx";
 import Button from "@/components/ui/Button.jsx";
@@ -20,6 +21,8 @@ const STATUS_OPTIONS = Object.entries(ARTIFACT_STATUS_LABELS).map(([value, label
 export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
   const router = useRouter();
   const { setDirty } = useDirtyForm();
+  const role = useProjectRole();
+  const canEdit = hasRole(role, "EDITOR");
   const isEdit = !!artifact;
   const artifactType = type ?? artifact?.type;
 
@@ -145,6 +148,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
             error={errors.title}
             placeholder={`${ARTIFACT_TYPE_LABELS[artifactType] ?? "Artefakt"} benennen…`}
             autoFocus={!isEdit}
+            disabled={!canEdit}
           />
         </div>
         <div className="w-36 flex-shrink-0">
@@ -153,6 +157,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
             value={status}
             onChange={handleStatusChange}
             options={STATUS_OPTIONS}
+            disabled={!canEdit}
           />
         </div>
       </div>
@@ -166,7 +171,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
       {/* Type-specific field component */}
       <div className="flex-1">
         {FieldsComponent ? (
-          <FieldsComponent fields={fields} onChange={handleFieldChange} />
+          <FieldsComponent fields={fields} onChange={handleFieldChange} disabled={!canEdit} />
         ) : (
           <p className="text-sm text-gray-400 italic">
             Keine Felder für Typ "{artifactType}" definiert.
@@ -174,24 +179,26 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         )}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
-        <Button type="submit" disabled={saving}>
-          {saving ? (
-            <><Spinner className="w-4 h-4" />{isEdit ? "Speichern…" : "Erstellen…"}</>
-          ) : (
-            isEdit ? "Speichern" : "Artefakt erstellen"
-          )}
-        </Button>
-        {saved && (
-          <span className="text-sm text-green-600 font-medium">✓ Gespeichert</span>
-        )}
-        {!isEdit && (
-          <Button type="button" variant="secondary" onClick={() => router.back()}>
-            Abbrechen
+      {/* Actions — only for EDITOR+ */}
+      {canEdit && (
+        <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+          <Button type="submit" disabled={saving}>
+            {saving ? (
+              <><Spinner className="w-4 h-4" />{isEdit ? "Speichern…" : "Erstellen…"}</>
+            ) : (
+              isEdit ? "Speichern" : "Artefakt erstellen"
+            )}
           </Button>
-        )}
-      </div>
+          {saved && (
+            <span className="text-sm text-green-600 font-medium">✓ Gespeichert</span>
+          )}
+          {!isEdit && (
+            <Button type="button" variant="secondary" onClick={() => router.back()}>
+              Abbrechen
+            </Button>
+          )}
+        </div>
+      )}
     </form>
   );
 }

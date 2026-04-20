@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button.jsx";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
 import { DirtyFormProvider } from "@/lib/DirtyFormContext.js";
+import { ProjectRoleProvider } from "@/lib/ProjectRoleContext.js";
 
 export async function generateMetadata({ params }) {
   const { projectId } = await params;
@@ -53,13 +54,16 @@ export default async function ProjectPage({ params }) {
           <span className="text-gray-300">/</span>
           <span className="font-medium text-gray-900">{project.name}</span>
         </div>
-        <Button href={`/projects/${projectId}/settings`} variant="ghost">
-          <Settings className="h-4 w-4" />
-          Einstellungen
-        </Button>
+        {role === "OWNER" && (
+          <Button href={`/projects/${projectId}/settings`} variant="ghost">
+            <Settings className="h-4 w-4" />
+            Einstellungen
+          </Button>
+        )}
       </header>
 
       {/* Two-column explorer */}
+      <ProjectRoleProvider role={role}>
       <DirtyFormProvider>
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Tree */}
@@ -83,6 +87,7 @@ export default async function ProjectPage({ params }) {
         </main>
       </div>
       </DirtyFormProvider>
+      </ProjectRoleProvider>
     </div>
   );
 }

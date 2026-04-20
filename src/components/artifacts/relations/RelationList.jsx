@@ -8,6 +8,7 @@ import { RELATION_TYPE_LABELS, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 import Spinner from "@/components/ui/Spinner.jsx";
 import ConfirmDialog from "@/components/ui/ConfirmDialog.jsx";
 import RelationAddDialog from "./RelationAddDialog.jsx";
+import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
 
 const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
 
@@ -17,7 +18,7 @@ const STATUS_DOT = {
   DRAFT: "bg-gray-300",
 };
 
-function RelationRow({ relation, artifact, direction, projectId, artifactId, onDeleted }) {
+function RelationRow({ relation, artifact, direction, projectId, artifactId, onDeleted, canEdit }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -48,14 +49,16 @@ function RelationRow({ relation, artifact, direction, projectId, artifactId, onD
           <p className="truncate text-sm text-gray-800">{artifact.title}</p>
           <p className="text-xs text-gray-400">{ARTIFACT_TYPE_LABELS[artifact.type] ?? artifact.type}</p>
         </div>
-        <button
-          onClick={() => setConfirmOpen(true)}
-          disabled={deleting}
-          className="flex-shrink-0 rounded p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 text-gray-400 hover:text-red-500"
-          title="Verknüpfung entfernen"
-        >
-          {deleting ? <Spinner className="h-3.5 w-3.5" /> : <Trash2 className="h-3.5 w-3.5" />}
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={deleting}
+            className="flex-shrink-0 rounded p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 text-gray-400 hover:text-red-500"
+            title="Verknüpfung entfernen"
+          >
+            {deleting ? <Spinner className="h-3.5 w-3.5" /> : <Trash2 className="h-3.5 w-3.5" />}
+          </button>
+        )}
       </div>
 
       <ConfirmDialog
@@ -75,6 +78,8 @@ export default function RelationList({ projectId, artifactId }) {
   const relationsKey = `/api/projects/${projectId}/artifacts/${artifactId}/relations`;
   const { data, isLoading, mutate } = useSWR(relationsKey, fetcher);
   const [addOpen, setAddOpen] = useState(false);
+  const role = useProjectRole();
+  const canEdit = hasRole(role, "EDITOR");
 
   const relationsFrom = data?.relationsFrom ?? [];
   const relationsTo = data?.relationsTo ?? [];
@@ -111,13 +116,15 @@ export default function RelationList({ projectId, artifactId }) {
             <span className="text-xs text-gray-400">({relationsFrom.length + relationsTo.length})</span>
           )}
         </div>
-        <button
-          onClick={() => setAddOpen(true)}
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Hinzufügen
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setAddOpen(true)}
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Hinzufügen
+          </button>
+        )}
       </div>
 
       {isLoading ? (
@@ -137,6 +144,7 @@ export default function RelationList({ projectId, artifactId }) {
               projectId={projectId}
               artifactId={artifactId}
               onDeleted={handleDeleted}
+              canEdit={canEdit}
             />
           ))}
           {relationsTo.map((r) => (
@@ -148,6 +156,7 @@ export default function RelationList({ projectId, artifactId }) {
               projectId={projectId}
               artifactId={artifactId}
               onDeleted={handleDeleted}
+              canEdit={canEdit}
             />
           ))}
         </div>

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx prisma:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(git init:*)",
+      "Bash(git:*)",
+      "Bash(npx next:*)",
+      "Bash(python3:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)"
+    ]
+  }
+}

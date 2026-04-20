@@ -1,6 +1,6 @@
 import { FieldGroup, FieldLabel, FieldInput, FieldTextarea } from "./FieldHelpers.jsx";
 
-export default function UserPersonaFields({ fields, onChange }) {
+export default function UserPersonaFields({ fields, onChange, disabled }) {
   return (
     <div className="flex flex-col gap-5">
       <FieldGroup>
@@ -10,6 +10,7 @@ export default function UserPersonaFields({ fields, onChange }) {
           fields={fields}
           onChange={onChange}
           placeholder="z. B. Max Müller"
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -21,6 +22,7 @@ export default function UserPersonaFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Beschreibe die wichtigsten Ziele und Motivationen dieser Persona…"
           rows={4}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -32,6 +34,7 @@ export default function UserPersonaFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Welche Probleme, Hindernisse oder Frustrationen hat diese Persona?…"
           rows={4}
+          disabled={disabled}
         />
       </FieldGroup>
 
@@ -43,6 +46,7 @@ export default function UserPersonaFields({ fields, onChange }) {
           onChange={onChange}
           placeholder="Beschreibe den Lebens- und Arbeitskontext dieser Persona…"
           rows={3}
+          disabled={disabled}
         />
       </FieldGroup>
     </div>
