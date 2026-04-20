@@ -6,6 +6,8 @@ import { FileText, AlertCircle } from "lucide-react";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 import ArtifactForm from "@/components/artifacts/ArtifactForm.jsx";
 import ArtifactHeader from "@/components/artifacts/ArtifactHeader.jsx";
+import RelationList from "@/components/artifacts/relations/RelationList.jsx";
+import CommentList from "@/components/artifacts/comments/CommentList.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
 
 const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
@@ -61,6 +63,8 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
           onSaved={(updated) => mutate(updated, false)}
         />
       </div>
+      <RelationList projectId={projectId} artifactId={artifactId} />
+      <CommentList projectId={projectId} artifactId={artifactId} />
     </div>
   );
 }

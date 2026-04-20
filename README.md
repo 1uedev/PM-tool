@@ -264,14 +264,49 @@ Für jeden der 6 Artefakttypen eine dedizierte Feldkomponente mit typengerechtem
 
 Alle 10 Schritte von Sprint 1 sind implementiert.
 
-## Geplant (Sprint 2–4)
+---
 
-- **Sprint 2**: Relationen, Kommentare, Rollenprüfung
+## Fortschritt: Sprint 2
+
+### Schritt 1 — Relation anlegen (E1) ✅
+
+**API:**
+- `GET /api/projects/:id/artifacts/:aid/relations` — lädt alle Relationen (von und zu diesem Artefakt), inkl. verknüpfte Artefakt-Metadaten
+- `POST /api/projects/:id/artifacts/:aid/relations` — legt eine neue Relation an (Duplikat-Check, Self-Reference-Check)
+- `DELETE /api/projects/:id/artifacts/:aid/relations/:rid` — löscht Relation (prüft Zugehörigkeit zum Artefakt)
+
+**Frontend:**
+- `RelationList` — zeigt alle Verknüpfungen unterhalb des Artefakt-Formulars; jede Zeile mit Löschen-Button und `ConfirmDialog`
+- `RelationAddDialog` — Modal zur Auswahl von Beziehungstyp und Ziel-Artefakt
+- `ExplorerDetail` — integriert `RelationList` unterhalb des Formulars
+
+**Shared:**
+- `src/lib/validators/relation.js` — Zod-Schema für Relation anlegen
+
+---
+
+### Schritt 2 — Kommentare (G1, G2) ✅
+
+**API:**
+- `GET /api/projects/:id/artifacts/:aid/comments` — lädt alle Kommentare chronologisch (älteste zuerst), inkl. Autorendaten
+- `POST /api/projects/:id/artifacts/:aid/comments` — fügt neuen Kommentar hinzu (VIEWER+ darf kommentieren)
+
+**Frontend:**
+- `CommentList` — zeigt Kommentarthread unterhalb der Verknüpfungen; Avatar-Initialen, Name und Zeitstempel pro Eintrag
+- `CommentForm` — Textarea mit Senden-Button, optimistisches Update via SWR mutate
+- `ExplorerDetail` — integriert `CommentList` nach `RelationList`
+
+**Shared:**
+- `src/lib/validators/comment.js` — Zod-Schema (min 1, max 2000 Zeichen)
+
+---
+
+## Geplant (Sprint 2 Fortsetzung)
+
+- Rollenbasierte Zugriffsprüfung (L1) — VIEWER/EDITOR/OWNER
+- Tenant-/Projektisolation (L2) absichern
+
+## Geplant (Sprint 3–4)
+
 - **Sprint 3**: KI-Vorschläge, Versionshistorie, Fortschrittsansicht
 - **Sprint 4**: Volltextsuche, Tags, Board View, Hardening
-
-## Geplant (Sprint 2–4)
-
-- Sprint 2: Relationen, Kommentare, Rollenprüfung
-- Sprint 3: KI-Vorschläge, Versionshistorie, Fortschrittsansicht
-- Sprint 4: Volltextsuche, Tags, Board View, Hardening
