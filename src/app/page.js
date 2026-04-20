@@ -1,17 +1,11 @@
-import Hero from "@/components/sections/Hero";
-import LogoBar from "@/components/sections/LogoBar";
-import FeatureHighlights from "@/components/sections/FeatureHighlights";
-import Testimonials from "@/components/sections/Testimonials";
-import CtaBanner from "@/components/sections/CtaBanner";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth.js";
 
-export default function HomePage() {
-  return (
-    <>
-      <Hero />
-      <LogoBar />
-      <FeatureHighlights />
-      <Testimonials />
-      <CtaBanner />
-    </>
-  );
+export default async function RootPage() {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect("/projects");
+  }
+  redirect("/login");
 }
