@@ -243,9 +243,32 @@ Für jeden der 6 Artefakttypen eine dedizierte Feldkomponente mit typengerechtem
 
 ---
 
-## Noch ausstehend (Sprint 1, Schritt 10)
+### Schritt 10 — Explorer-Baum: Navigation und Unsaved-Changes-Guard (C2, C3) ✅
 
-- **Schritt 10** — Explorer-Baum: Gruppierung (C3) + Navigation (C2)
+**C2 — Navigation:**
+- Klick auf Baumeintrag setzt `?artifact=ID` in der URL → Detail-Panel lädt das Artefakt per SWR
+- Klick auf `+` in einer Gruppe setzt `?new=TYPE` → neues Artefakt-Formular
+- **Unsaved-Changes-Guard** (Spec-Regel 7): Wenn das Formular dirty ist und der Nutzer navigiert (anderes Artefakt, + Neu, Seite verlassen), erscheint ein `ConfirmDialog` — „Verwerfen und wechseln" oder „Abbrechen"
+- `DirtyFormContext` — React Context, schreibt/liest `isDirty` global zwischen `ArtifactForm`, `ExplorerTreeItem` und `ExplorerTreeGroup`
+- `ArtifactForm` setzt `isDirty = true` bei jeder Feldänderung, `isDirty = false` nach erfolgreichem Save oder beim Wechsel zu einem anderen Artefakt (via `useEffect` auf `artifact.id`)
+
+**C3 — Gruppierung:**
+- 6 Gruppen in kanonischer Reihenfolge: Persona → Hypothese → Vision → Use Case → Story → Anforderung
+- Jede Gruppe: aufklappbar, zeigt Artefakt-Anzahl, `+`-Button bei Hover
+- Leere Gruppen zeigen „Keine Einträge" (kein visuelles Rauschen)
+- Status-Dot pro Item: grün (Fertig), gelb (In Prüfung), grau (Entwurf)
+
+---
+
+## Sprint 1 abgeschlossen ✅
+
+Alle 10 Schritte von Sprint 1 sind implementiert.
+
+## Geplant (Sprint 2–4)
+
+- **Sprint 2**: Relationen, Kommentare, Rollenprüfung
+- **Sprint 3**: KI-Vorschläge, Versionshistorie, Fortschrittsansicht
+- **Sprint 4**: Volltextsuche, Tags, Board View, Hardening
 
 ## Geplant (Sprint 2–4)
 

@@ -7,6 +7,7 @@ import { Settings } from "lucide-react";
 import Button from "@/components/ui/Button.jsx";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
+import { DirtyFormProvider } from "@/lib/DirtyFormContext.js";
 
 export async function generateMetadata({ params }) {
   const { projectId } = await params;
@@ -59,6 +60,7 @@ export default async function ProjectPage({ params }) {
       </header>
 
       {/* Two-column explorer */}
+      <DirtyFormProvider>
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Tree */}
         <aside className="flex w-64 flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white">
@@ -80,6 +82,7 @@ export default async function ProjectPage({ params }) {
           <ExplorerDetail projectId={projectId} />
         </main>
       </div>
+      </DirtyFormProvider>
     </div>
   );
 }

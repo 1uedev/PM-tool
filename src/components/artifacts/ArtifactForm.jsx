@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mutate } from "swr";
 import { ARTIFACT_STATUS_LABELS, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 import { getDefaultFields } from "@/lib/artifactFields.js";
 import { FIELD_COMPONENTS } from "@/components/artifacts/fields/index.js";
+import { useDirtyForm } from "@/lib/DirtyFormContext.js";
 import Input from "@/components/ui/Input.jsx";
 import Select from "@/components/ui/Select.jsx";
 import Button from "@/components/ui/Button.jsx";
@@ -18,6 +19,7 @@ const STATUS_OPTIONS = Object.entries(ARTIFACT_STATUS_LABELS).map(([value, label
 
 export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
   const router = useRouter();
+  const { setDirty } = useDirtyForm();
   const isEdit = !!artifact;
   const artifactType = type ?? artifact?.type;
 
@@ -31,8 +33,40 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
   const [globalError, setGlobalError] = useState("");
   const [saved, setSaved] = useState(false);
 
+  // Reset form state when switching to a different artifact
+  useEffect(() => {
+    setTitle(artifact?.title ?? "");
+    setStatus(artifact?.status ?? "DRAFT");
+    setFields(artifact?.fields ?? getDefaultFields(artifactType));
+    setErrors({});
+    setGlobalError("");
+    setSaved(false);
+    setDirty(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artifact?.id]);
+
+  // Clear dirty on unmount
+  useEffect(() => () => setDirty(false), [setDirty]);
+
+  function markDirty() {
+    setDirty(true);
+    setSaved(false);
+  }
+
+  function handleTitleChange(e) {
+    setTitle(e.target.value);
+    setErrors((err) => ({ ...err, title: undefined }));
+    markDirty();
+  }
+
+  function handleStatusChange(e) {
+    setStatus(e.target.value);
+    markDirty();
+  }
+
   function handleFieldChange(key, value) {
     setFields((f) => ({ ...f, [key]: value }));
+    markDirty();
   }
 
   const validate = useCallback(() => {
@@ -77,6 +111,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         return;
       }
 
+      setDirty(false);
       mutate(`/api/projects/${projectId}/artifacts`);
 
       if (isEdit) {
@@ -106,10 +141,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
           <Input
             label="Titel"
             value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setErrors((err) => ({ ...err, title: undefined }));
-            }}
+            onChange={handleTitleChange}
             error={errors.title}
             placeholder={`${ARTIFACT_TYPE_LABELS[artifactType] ?? "Artefakt"} benennen…`}
             autoFocus={!isEdit}
@@ -119,7 +151,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
           <Select
             label="Status"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={handleStatusChange}
             options={STATUS_OPTIONS}
           />
         </div>
@@ -137,7 +169,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
           <FieldsComponent fields={fields} onChange={handleFieldChange} />
         ) : (
           <p className="text-sm text-gray-400 italic">
-            Keine Felder für Typ „{artifactType}" definiert.
+            Keine Felder für Typ "{artifactType}" definiert.
           </p>
         )}
       </div>
