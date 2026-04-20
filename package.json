@@ -1,0 +1,36 @@
+{
+  "name": "pm-tool",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:seed": "node prisma/seed.js",
+    "db:reset": "npx prisma migrate reset --force && node prisma/seed.js"
+  },
+  "type": "module",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.9.0",
+    "lucide-react": "^0.475.0",
+    "next": "^15.3.1",
+    "next-auth": "^4.24.14",
+    "prisma": "^7.7.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "dotenv": "^17.4.2",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
+  }
+}

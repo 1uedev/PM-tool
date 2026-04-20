@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Auth & Users ───
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships   ProjectMember[]
+  comments      Comment[]
+  versions      ArtifactVersion[]
+  aiSessions    AiSession[]
+}
+
+// ─── Projects ───
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      String        @default("ACTIVE")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  members     ProjectMember[]
+  artifacts   Artifact[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  role      String   @default("EDITOR")
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+}
+
+// ─── Artifacts ───
+
+model Artifact {
+  id          String   @id @default(cuid())
+  type        String
+  title       String
+  status      String   @default("DRAFT")
+  fields      String   // JSON stored as text
+  projectId   String
+  deleted     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions    ArtifactVersion[]
+  comments    Comment[]
+  tags        ArtifactTag[]
+  aiSessions  AiSession[]
+
+  relationsFrom Relation[] @relation("RelationSource")
+  relationsTo   Relation[] @relation("RelationTarget")
+
+  @@index([projectId, type])
+  @@index([projectId, deleted])
+}
+
+// ─── Relations ───
+
+model Relation {
+  id        String   @id @default(cuid())
+  type      String
+  sourceId  String
+  targetId  String
+  createdAt DateTime @default(now())
+
+  source Artifact @relation("RelationSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target Artifact @relation("RelationTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId, type])
+  @@index([sourceId])
+  @@index([targetId])
+}
+
+// ─── Versions ───
+
+model ArtifactVersion {
+  id         String   @id @default(cuid())
+  version    Int
+  title      String
+  fields     String   // JSON stored as text
+  status     String
+  authorId   String
+  artifactId String
+  createdAt  DateTime @default(now())
+
+  author   User     @relation(fields: [authorId], references: [id])
+  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
+  @@unique([artifactId, version])
+  @@index([artifactId])
+}
+
+// ─── Comments ───
+
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  authorId   String
+  artifactId String
+  createdAt  DateTime @default(now())
+
+  author   User     @relation(fields: [authorId], references: [id])
+  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
+  @@index([artifactId])
+}
+
+// ─── Tags ───
+
+model Tag {
+  id        String      @id @default(cuid())
+  name      String
+  projectId String
+  createdAt DateTime    @default(now())
+
+  artifacts ArtifactTag[]
+
+  @@unique([name, projectId])
+}
+
+model ArtifactTag {
+  artifactId String
+  tagId      String
+
+  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([artifactId, tagId])
+}
+
+// ─── AI Sessions ───
+
+model AiSession {
+  id         String   @id @default(cuid())
+  provider   String
+  mode       String
+  prompt     String
+  response   String
+  artifactId String
+  userId     String
+  durationMs Int?
+  createdAt  DateTime @default(now())
+
+  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@index([artifactId])
+}
