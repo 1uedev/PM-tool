@@ -3,28 +3,31 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import ExplorerTreeGroup from "./ExplorerTreeGroup.jsx";
+import { ARTIFACT_GROUP_COLORS } from "@/lib/constants.js";
 
 export default function ExplorerGroupSection({ group, byType, projectId }) {
-  const [open, setOpen] = useState(true);
-
-  // Count total artifacts in this group
   const total = group.types.reduce((sum, t) => sum + (byType[t]?.length ?? 0), 0);
+  // Start collapsed when the entire group has no artifacts
+  const [open, setOpen] = useState(total > 0);
+  const colors = ARTIFACT_GROUP_COLORS[group.key] ?? {};
 
   return (
     <div className="mb-1">
       {/* Group header */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left hover:bg-gray-50"
+        className={`flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left transition-colors hover:bg-gray-50`}
       >
         <ChevronRight
-          className={`h-3 w-3 flex-shrink-0 text-gray-300 transition-transform ${open ? "rotate-90" : ""}`}
+          className={`h-3 w-3 flex-shrink-0 transition-transform ${open ? "rotate-90" : ""} ${colors.text ?? "text-gray-300"}`}
         />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+        <span className={`text-[10px] font-bold uppercase tracking-widest ${colors.text ?? "text-gray-400"}`}>
           {group.label}
         </span>
         {total > 0 && (
-          <span className="ml-auto text-[10px] text-gray-300">{total}</span>
+          <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-medium ${colors.bg ?? ""} ${colors.text ?? "text-gray-400"}`}>
+            {total}
+          </span>
         )}
       </button>
 

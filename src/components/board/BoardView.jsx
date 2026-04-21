@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import BoardColumn from "./BoardColumn.jsx";
-import { ARTIFACT_TYPE, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
+import { ARTIFACT_GROUPS, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 import Spinner from "@/components/ui/Spinner.jsx";
 
 const fetcher = (url) => fetch(url).then((r) => r.json()).then((d) => d.data ?? []);
@@ -15,7 +15,8 @@ const COLUMNS = [
   { status: "DONE", label: "Fertig", color: "bg-green-500" },
 ];
 
-const ALL_TYPES = Object.keys(ARTIFACT_TYPE);
+// Canonical type order for the filter, derived from groups
+const TYPE_ORDER = ARTIFACT_GROUPS.flatMap((g) => g.types);
 
 export default function BoardView({ projectId }) {
   const router = useRouter();
@@ -27,6 +28,9 @@ export default function BoardView({ projectId }) {
     fetcher,
     { revalidateOnFocus: false }
   );
+
+  // Only offer types that actually have artifacts in the filter bar
+  const presentTypes = TYPE_ORDER.filter((t) => artifacts.some((a) => a.type === t));
 
   const filtered = typeFilter ? artifacts.filter((a) => a.type === typeFilter) : artifacts;
 
@@ -88,7 +92,7 @@ export default function BoardView({ projectId }) {
           >
             Alle
           </button>
-          {ALL_TYPES.map((type) => (
+          {presentTypes.map((type) => (
             <button
               key={type}
               onClick={() => setTypeFilter(type === typeFilter ? "" : type)}

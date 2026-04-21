@@ -88,6 +88,17 @@ export const ARTIFACT_TYPE_LABELS = {
 // ─── Explorer Navigator Groups ───
 // Fachliche Gruppierung statt alphabetischer Reihenfolge
 
+// Color accent per group — used in explorer, traceability, progress
+export const ARTIFACT_GROUP_COLORS = {
+  research:  { bg: "bg-violet-100",  text: "text-violet-700",  dot: "bg-violet-400",  border: "border-violet-200",  header: "bg-violet-100 text-violet-800",  badge: "bg-violet-50 border-violet-200 text-violet-700" },
+  audience:  { bg: "bg-pink-100",    text: "text-pink-700",    dot: "bg-pink-400",    border: "border-pink-200",    header: "bg-pink-100 text-pink-800",      badge: "bg-pink-50 border-pink-200 text-pink-700" },
+  strategy:  { bg: "bg-blue-100",    text: "text-blue-700",    dot: "bg-blue-400",    border: "border-blue-200",    header: "bg-blue-100 text-blue-800",      badge: "bg-blue-50 border-blue-200 text-blue-700" },
+  discovery: { bg: "bg-cyan-100",    text: "text-cyan-700",    dot: "bg-cyan-400",    border: "border-cyan-200",    header: "bg-cyan-100 text-cyan-800",      badge: "bg-cyan-50 border-cyan-200 text-cyan-700" },
+  delivery:  { bg: "bg-green-100",   text: "text-green-700",   dot: "bg-green-400",   border: "border-green-200",   header: "bg-green-100 text-green-800",    badge: "bg-green-50 border-green-200 text-green-700" },
+  planning:  { bg: "bg-orange-100",  text: "text-orange-700",  dot: "bg-orange-400",  border: "border-orange-200",  header: "bg-orange-100 text-orange-800",  badge: "bg-orange-50 border-orange-200 text-orange-700" },
+  feedback:  { bg: "bg-rose-100",    text: "text-rose-700",    dot: "bg-rose-400",    border: "border-rose-200",    header: "bg-rose-100 text-rose-800",      badge: "bg-rose-50 border-rose-200 text-rose-700" },
+};
+
 export const ARTIFACT_GROUPS = [
   {
     key: "research",

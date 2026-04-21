@@ -10,7 +10,8 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog.jsx";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 
 export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
-  const [open, setOpen] = useState(true);
+  // Start collapsed when no artifacts exist — keeps the tree clean with 26+ types
+  const [open, setOpen] = useState(artifacts.length > 0);
   const [pendingNewNav, setPendingNewNav] = useState(false);
   const router = useRouter();
   const pathname = usePathname();

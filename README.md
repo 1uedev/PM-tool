@@ -547,8 +547,34 @@ Alle P0-Features aus der Spec sind umgesetzt:
 - Neuer "Traceability"-Button (`GitBranch`-Icon) im Explorer-Header
 
 **Nächster Schritt:**
-- Schritt 4: Explorer/Navigation anpassen — neue Typen vollständig abbilden
-- Schritt 5: Detailansichten und Editoren für neue Objekttypen
+- Schritt 4: Explorer/Navigation anpassen ✅ (siehe unten)
+- Schritt 5: Detailansichten und Editoren für neue Objekttypen ✅ (siehe unten)
+
+---
+
+### Erweiterungsschritt 4 — Explorer/Navigation anpassen ✅
+
+**Problem:** Mit 26 Artefakttypen in 7 Gruppen wurde der Explorer-Baum unübersichtlich — alle Typen-Gruppen starteten offen, auch bei 0 Einträgen.
+
+**Neu umgesetzt:**
+
+**Explorer-Baum:**
+- `ExplorerTreeGroup` — Typen-Gruppen mit 0 Artefakten starten jetzt **kollabiert** (vorher: immer offen → 26 "Keine Einträge"-Zeilen sichtbar)
+- `ExplorerGroupSection` — Fachliche Gruppen starten ebenfalls kollabiert wenn leer
+- Gruppen-Header mit farbcodierten Typ-Akzenten (je Gruppe eigene Farbe) und colored Count-Badge
+- `ARTIFACT_GROUP_COLORS` in `constants.js` — zentrales Color-Token-Schema für alle 7 Gruppen (bg, text, dot, border, header, badge); einheitlich in Explorer, Progress und Traceability verwendet
+
+**Fortschrittsansicht:**
+- `ProgressOverview` umgebaut: statt 26 Typ-Karten in einem flachen Grid werden die Karten jetzt **nach den 7 fachlichen Gruppen gruppiert**
+- Jede Gruppe hat einen farbigen Header mit Gesamt-Artefaktzahl und Gruppen-Fortschrittsbalken (% done)
+- Leere Gruppen zeigen "Keine Einträge" im Header, erscheinen aber nicht gar nicht
+
+**Board-Ansicht:**
+- Typ-Filter zeigt nur noch Typen, die **tatsächlich Artefakte** haben (statt alle 26 als flache Button-Leiste)
+- Kanonische Typenreihenfolge (via `ARTIFACT_GROUPS`) statt alphabetisch
+
+**Traceability:**
+- `TraceabilityView` nutzt nun `ARTIFACT_GROUP_COLORS` aus `constants.js` statt lokaler Farb-Maps — konsistente Farbgebung sichergestellt
 
 ---
 

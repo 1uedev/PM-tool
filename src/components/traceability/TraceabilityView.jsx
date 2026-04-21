@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import {
   ARTIFACT_GROUPS,
+  ARTIFACT_GROUP_COLORS,
   ARTIFACT_TYPE_LABELS,
   RELATION_TYPE_LABELS,
 } from "@/lib/constants.js";
@@ -15,29 +16,9 @@ const STATUS_DOT = {
   DRAFT: "bg-gray-300",
 };
 
-const GROUP_COLORS = {
-  research: "bg-violet-50 border-violet-200 text-violet-700",
-  audience: "bg-pink-50 border-pink-200 text-pink-700",
-  strategy: "bg-blue-50 border-blue-200 text-blue-700",
-  discovery: "bg-cyan-50 border-cyan-200 text-cyan-700",
-  delivery: "bg-green-50 border-green-200 text-green-700",
-  planning: "bg-orange-50 border-orange-200 text-orange-700",
-  feedback: "bg-rose-50 border-rose-200 text-rose-700",
-};
-
-const GROUP_HEADER_COLORS = {
-  research: "bg-violet-100 text-violet-800",
-  audience: "bg-pink-100 text-pink-800",
-  strategy: "bg-blue-100 text-blue-800",
-  discovery: "bg-cyan-100 text-cyan-800",
-  delivery: "bg-green-100 text-green-800",
-  planning: "bg-orange-100 text-orange-800",
-  feedback: "bg-rose-100 text-rose-800",
-};
-
 function ConnectionBadge({ artifact, relationType, direction, projectId }) {
   const groupKey = ARTIFACT_GROUPS.find((g) => g.types.includes(artifact.type))?.key;
-  const colorClass = groupKey ? GROUP_COLORS[groupKey] : "bg-gray-50 border-gray-200 text-gray-600";
+  const colorClass = groupKey ? (ARTIFACT_GROUP_COLORS[groupKey]?.badge ?? "") : "bg-gray-50 border-gray-200 text-gray-600";
 
   return (
     <Link
@@ -93,7 +74,7 @@ function GroupSection({ group, artifacts, connectionMap, projectId, artifactById
   if (groupArtifacts.length === 0) return null;
 
   const connectedCount = groupArtifacts.filter((a) => (connectionMap[a.id]?.length ?? 0) > 0).length;
-  const colorClass = GROUP_HEADER_COLORS[group.key] ?? "bg-gray-100 text-gray-800";
+  const colorClass = ARTIFACT_GROUP_COLORS[group.key]?.header ?? "bg-gray-100 text-gray-800";
 
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden">
