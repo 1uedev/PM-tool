@@ -522,7 +522,32 @@ Alle P0-Features aus der Spec sind umgesetzt:
 - Typ-spezifische Feldkomponenten (mit besonderem UX) noch nicht für alle neuen Typen — generisches Formular wird verwendet
 - Fortschrittsansicht zeigt jetzt alle 26 Typen (wird bei vielen leeren Phasen sehr lang)
 
+---
+
+### Erweiterungsschritt 3 — Relationsmodell generalisieren + Traceability ✅
+
+**Neu umgesetzt:**
+
+**Intelligente Relation-Vorschläge:**
+- `RELATION_SUGGESTIONS` in `constants.js` — Karte `[Quelltyp][Zieltyp] → empfohlener Relationstyp` für alle 26 Artefakttypen
+- `RelationAddDialog` überarbeitet:
+  - Ziel-Artefakt wird zuerst ausgewählt (Reihenfolge für bessere UX)
+  - Kandidaten nach Gruppe (Research / Audience / Strategy / …) gruppiert via `<optgroup>`
+  - Relationstyp wird automatisch vorgeschlagen, sobald Ziel gewählt wird; Hinweis "(empfohlen)" sichtbar
+  - Manuelle Überschreibung jederzeit möglich
+
+**Neue Traceability-Ansicht:**
+- `GET /api/projects/:id/traceability` — gibt alle Artefakte + alle Relationen zurück (nur eingehende Richtung für Effizienz)
+- `TraceabilityView` Komponente — gruppierte Übersicht aller Artefakte mit ihren Verbindungen:
+  - Summary-Bar: Gesamt / verbunden / isoliert / Relationen-Anzahl
+  - Pro Gruppe (7 fachliche Gruppen) eine aufklappbare Sektion mit farblicher Kennzeichnung
+  - Pro Artefakt: Verbindungen als farbige Badges mit Pfeilrichtung, klickbar → Explorer
+  - Isolierte Artefakte (keine Verbindungen) sichtbar aber gedimmt
+- `/projects/:id/traceability` — neue Seite, serverseitig gerendert
+- Neuer "Traceability"-Button (`GitBranch`-Icon) im Explorer-Header
+
 **Nächster Schritt:**
-- Schritt 3: Relationsmodell generalisieren — regelbasierte Verknüpfungen, Cross-Type-Links, Traceability
+- Schritt 4: Explorer/Navigation anpassen — neue Typen vollständig abbilden
+- Schritt 5: Detailansichten und Editoren für neue Objekttypen
 
 ---

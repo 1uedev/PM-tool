@@ -64,7 +64,7 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
           onSaved={(updated) => mutate(updated, false)}
         />
       </div>
-      <RelationList projectId={projectId} artifactId={artifactId} />
+      <RelationList projectId={projectId} artifactId={artifactId} artifactType={artifact.type} />
       <CommentList projectId={projectId} artifactId={artifactId} />
       <VersionList projectId={projectId} artifactId={artifactId} />
     </div>

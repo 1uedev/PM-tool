@@ -74,7 +74,7 @@ function RelationRow({ relation, artifact, direction, projectId, artifactId, onD
   );
 }
 
-export default function RelationList({ projectId, artifactId }) {
+export default function RelationList({ projectId, artifactId, artifactType }) {
   const relationsKey = `/api/projects/${projectId}/artifacts/${artifactId}/relations`;
   const { data, isLoading, mutate } = useSWR(relationsKey, fetcher);
   const [addOpen, setAddOpen] = useState(false);
@@ -166,6 +166,7 @@ export default function RelationList({ projectId, artifactId }) {
         <RelationAddDialog
           projectId={projectId}
           artifactId={artifactId}
+          sourceType={artifactType}
           onAdded={handleAdded}
           onCancel={() => setAddOpen(false)}
         />

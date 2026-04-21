@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
 import Link from "next/link";
-import { Settings, BarChart3, Columns3 } from "lucide-react";
+import { Settings, BarChart3, Columns3, GitBranch } from "lucide-react";
 import Button from "@/components/ui/Button.jsx";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
@@ -64,6 +64,10 @@ export default async function ProjectPage({ params }) {
           <Button href={`/projects/${projectId}/progress`} variant="ghost">
             <BarChart3 className="h-4 w-4" />
             Fortschritt
+          </Button>
+          <Button href={`/projects/${projectId}/traceability`} variant="ghost">
+            <GitBranch className="h-4 w-4" />
+            Traceability
           </Button>
           {role === "OWNER" && (
             <Button href={`/projects/${projectId}/settings`} variant="ghost">
