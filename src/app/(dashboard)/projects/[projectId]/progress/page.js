@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
 import Link from "next/link";
 import ProgressOverview from "@/components/progress/ProgressOverview.jsx";
+import { ARTIFACT_GROUPS, ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 
 async function getProgressData(projectId, userId) {
   const [membership, artifacts] = await Promise.all([
@@ -19,14 +20,8 @@ async function getProgressData(projectId, userId) {
   return { membership, artifacts };
 }
 
-const TYPE_ORDER = [
-  "USER_PERSONA",
-  "PROBLEM_HYPOTHESIS",
-  "PRODUCT_VISION",
-  "USE_CASE",
-  "USER_STORY",
-  "FUNCTIONAL_REQUIREMENT",
-];
+// Use all types from all groups for progress
+const TYPE_ORDER = ARTIFACT_GROUPS.flatMap((g) => g.types);
 
 function computeProgress(artifacts) {
   const phases = TYPE_ORDER.map((type) => {

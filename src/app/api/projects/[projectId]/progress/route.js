@@ -2,16 +2,9 @@ import prisma from "@/lib/prisma.js";
 import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess } from "@/lib/middleware/project-access.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
-import { ARTIFACT_TYPE } from "@/lib/constants.js";
+import { ARTIFACT_GROUPS } from "@/lib/constants.js";
 
-const TYPE_ORDER = [
-  "USER_PERSONA",
-  "PROBLEM_HYPOTHESIS",
-  "PRODUCT_VISION",
-  "USE_CASE",
-  "USER_STORY",
-  "FUNCTIONAL_REQUIREMENT",
-];
+const TYPE_ORDER = ARTIFACT_GROUPS.flatMap((g) => g.types);
 
 // GET /api/projects/:id/progress — aggregate stats per artifact type
 export async function GET(request, { params }) {
