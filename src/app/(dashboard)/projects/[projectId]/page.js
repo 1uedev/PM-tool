@@ -9,6 +9,7 @@ import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
 import { DirtyFormProvider } from "@/lib/DirtyFormContext.js";
 import { ProjectRoleProvider } from "@/lib/ProjectRoleContext.js";
+import SearchButton from "@/components/search/SearchButton.jsx";
 
 export async function generateMetadata({ params }) {
   const { projectId } = await params;
@@ -55,6 +56,7 @@ export default async function ProjectPage({ params }) {
           <span className="font-medium text-gray-900">{project.name}</span>
         </div>
         <div className="flex items-center gap-2">
+          <SearchButton projectId={projectId} />
           <Button href={`/projects/${projectId}/progress`} variant="ghost">
             <BarChart3 className="h-4 w-4" />
             Fortschritt
