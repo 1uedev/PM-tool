@@ -8,6 +8,7 @@ import ArtifactForm from "@/components/artifacts/ArtifactForm.jsx";
 import ArtifactHeader from "@/components/artifacts/ArtifactHeader.jsx";
 import RelationList from "@/components/artifacts/relations/RelationList.jsx";
 import CommentList from "@/components/artifacts/comments/CommentList.jsx";
+import VersionList from "@/components/artifacts/versions/VersionList.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
 
 const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
@@ -65,6 +66,7 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
       </div>
       <RelationList projectId={projectId} artifactId={artifactId} />
       <CommentList projectId={projectId} artifactId={artifactId} />
+      <VersionList projectId={projectId} artifactId={artifactId} />
     </div>
   );
 }

@@ -354,11 +354,27 @@ Alle 10 Schritte von Sprint 1 sind implementiert.
 
 ---
 
+---
+
+### Schritt 2 — Versionshistorie (H1, H2, H3) ✅
+
+**H1** — Versionierung bei Speicherung: bereits in Sprint 1 implementiert — jeder PATCH erzeugt automatisch eine neue `ArtifactVersion`.
+
+**API:**
+- `GET /api/.../versions` — alle Versionen (neueste zuerst) inkl. Autorendaten und geparsten Feldern
+- `POST /api/.../versions/:vid` — Version wiederherstellen: setzt Artefakt-Inhalt zurück und legt neue Version an
+
+**Frontend (`VersionList`):**
+- Einklappbare Sektion unterhalb der Kommentare
+- Aktuelle Version mit blauem „Aktuell"-Badge
+- Jede Version aufklappbar → zeigt Felder als Vorschau
+- Wiederherstellen-Button (nur EDITOR+) mit `ConfirmDialog`
+- Nach Wiederherstellung: SWR-Cache für Artefakt, Versionen und Baum invalidiert
+
+---
+
 ## Geplant (Sprint 3 Fortsetzung)
 
-- Versionierung bei Speicherung (H1)
-- Versionsliste anzeigen (H2)
-- Version wiederherstellen (H3)
 - Fortschritt über Kernphasen (I1, I2)
 
 ## Geplant (Sprint 4)
