@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Settings, BarChart3 } from "lucide-react";
 import Button from "@/components/ui/Button.jsx";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
@@ -54,12 +54,18 @@ export default async function ProjectPage({ params }) {
           <span className="text-gray-300">/</span>
           <span className="font-medium text-gray-900">{project.name}</span>
         </div>
-        {role === "OWNER" && (
-          <Button href={`/projects/${projectId}/settings`} variant="ghost">
-            <Settings className="h-4 w-4" />
-            Einstellungen
+        <div className="flex items-center gap-2">
+          <Button href={`/projects/${projectId}/progress`} variant="ghost">
+            <BarChart3 className="h-4 w-4" />
+            Fortschritt
           </Button>
-        )}
+          {role === "OWNER" && (
+            <Button href={`/projects/${projectId}/settings`} variant="ghost">
+              <Settings className="h-4 w-4" />
+              Einstellungen
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* Two-column explorer */}
