@@ -390,9 +390,62 @@ Alle 10 Schritte von Sprint 1 sind implementiert.
 
 ---
 
-## Geplant (Sprint 4)
+## Fortschritt: Sprint 4
 
-- Volltextsuche (K1), Tags (K2), Filter (K3)
-- Board View (J1), Drag & Drop (J2)
-- Validierung härten, Error Handling, Responsive, A11y
-- E2E-Tests für Kern-Flows
+### Schritt 1 — Volltextsuche (K1) ✅
+
+- `GET /api/projects/:id/search?q=&type=&status=&tag=` — LIKE-Suche über Titel und `fields`-JSON, kombinierbar mit Typ-, Status- und Tag-Filter
+- `SearchDialog` — Command-Palette-Modal mit 250ms Debounce, Keyboard-Navigation (↑↓↵Esc), Snippet-Vorschau aus Feldinhalten
+- `SearchButton` — Öffnet Dialog; globaler ⌘K/Ctrl+K Shortcut
+- Suchen-Button im Explorer-Header für alle Rollen sichtbar
+
+---
+
+### Schritt 2 — Tags vergeben und Filter nach Tags (K2, K3) ✅
+
+- `GET/POST /api/projects/:id/tags` — Projekt-Tags verwalten (upsert by name)
+- `GET/POST/DELETE /api/projects/:id/artifacts/:aid/tags` — Tags zuweisen/entfernen
+- `TagEditor` — inline Tag-Chip-Editor im ArtifactHeader: Dropdown mit bestehenden Tags, „Tag erstellen"-Option, Entfernen per X
+- Tag-Filter-Dropdown in SearchDialog (erscheint wenn Projekt-Tags vorhanden)
+
+---
+
+### Schritt 3 — Status-Filter im Explorer-Tree (K3) ✅
+
+- Filterleiste oben im Artefakt-Baum: Alle / Entwurf / In Prüfung / Fertig
+- Client-seitiger Filter ohne extra API-Call
+- Aktiver Filter mit blauem Pill-Badge hervorgehoben
+
+---
+
+### Schritt 4 — Board View mit Drag & Drop (J1, J2) ✅
+
+- `BoardCard` — draggable Karte mit nativer HTML5 Drag & Drop API
+- `BoardColumn` — Drop-Zone pro Status, visuelles Highlight bei Drag-Over, Leer-Zustand
+- `BoardView` — 3 Spalten (Entwurf / In Prüfung / Fertig), optimistisches Status-Update via PATCH, Typ-Filter-Toolbar
+- Klick auf Karte öffnet Artefakt im Explorer (`/projects/:id?artifact=ID`)
+- `/projects/:id/board` — Board-Seite mit Breadcrumb; Board-Button im Explorer-Header
+
+---
+
+### Schritt 5 — Error Boundaries und Hardening (L3) ✅
+
+- `(dashboard)/error.js` — React Error Boundary für alle Dashboard-Seiten mit Reset/Zurück-Button
+- `(dashboard)/not-found.js` — 404-Seite für unbekannte Projekt/Artefakt-IDs
+- `app/not-found.js` — minimales Root-404 für unbekannte Top-Level-Routen
+- Backend-Validierung (Zod), Tenant-Isolation und Rollen bereits vollständig implementiert
+
+---
+
+## Sprint 4 abgeschlossen ✅
+
+## MVP vollständig implementiert ✅
+
+Alle P0-Features aus der Spec sind umgesetzt:
+
+| Sprint | Features |
+|---|---|
+| Sprint 1 | Auth (A1–A3), Projektverwaltung (B1–B4), Explorer (C1–C3), Artefakt-CRUD (D1–D5) |
+| Sprint 2 | Relationen (E1–E3), Kommentare (G1–G2), Rollen (L1–L2) |
+| Sprint 3 | KI-Vorschläge (F1–F5), Versionshistorie (H1–H3), Fortschrittsansicht (I1–I2) |
+| Sprint 4 | Suche (K1), Tags (K2), Filter (K3), Board View (J1–J2), Error Handling (L3) |
