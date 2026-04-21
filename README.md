@@ -373,15 +373,26 @@ Alle 10 Schritte von Sprint 1 sind implementiert.
 
 ---
 
-## Geplant (Sprint 3 Fortsetzung)
+### Schritt 3 — Fortschrittsansicht (I1, I2) ✅
 
-- Fortschritt über Kernphasen (I1, I2)
+**API:**
+- `GET /api/projects/:id/progress` — aggregiert Stats pro Artefakttyp: `total`, `done`, `inReview`, `draft`, `progress%`, `missing`-Flag; plus Gesamt-Stats (`overallProgress`, `missingTypes`)
+
+**Frontend:**
+- `ProgressOverview` — Summary-Bar (Gesamtfortschritt %, Anzahl fertig, fehlende Phasen) + Grid der Phasenkarten
+- `PhaseCard` — pro Artefakttyp: Fortschrittsbalken, Status-Aufschlüsselung (Punkte in grün/gelb/grau), orange Warnung für fehlende Phasen, CTA-Link zum Anlegen
+- `/projects/:id/progress` — Server-seitig gerendertes Page.js für schnelles Initial-Rendering
+- „Fortschritt"-Button (BarChart3-Icon) im Explorer-Header für alle Rollen sichtbar
+
+---
+
+## Sprint 3 abgeschlossen ✅
+
+---
 
 ## Geplant (Sprint 4)
 
-- Volltextsuche, Tags, Board View, Hardening
-
-## Geplant (Sprint 3–4)
-
-- **Sprint 3**: KI-Vorschläge, Versionshistorie, Fortschrittsansicht
-- **Sprint 4**: Volltextsuche, Tags, Board View, Hardening
+- Volltextsuche (K1), Tags (K2), Filter (K3)
+- Board View (J1), Drag & Drop (J2)
+- Validierung härten, Error Handling, Responsive, A11y
+- E2E-Tests für Kern-Flows
