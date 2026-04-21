@@ -81,7 +81,7 @@ export default async function ProjectPage({ params }) {
               Artefakte
             </span>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex flex-1 flex-col overflow-hidden">
             <ExplorerTreeClient
               projectId={projectId}
               initialArtifacts={artifacts}
