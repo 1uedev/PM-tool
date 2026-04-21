@@ -2,8 +2,11 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
+import Link from "next/link";
 import ProjectForm from "@/components/projects/ProjectForm.jsx";
 import ProjectSettingsActions from "@/components/projects/ProjectSettingsActions.jsx";
+import MemberList from "@/components/projects/members/MemberList.jsx";
+import InviteMember from "@/components/projects/members/InviteMember.jsx";
 
 export const metadata = { title: "Projekteinstellungen — PM Copilot" };
 
@@ -26,10 +29,13 @@ export default async function ProjectSettingsPage({ params }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
-      <header className="flex h-14 items-center border-b border-gray-200 bg-white px-6">
+      <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
         <h1 className="text-base font-semibold text-gray-900">
           Einstellungen — {project.name}
         </h1>
+        <Link href={`/projects/${projectId}`} className="text-sm text-gray-500 hover:text-gray-900">
+          ← Explorer
+        </Link>
       </header>
 
       <main className="flex-1 p-6 max-w-2xl flex flex-col gap-10">
@@ -38,6 +44,22 @@ export default async function ProjectSettingsPage({ params }) {
             Allgemein
           </h2>
           <ProjectForm project={project} />
+        </section>
+
+        {/* Members section — visible to all, but invite/role-change only for OWNER */}
+        <section>
+          <h2 className="mb-4 text-sm font-semibold text-gray-700 uppercase tracking-wide">
+            Mitglieder
+          </h2>
+          <div className="flex flex-col gap-4">
+            <MemberList projectId={projectId} />
+            {role === "OWNER" && (
+              <InviteMember
+                projectId={projectId}
+                onInvited={() => {}}
+              />
+            )}
+          </div>
         </section>
 
         {role === "OWNER" && (
