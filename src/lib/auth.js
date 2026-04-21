@@ -20,6 +20,7 @@ export const authOptions = {
         });
 
         if (!user) return null;
+        if (user.status === "INACTIVE") return null;
 
         const passwordValid = await bcrypt.compare(
           credentials.password,
@@ -32,6 +33,7 @@ export const authOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
+          systemRole: user.systemRole,
         };
       },
     }),
@@ -45,12 +47,14 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.systemRole = user.systemRole;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
+        session.user.systemRole = token.systemRole;
       }
       return session;
     },

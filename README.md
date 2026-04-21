@@ -34,10 +34,11 @@ Die App läuft dann unter [http://localhost:3000](http://localhost:3000).
 
 ### Demo-Zugangsdaten
 
-| E-Mail | Passwort | Rolle |
-|---|---|---|
-| alice@example.com | password123 | Owner |
-| bob@example.com | password123 | Editor |
+| E-Mail | Passwort | System-Rolle | Projekt-Rolle |
+|---|---|---|---|
+| admin@example.com | password123 | Admin | — |
+| alice@example.com | password123 | User | Owner (Smart Home App) |
+| bob@example.com | password123 | User | Editor (Smart Home App) |
 
 ### Umgebungsvariablen
 
@@ -449,3 +450,43 @@ Alle P0-Features aus der Spec sind umgesetzt:
 | Sprint 2 | Relationen (E1–E3), Kommentare (G1–G2), Rollen (L1–L2) |
 | Sprint 3 | KI-Vorschläge (F1–F5), Versionshistorie (H1–H3), Fortschrittsansicht (I1–I2) |
 | Sprint 4 | Suche (K1), Tags (K2), Filter (K3), Board View (J1–J2), Error Handling (L3) |
+
+---
+
+## Erweiterung: Vollständiges Produktmodell
+
+### Erweiterungsschritt 1 — Admin-only Benutzerverwaltung ✅
+
+**Neu umgesetzt:**
+- Globales Rollenkonzept `systemRole` (`ADMIN` | `USER`) am User-Modell, getrennt von Projekt-Rollen
+- Benutzer-`status` (`ACTIVE` | `INACTIVE`) — Soft-Deaktivierung statt physischer Löschung
+- Inaktive Benutzer können sich nicht einloggen (Auth-Check in `authorize()`)
+- Admin-only Middleware (`requireAdmin`) schützt alle Admin-Routen serverseitig
+
+**Neue Domänen-Felder am User-Objekt:**
+- `firstName`, `lastName` — strukturierter Name
+- `systemRole` — systemweite Rolle (`ADMIN` / `USER`)
+- `status` — Kontostatus (`ACTIVE` / `INACTIVE`)
+
+**Neue API-Endpunkte (alle Admin-only):**
+- `GET  /api/admin/users` — Benutzerliste
+- `POST /api/admin/users` — Benutzer anlegen
+- `GET  /api/admin/users/:id` — Benutzerdetail
+- `PATCH /api/admin/users/:id` — Benutzer bearbeiten (inkl. Passwort-Reset)
+- `DELETE /api/admin/users/:id` — Benutzer deaktivieren (Soft Delete)
+
+**Neue UI-Bereiche:**
+- `/admin/users` — Benutzerliste mit Status-Badges, Reaktivieren/Deaktivieren
+- `/admin/users/new` — Benutzer anlegen (Vorname, Nachname, E-Mail, Passwort, Rolle, Status)
+- `/admin/users/:id/edit` — Benutzer bearbeiten
+- Sidebar: Admin-Bereich nur für Admins sichtbar (`Administration > Benutzerverwaltung`)
+
+**Bekannte Einschränkungen:**
+- Keine E-Mail-Flows (kein Passwort-Reset per Mail, keine Einladungslogik)
+- Self-Service-Registrierung bleibt aktiv (kann optional deaktiviert werden)
+- Kein Audit-Log für Admin-Aktionen (geplant für spätere Schritte)
+
+**Nächster Schritt:**
+- Schritt 2: Domänenmodell erweitern — zusätzliche PRD-/Produktobjekttypen (Marktanalyse, Epic, Feature, Roadmap, etc.)
+
+---

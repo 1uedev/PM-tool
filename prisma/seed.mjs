@@ -28,11 +28,27 @@ async function main() {
   // Create users
   const passwordHash = await bcrypt.hash("password123", 10);
 
+  const admin = await prisma.user.create({
+    data: {
+      email: "admin@example.com",
+      passwordHash,
+      firstName: "System",
+      lastName: "Admin",
+      name: "System Admin",
+      systemRole: "ADMIN",
+      status: "ACTIVE",
+    },
+  });
+
   const alice = await prisma.user.create({
     data: {
       email: "alice@example.com",
       passwordHash,
+      firstName: "Alice",
+      lastName: "Muster",
       name: "Alice Muster",
+      systemRole: "USER",
+      status: "ACTIVE",
     },
   });
 
@@ -40,11 +56,15 @@ async function main() {
     data: {
       email: "bob@example.com",
       passwordHash,
+      firstName: "Bob",
+      lastName: "Beispiel",
       name: "Bob Beispiel",
+      systemRole: "USER",
+      status: "ACTIVE",
     },
   });
 
-  console.log("Users created:", alice.email, bob.email);
+  console.log("Users created:", admin.email, alice.email, bob.email);
 
   // Create demo project
   const project = await prisma.project.create({
@@ -225,9 +245,9 @@ async function main() {
   console.log("Comments created: 1");
   console.log("\nSeed completed successfully!");
   console.log("\nDemo-Zugangsdaten:");
-  console.log("  E-Mail:    alice@example.com");
-  console.log("  Passwort:  password123");
-  console.log("             (oder: bob@example.com / password123)");
+  console.log("  Admin:   admin@example.com / password123  (systemRole: ADMIN)");
+  console.log("  Alice:   alice@example.com / password123  (systemRole: USER, Projekt-Owner)");
+  console.log("  Bob:     bob@example.com   / password123  (systemRole: USER, Projekt-Editor)");
 }
 
 main()

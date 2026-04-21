@@ -13,6 +13,10 @@ model User {
   email         String    @unique
   passwordHash  String
   name          String?
+  firstName     String?
+  lastName      String?
+  systemRole    String    @default("USER")   // "ADMIN" | "USER"
+  status        String    @default("ACTIVE") // "ACTIVE" | "INACTIVE"
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
