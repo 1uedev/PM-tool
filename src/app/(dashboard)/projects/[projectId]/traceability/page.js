@@ -6,7 +6,7 @@ import Link from "next/link";
 import TraceabilityView from "@/components/traceability/TraceabilityView.jsx";
 
 async function getTraceabilityData(projectId, userId) {
-  const [membership, artifacts, relations] = await Promise.all([
+  const [membership, artifacts] = await Promise.all([
     prisma.projectMember.findUnique({
       where: { userId_projectId: { userId, projectId } },
       include: { project: { select: { name: true } } },
@@ -16,16 +16,17 @@ async function getTraceabilityData(projectId, userId) {
       select: { id: true, type: true, title: true, status: true },
       orderBy: { title: "asc" },
     }),
-    prisma.relation.findMany({
-      where: {
-        OR: [
-          { source: { projectId } },
-          { target: { projectId } },
-        ],
-      },
-      select: { id: true, type: true, sourceId: true, targetId: true },
-    }),
   ]);
+
+  // Two-step query to avoid SQLite nested-filter hang
+  const artifactIds = artifacts.map((a) => a.id);
+  const relations = artifactIds.length > 0
+    ? await prisma.relation.findMany({
+        where: { sourceId: { in: artifactIds } },
+        select: { id: true, type: true, sourceId: true, targetId: true },
+      })
+    : [];
+
   return { membership, artifacts, relations };
 }
 

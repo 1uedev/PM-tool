@@ -552,6 +552,30 @@ Alle P0-Features aus der Spec sind umgesetzt:
 
 ---
 
+### Erweiterungsschritt 6 — Traceability verbessern ✅
+
+**Neu umgesetzt:**
+
+**Bugfix — SQLite-Query:**
+- `traceability/page.js` verwendete `OR: [{ source: { projectId } }, { target: { projectId } }]` — dieselbe Nested-Filter-Pattern, die beim Traceability-API-Route zum SQLite-Hang geführt hatte
+- Fix: Zwei-Schritt-Query (erst Artefakt-IDs, dann `sourceId: { in: [...] }`) — konsistent mit der API-Route
+
+**Filter-Toolbar:**
+- **Sichtbarkeitsfilter** (Alle / Nur verbunden / Nur isoliert) — klickbare Pills, auch die Summary-Bar-Zahlen sind anklickbar und setzen den Filter
+- **Gruppen-Filter** — farbige Pill-Buttons für alle 7 fachlichen Gruppen (erscheinen nur wenn Gruppe Artefakte hat); Toggle-Logik (erneuter Klick = zurück zu Alle)
+- **Expand/Collapse-All** — zwei Buttons ("Alle auf" / "Alle zu") steuern alle Gruppen-Sektionen gleichzeitig über `forceOpen`-Prop
+
+**Relationstyp sichtbar im Badge:**
+- Connection-Badges zeigen jetzt explizit den Relationstyp ("Abgeleitet von:", "Validiert:", "Abhängig von:") vor dem Artefakttitel
+- Richtungspfeil (← / →) weiterhin sichtbar
+- Typ-Label des verlinkten Artefakts direkt im Titel für bessere Orientierung
+
+**Isolierte Artefakte:**
+- Summary-Bar: Isoliert-Zahl in orange (wenn > 0) statt grau — klickbar als Schnell-Filter
+- Gruppe-Header: zeigt separates "X isoliert"-Badge wenn Gruppe isolierte Artefakte enthält
+
+---
+
 ### Erweiterungsschritt 4 — Explorer/Navigation anpassen ✅
 
 **Problem:** Mit 26 Artefakttypen in 7 Gruppen wurde der Explorer-Baum unübersichtlich — alle Typen-Gruppen starteten offen, auch bei 0 Einträgen.
