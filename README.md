@@ -487,6 +487,42 @@ Alle P0-Features aus der Spec sind umgesetzt:
 - Kein Audit-Log für Admin-Aktionen (geplant für spätere Schritte)
 
 **Nächster Schritt:**
-- Schritt 2: Domänenmodell erweitern — zusätzliche PRD-/Produktobjekttypen (Marktanalyse, Epic, Feature, Roadmap, etc.)
+- Schritt 2: Domänenmodell erweitern — zusätzliche PRD-/Produktobjekttypen ✅ (siehe unten)
+
+---
+
+### Erweiterungsschritt 2 — Domänenmodell: 26 PRD-Objekttypen ✅
+
+**Neu umgesetzt:**
+- 20 neue Artefakttypen (kein DB-Migration nötig — Typen als String gespeichert)
+- Fachliche Gruppenstruktur (7 Gruppen) statt alphabetischer Typliste
+- Explorer-Navigation mit zweistufiger Struktur: Gruppe → Typ → Artefakte
+- Felddefinitionen für alle 26 Typen
+
+**Neue Domänenobjekte:**
+
+| Gruppe | Typen |
+|---|---|
+| Research | Marktanalyse, Wettbewerber, Research Finding, Problem Statement, Opportunity, Hypothese |
+| Audience | User Persona *(bestehend)*, Buyer Persona |
+| Strategy | Produktvision *(bestehend)*, Value Proposition, Positionierung, Geschäftsmodell, KPI/OKR |
+| Discovery & Design | Use Case *(bestehend)*, User Journey, Feature, Epic |
+| Delivery | User Story *(bestehend)*, Funktionale Anforderung *(bestehend)*, NFR, Akzeptanzkriterien, Abhängigkeit, Risiko, Entscheidung |
+| Planning & Release | Roadmap Item, Release, Launch Task |
+| Feedback & Iteration | Feedback Item, Iteration |
+
+**Neue UI-Bereiche:**
+- Explorer-Baum: zweistufige Gruppennavigation — aufklappbare Gruppe → aufklappbarer Typ
+- `ExplorerGroupSection` — neue Komponente für Gruppen-Header mit Gesamt-Count
+- Alle neuen Typen sofort im Explorer anlegbar und bearbeitbar (generisches Formular)
+
+**Keine API-Änderung nötig** — bestehende Artifact-CRUD-Endpunkte funktionieren für alle Typen.
+
+**Bekannte Einschränkungen:**
+- Typ-spezifische Feldkomponenten (mit besonderem UX) noch nicht für alle neuen Typen — generisches Formular wird verwendet
+- Fortschrittsansicht zeigt jetzt alle 26 Typen (wird bei vielen leeren Phasen sehr lang)
+
+**Nächster Schritt:**
+- Schritt 3: Relationsmodell generalisieren — regelbasierte Verknüpfungen, Cross-Type-Links, Traceability
 
 ---
