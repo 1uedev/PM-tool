@@ -26,26 +26,32 @@ export default function SearchDialog({ projectId, open, onClose }) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
+  const [projectTags, setProjectTags] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
 
   const debouncedQuery = useDebounce(query, 250);
 
-  // Focus input when opened
+  // Focus input when opened; load project tags
   useEffect(() => {
     if (open) {
       setQuery("");
       setTypeFilter("");
       setStatusFilter("");
+      setTagFilter("");
       setResults([]);
       setActiveIdx(0);
       setTimeout(() => inputRef.current?.focus(), 50);
+      fetch(`/api/projects/${projectId}/tags`)
+        .then((r) => r.json())
+        .then((d) => setProjectTags(d.data ?? []));
     }
-  }, [open]);
+  }, [open, projectId]);
 
   const fetchResults = useCallback(async () => {
-    if (!debouncedQuery && !typeFilter && !statusFilter) {
+    if (!debouncedQuery && !typeFilter && !statusFilter && !tagFilter) {
       setResults([]);
       return;
     }
@@ -55,6 +61,7 @@ export default function SearchDialog({ projectId, open, onClose }) {
       if (debouncedQuery) params.set("q", debouncedQuery);
       if (typeFilter) params.set("type", typeFilter);
       if (statusFilter) params.set("status", statusFilter);
+      if (tagFilter) params.set("tag", tagFilter);
       const res = await fetch(`/api/projects/${projectId}/search?${params}`);
       if (res.ok) {
         const json = await res.json();
@@ -64,7 +71,7 @@ export default function SearchDialog({ projectId, open, onClose }) {
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, typeFilter, statusFilter, projectId]);
+  }, [debouncedQuery, typeFilter, statusFilter, tagFilter, projectId]);
 
   useEffect(() => {
     fetchResults();
@@ -101,8 +108,8 @@ export default function SearchDialog({ projectId, open, onClose }) {
             placeholder="Artefakte suchen…"
             className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
           />
-          {(query || typeFilter || statusFilter) && (
-            <button onClick={() => { setQuery(""); setTypeFilter(""); setStatusFilter(""); }} className="text-gray-400 hover:text-gray-600">
+          {(query || typeFilter || statusFilter || tagFilter) && (
+            <button onClick={() => { setQuery(""); setTypeFilter(""); setStatusFilter(""); setTagFilter(""); }} className="text-gray-400 hover:text-gray-600">
               <X className="h-4 w-4" />
             </button>
           )}
@@ -131,6 +138,18 @@ export default function SearchDialog({ projectId, open, onClose }) {
               <option key={key} value={key}>{ARTIFACT_STATUS_LABELS[key]}</option>
             ))}
           </select>
+          {projectTags.length > 0 && (
+            <select
+              value={tagFilter}
+              onChange={(e) => setTagFilter(e.target.value)}
+              className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 focus:outline-none"
+            >
+              <option value="">Alle Tags</option>
+              {projectTags.map((t) => (
+                <option key={t.id} value={t.name}>{t.name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Results */}
@@ -141,7 +160,7 @@ export default function SearchDialog({ projectId, open, onClose }) {
           {!loading && results.length === 0 && (query || typeFilter || statusFilter) && (
             <p className="px-4 py-6 text-center text-sm text-gray-400">Keine Ergebnisse</p>
           )}
-          {!loading && results.length === 0 && !query && !typeFilter && !statusFilter && (
+          {!loading && results.length === 0 && !query && !typeFilter && !statusFilter && !tagFilter && (
             <p className="px-4 py-6 text-center text-sm text-gray-400">Suchbegriff eingeben…</p>
           )}
           {results.map((r, idx) => (

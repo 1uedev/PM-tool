@@ -9,6 +9,7 @@ import ArtifactStatusBadge from "./ArtifactStatusBadge.jsx";
 import ConfirmDialog from "@/components/ui/ConfirmDialog.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
 import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
+import TagEditor from "./tags/TagEditor.jsx";
 
 // Status transition order
 const STATUS_FLOW = [
@@ -118,6 +119,11 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
             </button>
           </div>
         )}
+      </div>
+
+      {/* Tags */}
+      <div className="pt-2">
+        <TagEditor artifactId={artifact.id} projectId={projectId} />
       </div>
 
       <ConfirmDialog

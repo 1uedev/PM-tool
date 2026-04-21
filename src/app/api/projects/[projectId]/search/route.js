@@ -19,8 +19,9 @@ export async function GET(request, { params }) {
     const q = (searchParams.get("q") ?? "").trim();
     const type = searchParams.get("type") ?? "";
     const status = searchParams.get("status") ?? "";
+    const tag = searchParams.get("tag") ?? "";
 
-    if (!q && !type && !status) {
+    if (!q && !type && !status && !tag) {
       return successResponse([]);
     }
 
@@ -29,6 +30,7 @@ export async function GET(request, { params }) {
       deleted: false,
       ...(type ? { type } : {}),
       ...(status ? { status } : {}),
+      ...(tag ? { tags: { some: { tag: { name: tag } } } } : {}),
       ...(q
         ? {
             OR: [
