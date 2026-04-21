@@ -551,3 +551,45 @@ Alle P0-Features aus der Spec sind umgesetzt:
 - Schritt 5: Detailansichten und Editoren für neue Objekttypen
 
 ---
+
+### Erweiterungsschritt 5 — Detailansichten und Editoren für alle Objekttypen ✅
+
+**Neu umgesetzt:**
+
+Für alle 20 neuen Artefakttypen wurden dedizierte, typ-spezifische Feldkomponenten erstellt. Jeder Typ hat eine auf seinen fachlichen Kontext zugeschnittene UX — mit Hervorhebungen, Rasterlay­outs und strukturierten Eingabeformaten.
+
+**Neue Feldkomponenten (20 Typen, 24 Komponenten gesamt):**
+
+| Gruppe | Komponente | Besonderheit |
+|---|---|---|
+| Research | `MarketAnalysisFields` | Zusammenfassung + Marktgröße + Trends/Quellen-Grid |
+| Research | `CompetitorFields` | Name + SWOT-Grid (Stärken/Schwächen nebeneinander) + Positionierung |
+| Research | `ResearchFindingFields` | Insight + Methode/Teilnehmer-Grid + Implikationen |
+| Research | `ProblemStatementFields` | Problem + Kontext-Trenner + Auswirkung/Workaround-Grid |
+| Research | `OpportunityFields` | Beschreibung + Zielgruppe + Wert/Timing-Grid |
+| Research | `HypothesisFields` | Strukturierter Karten-Flow: "Wir glauben → weil → Test: → Bestätigt, wenn" mit Verbindungspfeilen |
+| Audience | `BuyerPersonaFields` | Name/Rolle-Grid + Profil-Trenner + Ziele/Pain Points/Kaufkriterien |
+| Strategy | `ValuePropositionFields` | Hervorgehobener blauer Statement-Kasten + Zielkunde + Nutzen/Differenzierung-Grid |
+| Strategy | `PositioningFields` | Hervorgehobener violetter Statement-Kasten mit Template-Hinweis + Segement/Vorteil/Kernbotschaft |
+| Strategy | `BusinessModelFields` | Einnahmen/Kosten-Grid + Kanäle/Partner-Grid |
+| Strategy | `KpiOkrFields` | Hervorgehobener amber Objective-Kasten + Key Results + Metriken + Zeitraum/Owner-Grid |
+| Discovery | `UserJourneyFields` | Akteur/Szenario-Grid + Journey-Schritte (groß) + Pain Points/Verbesserungen nebeneinander |
+| Discovery | `FeatureFields` | Beschreibung + Nutzen + Scope-Trenner + In-Scope/Out-of-Scope-Grid + Priorität |
+| Discovery | `EpicFields` | Beschreibung + Ziele + Abgrenzung-Trenner + Scope + Erfolgskriterien |
+| Delivery | `NonFunctionalRequirementFields` | Beschreibung + Kategorie/Metrik-Grid + Akzeptanz-Trenner |
+| Delivery | `AcceptanceCriteriaFields` | Hervorgehobener teal Given/When/Then-Kasten (Monospace) + Vorbedingungen + Ergebnis |
+| Delivery | `DependencyFields` | Beschreibung + Von/Typ-Grid + Konsequenzen-Trenner + Auswirkung + Owner |
+| Delivery | `RiskFields` | Beschreibung + Wahrscheinlichkeit/Auswirkung-Grid + Maßnahmen-Trenner + Mitigation + Owner |
+| Delivery | `DecisionFields` | Kontext + Hervorgehobener indigo Entscheidungs-Kasten + Begründung + Alternativen/Konsequenzen |
+| Planning | `RoadmapItemFields` | Beschreibung + Zeitraum + Kontext-Trenner + Features + Begründung |
+| Planning | `ReleaseFields` | Version/Datum-Grid + Beschreibung + Inhalt-Trenner + Scope + Release Notes |
+| Planning | `LaunchTaskFields` | Beschreibung + Owner/Datum-Grid + Checkliste-Trenner |
+| Feedback | `FeedbackItemFields` | Quelle/Sentiment-Grid + Inhalt + Maßnahmen-Trenner |
+| Feedback | `IterationFields` | Beschreibung + Learnings + Nächste-Schritte-Trenner + Verbesserungen + Next Steps |
+
+**Infrastruktur:**
+- `fields/index.js` — `FIELD_COMPONENTS`-Map vollständig auf alle 30 Typen erweitert (6 Legacy + 24 neue)
+- `ArtifactForm` nutzt `FIELD_COMPONENTS[type]` — alle Typen werden automatisch mit ihrem Spezialformular gerendert
+- Kein generisches Fallback-Rendering mehr nötig
+
+---
