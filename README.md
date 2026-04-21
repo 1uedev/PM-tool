@@ -328,10 +328,42 @@ Alle 10 Schritte von Sprint 1 sind implementiert.
 
 ## Sprint 2 abgeschlossen ✅
 
-## Geplant (Sprint 3–4)
+---
 
-- **Sprint 3**: KI-Vorschläge, Versionshistorie, Fortschrittsansicht
-- **Sprint 4**: Volltextsuche, Tags, Board View, Hardening
+## Fortschritt: Sprint 3
+
+### Schritt 1 — KI-Provider Adapter + Vorschläge (F1–F5) ✅
+
+**Backend:**
+- `src/lib/ai/provider.js` — Basis-Interface `AiProvider`
+- `src/lib/ai/claude-adapter.js` — Claude-Adapter (`claude-sonnet-4-6`), Timeout-Handling
+- `src/lib/ai/provider-factory.js` — `getAiProvider()` + `isAiAvailable()` (prüft API-Key)
+- `src/lib/ai/prompts/` — 6 Prompt-Templates (je Artefakttyp), JSON-Output-Format
+- `src/lib/ai/prompts/index.js` — `buildPrompt()` + `parseSuggestions()` mit JSON-Parse-Fallback
+- `POST /api/.../ai` — Vorschläge anfordern, verknüpfte Artefakte als Kontext, AiSession-Logging (F4)
+
+**Frontend:**
+- `AiSuggestButton` — lila Button im Formular (nur Edit-Modus, nur EDITOR+); zeigt Ladeindikator
+- `AiSuggestionPanel` — separates Panel mit allen Vorschlägen, „Alle übernehmen"-Button (F2, F3)
+- `AiSuggestionItem` — einzelner Vorschlag mit ✓-Button; nach Übernahme aus Panel entfernt (F3)
+- Guardrails (F5): KI überschreibt nie automatisch; jeder Vorschlag wird explizit übernommen
+
+**Konfiguration:**
+- `AI_CLAUDE_API_KEY` in `.env` setzen — ohne Key bleibt der Button deaktiviert (503)
+- `@anthropic-ai/sdk` zu `serverExternalPackages` in `next.config.mjs` hinzugefügt
+
+---
+
+## Geplant (Sprint 3 Fortsetzung)
+
+- Versionierung bei Speicherung (H1)
+- Versionsliste anzeigen (H2)
+- Version wiederherstellen (H3)
+- Fortschritt über Kernphasen (I1, I2)
+
+## Geplant (Sprint 4)
+
+- Volltextsuche, Tags, Board View, Hardening
 
 ## Geplant (Sprint 3–4)
 

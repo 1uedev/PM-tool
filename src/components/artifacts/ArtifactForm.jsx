@@ -8,6 +8,7 @@ import { getDefaultFields } from "@/lib/artifactFields.js";
 import { FIELD_COMPONENTS } from "@/components/artifacts/fields/index.js";
 import { useDirtyForm } from "@/lib/DirtyFormContext.js";
 import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
+import AiSuggestButton from "@/components/ai/AiSuggestButton.jsx";
 import Input from "@/components/ui/Input.jsx";
 import Select from "@/components/ui/Select.jsx";
 import Button from "@/components/ui/Button.jsx";
@@ -166,6 +167,18 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {globalError}
         </div>
+      )}
+
+      {/* AI suggestions — only in edit mode for EDITOR+ */}
+      {isEdit && canEdit && (
+        <AiSuggestButton
+          projectId={projectId}
+          artifactId={artifact.id}
+          artifactType={artifactType}
+          onAccept={(key, value) => {
+            handleFieldChange(key, value);
+          }}
+        />
       )}
 
       {/* Type-specific field component */}
