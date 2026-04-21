@@ -20,3 +20,21 @@ export async function requireAuth() {
 
   return { session, response: null };
 }
+
+/**
+ * Requires the current user to have systemRole ADMIN.
+ * Usage: const { session, response } = await requireAdmin(); if (response) return response;
+ */
+export async function requireAdmin() {
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return { session: null, response: authErr };
+
+  if (session.user.systemRole !== "ADMIN") {
+    return {
+      session: null,
+      response: errorResponse("FORBIDDEN", "Nur Admins haben Zugriff auf diesen Bereich", 403),
+    };
+  }
+
+  return { session, response: null };
+}
