@@ -552,6 +552,37 @@ Alle P0-Features aus der Spec sind umgesetzt:
 
 ---
 
+### Erweiterungsschritt 7 — Review / Hardening ✅
+
+**Kritischer Bugfix — AI-Prompts für alle 26 Artefakttypen:**
+
+Das war der schwerwiegendste verbleibende Fehler: Alle 20 neuen Artefakttypen hatten **keine Prompt-Templates** — jeder KI-Vorschlag-Request für einen neuen Typ führte zu einem 500-Fehler ("No prompt builder for type: FEATURE").
+
+**20 neue Prompt-Templates erstellt** (`src/lib/ai/prompts/`):
+
+| Gruppe | Neue Templates |
+|---|---|
+| Research | market-analysis, competitor, research-finding, problem-statement, opportunity, hypothesis |
+| Audience | buyer-persona |
+| Strategy | value-proposition, positioning, business-model, kpi-okr |
+| Discovery | user-journey, feature, epic |
+| Delivery | non-functional-requirement, acceptance-criteria, dependency, risk, decision |
+| Planning | roadmap-item, release, launch-task |
+| Feedback | feedback-item, iteration |
+
+**Jedes Template enthält:**
+- Rollenbeschreibung als Product Manager
+- Aktuelle Feldwerte im Prompt-Kontext
+- Exaktes JSON-Ausgabeformat mit den richtigen Feld-Keys
+- Typ-spezifische Qualitätsregeln (z. B. OKR-Format, Given/When/Then, Mitigation-Strategien)
+
+**Upstream-Validation in AI-Route:**
+- `hasPromptBuilder()` export in `prompts/index.js`
+- AI-Route prüft jetzt den Typ **vor** dem Provider-Call
+- Gibt 400 mit klarer Nachricht zurück statt 500 bei unbekanntem Typ (Sicherheitsnetz)
+
+---
+
 ### Erweiterungsschritt 6 — Traceability verbessern ✅
 
 **Neu umgesetzt:**

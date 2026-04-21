@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma.js";
 import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
 import { getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
+import { hasPromptBuilder } from "@/lib/ai/prompts/index.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 
 // POST /api/projects/:id/artifacts/:aid/ai — request AI suggestions
@@ -18,6 +19,19 @@ export async function POST(request, { params }) {
 
   if (!isAiAvailable()) {
     return errorResponse("SERVER_ERROR", "Kein KI-Provider konfiguriert", 503);
+  }
+
+  // Early type check — gives a clear 400 instead of a cryptic 500 for unsupported types
+  const artifactForTypeCheck = await prisma.artifact.findUnique({
+    where: { id: artifactId },
+    select: { type: true },
+  });
+  if (artifactForTypeCheck && !hasPromptBuilder(artifactForTypeCheck.type)) {
+    return errorResponse(
+      "VALIDATION_ERROR",
+      `KI-Vorschläge werden für den Typ "${artifactForTypeCheck.type}" noch nicht unterstützt`,
+      400
+    );
   }
 
   // Load artifact with related artifacts as context
