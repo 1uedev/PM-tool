@@ -5,8 +5,7 @@ import prisma from "@/lib/prisma.js";
 import Link from "next/link";
 import ProjectForm from "@/components/projects/ProjectForm.jsx";
 import ProjectSettingsActions from "@/components/projects/ProjectSettingsActions.jsx";
-import MemberList from "@/components/projects/members/MemberList.jsx";
-import InviteMember from "@/components/projects/members/InviteMember.jsx";
+import MembersSection from "@/components/projects/members/MembersSection.jsx";
 
 export const metadata = { title: "Projekteinstellungen — PM Copilot" };
 
@@ -51,15 +50,7 @@ export default async function ProjectSettingsPage({ params }) {
           <h2 className="mb-4 text-sm font-semibold text-gray-700 uppercase tracking-wide">
             Mitglieder
           </h2>
-          <div className="flex flex-col gap-4">
-            <MemberList projectId={projectId} />
-            {role === "OWNER" && (
-              <InviteMember
-                projectId={projectId}
-                onInvited={() => {}}
-              />
-            )}
-          </div>
+          <MembersSection projectId={projectId} isOwner={role === "OWNER"} />
         </section>
 
         {role === "OWNER" && (
