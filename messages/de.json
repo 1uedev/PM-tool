@@ -4,7 +4,8 @@
     "administration": "Administration",
     "users": "Benutzerverwaltung",
     "languages": "Sprachverwaltung",
-    "database": "Datenbank"
+    "database": "Datenbank",
+    "ai": "KI-Konfiguration"
   },
   "auth": {
     "logout": "Abmelden",

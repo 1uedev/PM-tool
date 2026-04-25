@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma.js";
 import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
-import { getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
+import { getAiConfig, getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
 import { hasPromptBuilder } from "@/lib/ai/prompts/index.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 
@@ -17,7 +17,8 @@ export async function POST(request, { params }) {
   const { response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
   if (artifactErr) return artifactErr;
 
-  if (!isAiAvailable()) {
+  const aiConfig = await getAiConfig();
+  if (!isAiAvailable(aiConfig)) {
     return errorResponse("SERVER_ERROR", "Kein KI-Provider konfiguriert", 503);
   }
 
@@ -67,7 +68,7 @@ export async function POST(request, { params }) {
     ? JSON.parse(artifact.fields)
     : artifact.fields;
 
-  const provider = getAiProvider();
+  const provider = getAiProvider(aiConfig);
   const startMs = Date.now();
   let result;
 
@@ -78,10 +79,9 @@ export async function POST(request, { params }) {
     );
   } catch (error) {
     console.error("[POST /ai]", error);
-    // Log failed session
     await prisma.aiSession.create({
       data: {
-        provider: process.env.AI_PROVIDER ?? "claude",
+        provider: aiConfig.provider,
         mode: "suggest",
         prompt: "",
         response: error.message ?? "error",
@@ -89,16 +89,15 @@ export async function POST(request, { params }) {
         userId: session.user.id,
         durationMs: Date.now() - startMs,
       },
-    }).catch(() => {}); // non-blocking
+    }).catch(() => {});
     return errorResponse("SERVER_ERROR", "KI-Anfrage fehlgeschlagen — bitte erneut versuchen", 500);
   }
 
   const durationMs = Date.now() - startMs;
 
-  // Log successful session (F4)
   await prisma.aiSession.create({
     data: {
-      provider: process.env.AI_PROVIDER ?? "claude",
+      provider: aiConfig.provider,
       mode: "suggest",
       prompt: `${artifact.type}/${artifactId}`,
       response: JSON.stringify(result),
@@ -106,7 +105,7 @@ export async function POST(request, { params }) {
       userId: session.user.id,
       durationMs,
     },
-  }).catch(() => {}); // non-blocking, don't fail the request
+  }).catch(() => {});
 
   return successResponse({ ...result, durationMs });
 }

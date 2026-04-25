@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderOpen, LayoutDashboard, Users, Globe2, Database } from "lucide-react";
+import { FolderOpen, LayoutDashboard, Users, Globe2, Database, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import LogoutButton from "@/components/auth/LogoutButton.jsx";
@@ -22,6 +22,7 @@ export default function Sidebar({ languages = [], currentLocale = "de" }) {
     { label: t("nav.users"), href: "/admin/users", icon: Users },
     { label: t("nav.languages"), href: "/admin/languages", icon: Globe2 },
     { label: t("nav.database"), href: "/admin/database", icon: Database },
+    { label: t("nav.ai"), href: "/admin/ai", icon: Sparkles },
   ];
 
   return (

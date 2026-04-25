@@ -12,7 +12,15 @@
       "Bash(grep:*)",
       "Bash(git add:*)",
       "Bash(curl:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)",
+      "Bash(gh pr *)",
+      "Bash(brew list *)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(lsof:*)",
+      "Bash(kill 27885 30914 31996 32049)",
+      "Bash(find:*)"
     ]
   }
 }

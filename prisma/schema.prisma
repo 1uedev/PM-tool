@@ -167,6 +167,18 @@ model ArtifactTag {
   @@id([artifactId, tagId])
 }
 
+// ─── AI Configuration ───
+
+model AiConfig {
+  id        String   @id @default("singleton")
+  provider  String   @default("disabled") // "claude" | "openai" | "disabled"
+  model     String   @default("")
+  apiKey    String   @default("")
+  timeoutMs Int      @default(30000)
+  maxTokens Int      @default(2048)
+  updatedAt DateTime @updatedAt
+}
+
 // ─── AI Sessions ───
 
 model AiSession {

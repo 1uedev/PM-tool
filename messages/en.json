@@ -4,7 +4,8 @@
     "administration": "Administration",
     "users": "User Management",
     "languages": "Language Management",
-    "database": "Database"
+    "database": "Database",
+    "ai": "AI Configuration"
   },
   "auth": {
     "logout": "Log out",
