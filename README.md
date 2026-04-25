@@ -10,11 +10,13 @@ KI-gestütztes Produktmanagementsystem für strukturierte PM-Artefakte, Traceabi
 | Sprache | JavaScript |
 | Styling | Tailwind CSS 3 |
 | ORM | Prisma 7 |
-| Datenbank | SQLite (MVP) |
+| Datenbank | SQLite (default) → PostgreSQL / MariaDB (konfigurierbar) |
 | Auth | NextAuth.js 4 (Credentials Provider, JWT) |
 | Datenfetching | SWR |
 | Validierung | Zod 3 |
 | Icons | Lucide React |
+| i18n | next-intl (cookie-basiert, kein URL-Prefix) |
+| KI | Anthropic Claude SDK + OpenAI SDK (Provider-agnostisch) |
 
 ## Lokale Entwicklung
 
@@ -48,11 +50,17 @@ Die App läuft dann unter [http://localhost:3000](http://localhost:3000).
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="dein-geheimes-secret"
 NEXTAUTH_URL="http://localhost:3000"
-AI_PROVIDER="claude"
+
+# KI-Provider (Fallback falls keine DB-Konfiguration vorhanden)
+# Wird ab sofort über die Admin-UI unter /admin/ai konfiguriert
+AI_PROVIDER="disabled"
 AI_CLAUDE_API_KEY=""
+AI_OPENAI_API_KEY=""
 AI_TIMEOUT_MS=30000
 AI_MAX_TOKENS=2048
 ```
+
+> **Hinweis:** KI-Provider, Modell und API-Key werden bevorzugt über die Admin-UI (`/admin/ai`) konfiguriert und in der Datenbank gespeichert. Die Env-Variablen dienen nur als Fallback für den initialen Start.
 
 ### Nützliche Skripte
 
@@ -672,5 +680,108 @@ Für alle 20 neuen Artefakttypen wurden dedizierte, typ-spezifische Feldkomponen
 - `fields/index.js` — `FIELD_COMPONENTS`-Map vollständig auf alle 30 Typen erweitert (6 Legacy + 24 neue)
 - `ArtifactForm` nutzt `FIELD_COMPONENTS[type]` — alle Typen werden automatisch mit ihrem Spezialformular gerendert
 - Kein generisches Fallback-Rendering mehr nötig
+
+---
+
+### Bugfix — Projekteinstellungen: Event-Handler-Prop-Fehler ✅
+
+**Problem:** Die Einstellungsseite `/projects/:id/settings` warf den Fehler „Event handlers cannot be passed to Client Component props" beim Laden. Ursache: Die Server Component `page.js` übergab eine Funktion (`onInvited`) direkt an die Client Component `InviteMember`.
+
+**Fix:**
+- Neue Client Component `MembersSection` als Wrapper erstellt — hält den SWR-`mutate`-Aufruf intern
+- `page.js` übergibt nur serialisierbare Props (`projectId`, `isOwner`) an `MembersSection`
+- `MembersSection` invalidiert den SWR-Cache (`/api/projects/:id/members`) nach erfolgreicher Einladung selbst
+
+---
+
+### Erweiterungsschritt 8 — Mehrsprachigkeit (DE / EN) ✅
+
+**Ziel:** Admins verwalten verfügbare Sprachen; Nutzer wählen ihre bevorzugte Anzeigesprache. Kein URL-Prefix — Locale wird per Cookie gesetzt.
+
+**Datenmodell:**
+- Neues `Language`-Modell: `code`, `name`, `nativeName`, `isActive`, `isDefault`
+- `User.preferredLanguage` — gespeicherte Sprachpräferenz pro Nutzer
+- Seed: Deutsch (`de`, Standard) + Englisch (`en`)
+
+**Infrastruktur (next-intl):**
+- `next-intl` installiert und mit `createNextIntlPlugin` in `next.config.mjs` integriert
+- `src/i18n/request.js` — liest `NEXT_LOCALE`-Cookie, fällt auf `de` zurück
+- `src/app/layout.js` — `NextIntlClientProvider` wrappet die gesamte App
+- `messages/de.json` + `messages/en.json` — Übersetzungskeys für Nav, Auth, Common, Admin, Projekte, Artefaktstatus
+
+**Admin — Sprachverwaltung (`/admin/languages`):**
+- Tabelle aller Sprachen mit Status-Badge und Standard-Markierung
+- Aktionen pro Sprache: als Standard setzen (⭐), aktivieren/deaktivieren (👁), löschen (🗑)
+- Schutz: Standardsprache kann nicht deaktiviert oder gelöscht werden
+- Formular zum Hinzufügen neuer Sprachen (Code / Name Englisch / Name Nativ)
+- API: `GET/POST /api/admin/languages`, `PATCH/DELETE /api/admin/languages/[code]`
+
+**Nutzer — Sprachauswahl:**
+- `LanguagePicker` im Sidebar-Footer — Popover mit allen aktiven Sprachen, Häkchen bei aktueller
+- Sprachwechsel: `PATCH /api/users/me/language` → schreibt `User.preferredLanguage` in DB + setzt `NEXT_LOCALE`-Cookie (30 Tage)
+- Sofortige Wirkung via `router.refresh()` ohne Reload
+
+**Übersetzungen angewendet:**
+- `Sidebar` — alle Nav-Labels via `useTranslations()`
+- `LogoutButton` — „Abmelden" / „Log out"
+
+---
+
+### Erweiterungsschritt 9 — Datenbank-Konfiguration UI ✅
+
+**Ziel:** Admins können die Datenbankverbindung für den Produktivbetrieb konfigurieren — direkt in der UI, ohne Dateien manuell editieren zu müssen.
+
+**Admin-Seite (`/admin/database`):**
+- **DB-Typ-Auswahl:** SQLite / PostgreSQL / MariaDB (Card-Style-Picker mit Beschreibungen)
+- **SQLite:** Dateipfad-Eingabe (relativ oder absolut)
+- **PostgreSQL / MariaDB:** Host, Port, Datenbankname, Benutzername, Passwort — oder Umschalten auf direkte Connection-URL-Eingabe
+- **Vorschau der `DATABASE_URL`** — live generiert, Passwort maskiert, Copy-Button
+- **Verbindung testen** — stellt echte Verbindung her (`pg` / `mysql2`, 5s Timeout), meldet Serverversion bei Erfolg
+- **Konfiguration speichern** — schreibt `DATABASE_URL` in `.env.local` (überschreibt `.env` ohne es zu verändern)
+- **Post-Save-Checkliste** — aufklappbar, mit Copy-Buttons für alle nötigen Folgeschritte:
+  1. `prisma/schema.prisma` Provider anpassen
+  2. Adapter installieren (`@prisma/adapter-pg` / `@prisma/adapter-mysql`)
+  3. `npx prisma migrate deploy`
+  4. Server neu starten
+
+**Neue Pakete:** `pg`, `mysql2`
+
+**Neue Hilfsbibliothek:** `src/lib/env-config.js` — Parsen und Schreiben von `.env`-Dateien, URL-Builder/Parser, DB-Typ-Erkennung
+
+**API:** `GET/PATCH /api/admin/database`, `POST /api/admin/database/test`
+
+> **Einschränkung:** Ein Datenbankwechsel erfordert weiterhin einen Neustart des Servers und manuelle Anpassung des Prisma-Schemas. Die UI deckt die Konfiguration ab, nicht die automatische Migration.
+
+---
+
+### Erweiterungsschritt 10 — KI-Provider Konfiguration UI ✅
+
+**Ziel:** Admins wählen KI-Provider, Modell und API-Key direkt in der UI. Änderungen wirken **sofort ohne Neustart** — die Konfiguration wird in der Datenbank gespeichert und bei jeder KI-Anfrage dynamisch geladen.
+
+**Datenmodell:**
+- Neues `AiConfig`-Modell (Singleton, `id = "singleton"`): `provider`, `model`, `apiKey`, `timeoutMs`, `maxTokens`
+- Provider-Factory liest zuerst aus DB, fällt auf Env-Variablen zurück
+
+**Admin-Seite (`/admin/ai`):**
+- **Provider-Auswahl:** Anthropic Claude / OpenAI / Deaktiviert
+- **Modellauswahl** (Radio-Buttons mit Empfehlungs-Badges):
+  - Claude: Opus 4.6 (Leistungsstark), **Sonnet 4.6 (Empfohlen)**, Haiku 4.5 (Schnell)
+  - OpenAI: GPT-4o (Leistungsstark), **GPT-4o mini (Empfohlen)**, GPT-4 Turbo
+- **API-Key-Eingabe** mit Show/Hide-Toggle; leer lassen = bestehenden Key behalten; „Key hinterlegt"-Indikator
+- **Erweiterte Einstellungen** (einklappbar): Timeout (ms) und Max Tokens
+- **Verbindung testen** — echter Mini-Call (max. 10 Tokens) zur Key-Verifikation
+- **Speichern** — schreibt in DB, wirkt sofort für alle nachfolgenden KI-Anfragen
+- **Wenn deaktiviert** — Info-Banner; KI-Button für alle Nutzer ausgeblendet (503-Response)
+
+**Architektur-Änderungen:**
+- `provider-factory.js` — `getAiConfig()` (async, liest aus DB), `isAiAvailable(config)`, `getAiProvider(config)` — alle Funktionen nehmen jetzt ein Config-Objekt entgegen
+- `claude-adapter.js` — nimmt Config-Objekt statt Env-Variablen
+- `openai-adapter.js` — neu implementiert (OpenAI SDK), analog zu Claude-Adapter
+- AI-Route `artifacts/:aid/ai` — ruft `getAiConfig()` auf und übergibt Config an Provider
+- `AiSession`-Logging verwendet dynamischen Provider-Namen aus Config
+
+**Neue Pakete:** `openai`
+
+**API:** `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test`
 
 ---
