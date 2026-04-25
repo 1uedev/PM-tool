@@ -3,7 +3,8 @@
     "projects": "Projects",
     "administration": "Administration",
     "users": "User Management",
-    "languages": "Language Management"
+    "languages": "Language Management",
+    "database": "Database"
   },
   "auth": {
     "logout": "Log out",

@@ -3,7 +3,8 @@
     "projects": "Projekte",
     "administration": "Administration",
     "users": "Benutzerverwaltung",
-    "languages": "Sprachverwaltung"
+    "languages": "Sprachverwaltung",
+    "database": "Datenbank"
   },
   "auth": {
     "logout": "Abmelden",
