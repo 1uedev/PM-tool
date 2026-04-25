@@ -1,58 +1,58 @@
 # PM Copilot
 
-KI-gestütztes Produktmanagementsystem für strukturierte PM-Artefakte, Traceability und kontextbezogene Assistenz.
+AI-powered product management system for structured PM artifacts, traceability, and contextual assistance.
 
-## Tech-Stack
+## Tech Stack
 
-| Schicht | Technologie |
+| Layer | Technology |
 |---|---|
 | Framework | Next.js 15 (App Router) |
-| Sprache | JavaScript |
+| Language | JavaScript |
 | Styling | Tailwind CSS 3 |
 | ORM | Prisma 7 |
-| Datenbank | SQLite (default) → PostgreSQL / MariaDB (konfigurierbar) |
+| Database | SQLite (default) → PostgreSQL / MariaDB (configurable) |
 | Auth | NextAuth.js 4 (Credentials Provider, JWT) |
-| Datenfetching | SWR |
-| Validierung | Zod 3 |
+| Data fetching | SWR |
+| Validation | Zod 3 |
 | Icons | Lucide React |
-| i18n | next-intl (cookie-basiert, kein URL-Prefix) |
-| KI | Anthropic Claude SDK + OpenAI SDK (Provider-agnostisch) |
+| i18n | next-intl (cookie-based, no URL prefix) |
+| AI | Anthropic Claude SDK + OpenAI SDK (provider-agnostic) |
 
-## Lokale Entwicklung
+## Local Development
 
 ```bash
-# Abhängigkeiten installieren
+# Install dependencies
 npm install
 
-# Datenbank initialisieren und Seed-Daten einspielen
+# Initialize database and seed demo data
 npx prisma migrate dev
 node prisma/seed.mjs
 
-# Entwicklungsserver starten
+# Start development server
 npm run dev
 ```
 
-Die App läuft dann unter [http://localhost:3000](http://localhost:3000).
+The app runs at [http://localhost:3000](http://localhost:3000).
 
-### Demo-Zugangsdaten
+### Demo Credentials
 
-| E-Mail | Passwort | System-Rolle | Projekt-Rolle |
+| Email | Password | System Role | Project Role |
 |---|---|---|---|
 | admin@example.com | password123 | Admin | — |
 | alice@example.com | password123 | User | Owner (Smart Home App) |
 | bob@example.com | password123 | User | Editor (Smart Home App) |
 
-### Umgebungsvariablen
+### Environment Variables
 
-`.env` wird nicht eingecheckt. Vorlage:
+`.env` is not checked in. Template:
 
 ```env
 DATABASE_URL="file:./dev.db"
-NEXTAUTH_SECRET="dein-geheimes-secret"
+NEXTAUTH_SECRET="your-secret-here"
 NEXTAUTH_URL="http://localhost:3000"
 
-# KI-Provider (Fallback falls keine DB-Konfiguration vorhanden)
-# Wird ab sofort über die Admin-UI unter /admin/ai konfiguriert
+# AI provider (fallback if no DB config exists)
+# Configured via the Admin UI at /admin/ai
 AI_PROVIDER="disabled"
 AI_CLAUDE_API_KEY=""
 AI_OPENAI_API_KEY=""
@@ -60,76 +60,76 @@ AI_TIMEOUT_MS=30000
 AI_MAX_TOKENS=2048
 ```
 
-> **Hinweis:** KI-Provider, Modell und API-Key werden bevorzugt über die Admin-UI (`/admin/ai`) konfiguriert und in der Datenbank gespeichert. Die Env-Variablen dienen nur als Fallback für den initialen Start.
+> **Note:** AI provider, model, and API key are preferably configured through the Admin UI (`/admin/ai`) and stored in the database. Environment variables serve only as a fallback for initial startup.
 
-### Nützliche Skripte
+### Useful Scripts
 
 ```bash
-npm run db:seed    # Seed-Daten einspielen
-npm run db:reset   # DB zurücksetzen und neu seeden
-npx prisma studio  # Datenbank-Browser öffnen
+npm run db:seed    # Seed demo data
+npm run db:reset   # Reset DB and re-seed
+npx prisma studio  # Open database browser
 ```
 
 ---
 
-## Fortschritt: Sprint 1
+## Progress: Sprint 1
 
-### Schritt 1 — Prisma Schema, Migration, Seed ✅
+### Step 1 — Prisma Schema, Migration, Seed ✅
 
-- Prisma 7 mit SQLite-Adapter (`@prisma/adapter-better-sqlite3`) aufgesetzt
-- Vollständiges Datenmodell angelegt: `User`, `Project`, `ProjectMember`, `Artifact`, `Relation`, `ArtifactVersion`, `Comment`, `Tag`, `ArtifactTag`, `AiSession`
-- Erste Migration ausgeführt (`prisma/migrations/…_init`)
-- Seed-Script (`prisma/seed.mjs`) mit Demo-Daten:
-  - 2 User (alice & bob)
-  - 1 Projekt „Smart Home App"
-  - 6 Artefakte (alle Typen, verschiedene Status)
-  - 3 Relationen zwischen Artefakten
-  - Je eine initiale Version pro Artefakt
-  - 1 Kommentar
-- `src/lib/prisma.js` — Prisma-Client-Singleton mit Adapter
-
----
-
-### Schritt 2 — NextAuth Setup (Credentials Provider, JWT) ✅
-
-- `src/lib/auth.js` — NextAuth-Config mit Credentials Provider, bcrypt-Passwortprüfung, JWT-Session, Custom Login-Page `/login`
-- `src/app/api/auth/[...nextauth]/route.js` — NextAuth API-Handler
-- `src/lib/middleware/auth-guard.js` — `requireAuth()` Hilfsfunktion für API-Routes
-- `src/lib/errors.js` — `errorResponse()` / `successResponse()` für konsistente API-Antworten
-- `src/middleware.js` — Next.js Middleware schützt `/projects/*` und `/api/projects/*` automatisch
-- `src/components/auth/SessionProvider.jsx` — Client-Wrapper für `SessionProvider`
-- Root-Layout mit `SessionProvider` gewrappt
-
-**Gelöste Besonderheiten:**
-- Zod auf v3 gehalten (next-auth v4 inkompatibel mit Zod v4)
-- `"type": "module"` entfernt — ESM/CJS-Konflikt mit next-auth; stattdessen `.mjs` für Seed und Config
-- `serverExternalPackages` für Prisma/bcryptjs verhindert Webpack-Bundling-Fehler
+- Prisma 7 set up with SQLite adapter (`@prisma/adapter-better-sqlite3`)
+- Full data model created: `User`, `Project`, `ProjectMember`, `Artifact`, `Relation`, `ArtifactVersion`, `Comment`, `Tag`, `ArtifactTag`, `AiSession`
+- First migration applied (`prisma/migrations/…_init`)
+- Seed script (`prisma/seed.mjs`) with demo data:
+  - 2 users (alice & bob)
+  - 1 project "Smart Home App"
+  - 6 artifacts (all types, various statuses)
+  - 3 relations between artifacts
+  - One initial version per artifact
+  - 1 comment
+- `src/lib/prisma.js` — Prisma client singleton with adapter
 
 ---
 
-### Schritt 3 — Registrierung, Login, Logout (A1, A2, A3) ✅
+### Step 2 — NextAuth Setup (Credentials Provider, JWT) ✅
 
-- `POST /api/auth/register` — Registrierung mit Zod-Validierung, bcrypt-Hashing, Duplikat-Check
-- `src/app/(auth)/layout.js` — zentriertes Auth-Layout ohne Sidebar
-- `/login` — `LoginForm` mit `signIn()`, Fehleranzeige, Ladeindikator, Redirect nach `/projects`
-- `/register` — `RegisterForm` mit API-Call, Auto-Login nach Registrierung, Feldvalidierung
+- `src/lib/auth.js` — NextAuth config with Credentials Provider, bcrypt password verification, JWT session, custom login page `/login`
+- `src/app/api/auth/[...nextauth]/route.js` — NextAuth API handler
+- `src/lib/middleware/auth-guard.js` — `requireAuth()` helper for API routes
+- `src/lib/errors.js` — `errorResponse()` / `successResponse()` for consistent API responses
+- `src/middleware.js` — Next.js middleware automatically protects `/projects/*` and `/api/projects/*`
+- `src/components/auth/SessionProvider.jsx` — client wrapper for `SessionProvider`
+- Root layout wrapped with `SessionProvider`
+
+**Implementation notes:**
+- Kept Zod on v3 (next-auth v4 incompatible with Zod v4)
+- Removed `"type": "module"` — ESM/CJS conflict with next-auth; using `.mjs` for seed and config instead
+- `serverExternalPackages` for Prisma/bcryptjs prevents Webpack bundling errors
+
+---
+
+### Step 3 — Registration, Login, Logout (A1, A2, A3) ✅
+
+- `POST /api/auth/register` — registration with Zod validation, bcrypt hashing, duplicate check
+- `src/app/(auth)/layout.js` — centered auth layout without sidebar
+- `/login` — `LoginForm` with `signIn()`, error display, loading indicator, redirect to `/projects`
+- `/register` — `RegisterForm` with API call, auto-login after registration, field validation
 - `LogoutButton` — `signOut()` → `/login`
-- Root `/` leitet authentifizierte User zu `/projects`, Gäste zu `/login`
-- Neue UI-Primitives: `Input`, `Spinner`, `Button` (überarbeitet)
+- Root `/` redirects authenticated users to `/projects`, guests to `/login`
+- New UI primitives: `Input`, `Spinner`, `Button` (revised)
 
 ---
 
-### Schritt 4 — Auth-Guard Middleware + Fehlerformat (L1, L2, L3) ✅
+### Step 4 — Auth Guard Middleware + Error Format (L1, L2, L3) ✅
 
 - `src/lib/middleware/project-access.js`:
-  - `requireProjectAccess(userId, projectId, requiredRole)` — prüft Membership + Rolle (VIEWER / EDITOR / OWNER) mit Tenant-Isolation
-  - `requireArtifactAccess(artifactId, projectId)` — stellt sicher, dass Artefakt zum Projekt gehört
+  - `requireProjectAccess(userId, projectId, requiredRole)` — checks membership + role (VIEWER / EDITOR / OWNER) with tenant isolation
+  - `requireArtifactAccess(artifactId, projectId)` — ensures artifact belongs to the project
 - `src/lib/validators/index.js`:
-  - `validateBody(request, schema)` — parst JSON-Body und validiert gegen Zod-Schema
-  - `validateParams(searchParams, schema)` — validiert URL-Query-Parameter
-- `src/lib/constants.js` — alle Domain-Enums und deutsche Labels (`PROJECT_STATUS`, `PROJECT_ROLE`, `ARTIFACT_TYPE`, `ARTIFACT_STATUS`, `RELATION_TYPE`)
+  - `validateBody(request, schema)` — parses JSON body and validates against Zod schema
+  - `validateParams(searchParams, schema)` — validates URL query parameters
+- `src/lib/constants.js` — all domain enums and labels (`PROJECT_STATUS`, `PROJECT_ROLE`, `ARTIFACT_TYPE`, `ARTIFACT_STATUS`, `RELATION_TYPE`)
 
-**Pattern für alle API-Routes:**
+**Pattern used across all API routes:**
 ```js
 const { session, response: authErr } = await requireAuth();
 if (authErr) return authErr;
@@ -143,432 +143,421 @@ if (validErr) return validErr;
 
 ---
 
-### Schritt 5 — Projekt CRUD (B1, B2, B3, B4) ✅
+### Step 5 — Project CRUD (B1, B2, B3, B4) ✅
 
 **API:**
-- `GET /api/projects` — Projektliste mit Artefakt-Anzahl
-- `POST /api/projects` — Projekt anlegen, Creator wird automatisch OWNER
-- `GET/PATCH/DELETE /api/projects/:id` — Details, Bearbeiten (EDITOR+), Löschen (OWNER)
-- `PATCH /api/projects/:id/archive` — Archivieren / Reaktivieren (OWNER)
-- Alle Routes mit `requireAuth` + `requireProjectAccess` abgesichert
+- `GET /api/projects` — project list with artifact count
+- `POST /api/projects` — create project; creator is automatically OWNER
+- `GET/PATCH/DELETE /api/projects/:id` — details, edit (EDITOR+), delete (OWNER)
+- `PATCH /api/projects/:id/archive` — archive / reactivate (OWNER)
+- All routes secured with `requireAuth` + `requireProjectAccess`
 
 **Frontend:**
-- Dashboard-Layout mit `Sidebar` (Auth-Gate, Server Component)
-- `/projects` — Projektgrid, aktive + archivierte Sektion, Empty State
-- `/projects/new` — Formular mit Validierung
-- `/projects/:id/settings` — Bearbeiten + Aktionen (Archivieren, Löschen mit Bestätigungsdialog)
-- Neue Komponenten: `ProjectCard`, `ProjectList`, `ProjectForm`, `ProjectSettingsActions`
-- Neue UI-Primitives: `Badge`, `ConfirmDialog`, `Sidebar`, `Header`, `EmptyState`
+- Dashboard layout with `Sidebar` (auth gate, Server Component)
+- `/projects` — project grid, active + archived sections, empty state
+- `/projects/new` — form with validation
+- `/projects/:id/settings` — edit + actions (archive, delete with confirmation dialog)
+- New components: `ProjectCard`, `ProjectList`, `ProjectForm`, `ProjectSettingsActions`
+- New UI primitives: `Badge`, `ConfirmDialog`, `Sidebar`, `Header`, `EmptyState`
 
 ---
 
-### Schritt 6 — Explorer Layout (C1) ✅
+### Step 6 — Explorer Layout (C1) ✅
 
-Zwei-Spalten-Layout für `/projects/:id`:
+Two-column layout for `/projects/:id`:
 
 ```
 ┌─────────────────────────────────────────┐
-│ Breadcrumb              Einstellungen   │  ← Header
+│ Breadcrumb                  Settings   │  ← Header
 ├──────────────┬──────────────────────────┤
-│ Artefakte    │                          │
+│ Artifacts    │                          │
 │              │                          │
-│ USER PERSONA │   Detail-Bereich         │
+│ USER PERSONA │   Detail panel           │
 │  • Persona A │                          │
-│              │   → leer: Hinweistext    │
-│ PROBLEM HYP. │   → ?artifact=ID: Form   │
-│  • Hyp. B    │   → ?new=TYPE: Neuanlage │
+│              │   → empty: hint text     │
+│ PROBLEM HYP. │   → ?artifact=ID: form   │
+│  • Hyp. B    │   → ?new=TYPE: create    │
 │              │                          │
 │ USE CASE (0) │                          │
-│  Keine...    │                          │
+│  None...     │                          │
 └──────────────┴──────────────────────────┘
 ```
 
-- `ExplorerTree` (Server Component) — gruppiert Artefakte nach Typ in kanonischer Reihenfolge
-- `ExplorerTreeGroup` — aufklappbare Gruppe mit Item-Count und `+`-Button (hover)
-- `ExplorerTreeItem` — Eintrag mit Status-Dot (grün / gelb / grau), setzt `?artifact=ID` in der URL
-- `ExplorerDetail` (Client Component) — liest URL-Params, zeigt kontextabhängigen Inhalt
-- `GET /api/projects/:id/artifacts` — Liste aller nicht-gelöschten Artefakte, optionaler `?type=` Filter
-- URL-Params als State (`?artifact=ID`, `?new=TYPE`) — deep-linkable, kein extra Client-State
+- `ExplorerTree` (Server Component) — groups artifacts by type in canonical order
+- `ExplorerTreeGroup` — collapsible group with item count and `+` button (on hover)
+- `ExplorerTreeItem` — entry with status dot (green / yellow / grey), sets `?artifact=ID` in the URL
+- `ExplorerDetail` (Client Component) — reads URL params, shows context-appropriate content
+- `GET /api/projects/:id/artifacts` — list of all non-deleted artifacts, optional `?type=` filter
+- URL params as state (`?artifact=ID`, `?new=TYPE`) — deep-linkable, no extra client state
 
 ---
 
-### Schritt 7 — Artefakt erstellen und bearbeiten (D1, D2) ✅
+### Step 7 — Create and Edit Artifacts (D1, D2) ✅
 
 **API:**
-- `POST /api/projects/:id/artifacts` — erstellt Artefakt + Version 1 in einer Transaktion, merged Felder mit Type-Defaults
-- `GET /api/projects/:id/artifacts/:aid` — vollständiges Artefakt mit geparsten JSON-Feldern
-- `PATCH /api/projects/:id/artifacts/:aid` — Update mit automatischer Versionierung
+- `POST /api/projects/:id/artifacts` — creates artifact + version 1 in a transaction, merges fields with type defaults
+- `GET /api/projects/:id/artifacts/:aid` — full artifact with parsed JSON fields
+- `PATCH /api/projects/:id/artifacts/:aid` — update with automatic versioning
 
 **Frontend:**
-- `ArtifactForm` — unified Create/Edit-Formular:
-  - Titel + Status-Select im Header
-  - Alle Felder des Typs als beschriftete Inputs / Textareas
-  - Optimistisches Speicher-Feedback („✓ Gespeichert")
-  - Bei Neuanlage: Redirect auf `?artifact=ID`
+- `ArtifactForm` — unified create/edit form:
+  - Title + status select in header
+  - All fields for the type as labeled inputs / textareas
+  - Optimistic save feedback ("✓ Saved")
+  - On create: redirect to `?artifact=ID`
 - `ExplorerDetail` (live):
-  - `?artifact=ID` → SWR-Fetch → `ArtifactForm` (Edit-Modus)
-  - `?new=TYPE` → `ArtifactForm` (Create-Modus)
-  - Leer → Hinweistext
-- `ExplorerTreeClient` — Client-Wrapper mit SWR-Revalidierung nach Mutations, server-gerenderte Initialdaten als Fallback
+  - `?artifact=ID` → SWR fetch → `ArtifactForm` (edit mode)
+  - `?new=TYPE` → `ArtifactForm` (create mode)
+  - Empty → hint text
+- `ExplorerTreeClient` — client wrapper with SWR revalidation after mutations, server-rendered initial data as fallback
 
 **Shared:**
-- `src/lib/artifactFields.js` — Feld-Definitionen (key, label, placeholder, multiline, rows) für alle 6 Artefakttypen + `getDefaultFields()`
-- `src/lib/validators/artifact.js` — Zod-Schemas für Create und Update
-- `Select` UI-Primitive
+- `src/lib/artifactFields.js` — field definitions (key, label, placeholder, multiline, rows) for all 6 artifact types + `getDefaultFields()`
+- `src/lib/validators/artifact.js` — Zod schemas for create and update
+- `Select` UI primitive
 
 ---
 
-### Schritt 8 — Typ-spezifische Feldkomponenten (D3) ✅
+### Step 8 — Type-Specific Field Components (D3) ✅
 
-Für jeden der 6 Artefakttypen eine dedizierte Feldkomponente mit typengerechtem UX:
+A dedicated field component for each of the 6 artifact types with type-appropriate UX:
 
-| Komponente | Besonderheit |
+| Component | Highlight |
 |---|---|
-| `UserPersonaFields` | Name, Ziele, Pain Points, Kontext als beschriftete Felder |
-| `ProblemHypothesisFields` | Visueller Trenner zwischen Problem-Teil und Hypothese-Teil |
-| `ProductVisionFields` | Einzeiler in hervorgehobenem blauen Kasten |
-| `UseCaseFields` | Akteur + Ziel nebeneinander, Ablauf in Mono-Textarea |
-| `UserStoryFields` | Klassisches „Als … möchte ich … damit …"-Format mit verbundener Darstellung |
-| `FunctionalRequirementFields` | Akzeptanzkriterien in Mono-Textarea mit Hinweis-Text |
+| `UserPersonaFields` | Name, goals, pain points, context as labeled fields |
+| `ProblemHypothesisFields` | Visual divider between problem section and hypothesis section |
+| `ProductVisionFields` | One-liner in a highlighted blue box |
+| `UseCaseFields` | Actor + goal side by side, flow in monospace textarea |
+| `UserStoryFields` | Classic "As a … I want … so that …" format with connected display |
+| `FunctionalRequirementFields` | Acceptance criteria in monospace textarea with hint text |
 
-- `FieldHelpers.jsx` — gemeinsame Primitive: `FieldLabel`, `FieldInput`, `FieldTextarea`, `FieldGroup`, `SectionDivider`
-- `fields/index.js` — `FIELD_COMPONENTS`-Map für dynamisches Rendering nach Typ
-- `ArtifactForm` — generischer Renderer entfernt, nutzt jetzt `FIELD_COMPONENTS[artifactType]`
-
----
-
-### Schritt 9 — Artefaktstatus und Soft Delete (D4, D5) ✅
-
-**D4 — Statusverwaltung:**
-- `ArtifactHeader` — zeigt Typ-Label + `ArtifactStatusBadge` + Quick-Status-Button
-- Quick-Status-Toggle: ein Klick wechselt DRAFT → IN_REVIEW → DONE → DRAFT (zyklisch), schreibt sofort eine neue Version, invalidiert SWR-Cache im Baum und Detail
-- Status-Button zeigt nächsten Zielstatus als Label an
-
-**D5 — Soft Delete:**
-- `DELETE /api/projects/:id/artifacts/:aid` — setzt `deleted: true`, physisch bleibt der Eintrag erhalten
-- Löschen-Icon im `ArtifactHeader` öffnet `ConfirmDialog` mit Artefakt-Titel
-- Nach Bestätigung: SWR-Cache invalidiert, Redirect auf leeren Explorer, Tree-Refresh
-- Alle Standardabfragen filtern bereits `deleted: false` — gelöschte Artefakte tauchen nicht mehr auf
+- `FieldHelpers.jsx` — shared primitives: `FieldLabel`, `FieldInput`, `FieldTextarea`, `FieldGroup`, `SectionDivider`
+- `fields/index.js` — `FIELD_COMPONENTS` map for dynamic rendering by type
+- `ArtifactForm` — generic renderer removed, now uses `FIELD_COMPONENTS[artifactType]`
 
 ---
 
-### Schritt 10 — Explorer-Baum: Navigation und Unsaved-Changes-Guard (C2, C3) ✅
+### Step 9 — Artifact Status and Soft Delete (D4, D5) ✅
+
+**D4 — Status management:**
+- `ArtifactHeader` — shows type label + `ArtifactStatusBadge` + quick status button
+- Quick status toggle: one click cycles DRAFT → IN_REVIEW → DONE → DRAFT, immediately writes a new version, invalidates SWR cache in tree and detail panel
+- Status button shows the next target status as its label
+
+**D5 — Soft delete:**
+- `DELETE /api/projects/:id/artifacts/:aid` — sets `deleted: true`; record is physically retained
+- Delete icon in `ArtifactHeader` opens `ConfirmDialog` with artifact title
+- After confirmation: SWR cache invalidated, redirect to empty explorer, tree refresh
+- All standard queries already filter `deleted: false` — deleted artifacts no longer appear
+
+---
+
+### Step 10 — Explorer Tree: Navigation and Unsaved-Changes Guard (C2, C3) ✅
 
 **C2 — Navigation:**
-- Klick auf Baumeintrag setzt `?artifact=ID` in der URL → Detail-Panel lädt das Artefakt per SWR
-- Klick auf `+` in einer Gruppe setzt `?new=TYPE` → neues Artefakt-Formular
-- **Unsaved-Changes-Guard** (Spec-Regel 7): Wenn das Formular dirty ist und der Nutzer navigiert (anderes Artefakt, + Neu, Seite verlassen), erscheint ein `ConfirmDialog` — „Verwerfen und wechseln" oder „Abbrechen"
-- `DirtyFormContext` — React Context, schreibt/liest `isDirty` global zwischen `ArtifactForm`, `ExplorerTreeItem` und `ExplorerTreeGroup`
-- `ArtifactForm` setzt `isDirty = true` bei jeder Feldänderung, `isDirty = false` nach erfolgreichem Save oder beim Wechsel zu einem anderen Artefakt (via `useEffect` auf `artifact.id`)
+- Clicking a tree entry sets `?artifact=ID` in the URL → detail panel loads the artifact via SWR
+- Clicking `+` in a group sets `?new=TYPE` → new artifact form
+- **Unsaved-changes guard** (spec rule 7): if the form is dirty and the user navigates away (different artifact, + new, leave page), a `ConfirmDialog` appears — "Discard and switch" or "Cancel"
+- `DirtyFormContext` — React context, reads/writes `isDirty` globally across `ArtifactForm`, `ExplorerTreeItem`, and `ExplorerTreeGroup`
+- `ArtifactForm` sets `isDirty = true` on any field change, `isDirty = false` after a successful save or when switching to another artifact (via `useEffect` on `artifact.id`)
 
-**C3 — Gruppierung:**
-- 6 Gruppen in kanonischer Reihenfolge: Persona → Hypothese → Vision → Use Case → Story → Anforderung
-- Jede Gruppe: aufklappbar, zeigt Artefakt-Anzahl, `+`-Button bei Hover
-- Leere Gruppen zeigen „Keine Einträge" (kein visuelles Rauschen)
-- Status-Dot pro Item: grün (Fertig), gelb (In Prüfung), grau (Entwurf)
-
----
-
-## Sprint 1 abgeschlossen ✅
-
-Alle 10 Schritte von Sprint 1 sind implementiert.
+**C3 — Grouping:**
+- 6 groups in canonical order: Persona → Hypothesis → Vision → Use Case → Story → Requirement
+- Each group: collapsible, shows artifact count, `+` button on hover
+- Empty groups show "No entries" (no visual noise)
+- Status dot per item: green (Done), yellow (In Review), grey (Draft)
 
 ---
 
-## Fortschritt: Sprint 2
+## Sprint 1 Complete ✅
 
-### Schritt 1 — Relation anlegen (E1) ✅
+All 10 steps of Sprint 1 are implemented.
+
+---
+
+## Progress: Sprint 2
+
+### Step 1 — Create Relations (E1) ✅
 
 **API:**
-- `GET /api/projects/:id/artifacts/:aid/relations` — lädt alle Relationen (von und zu diesem Artefakt), inkl. verknüpfte Artefakt-Metadaten
-- `POST /api/projects/:id/artifacts/:aid/relations` — legt eine neue Relation an (Duplikat-Check, Self-Reference-Check)
-- `DELETE /api/projects/:id/artifacts/:aid/relations/:rid` — löscht Relation (prüft Zugehörigkeit zum Artefakt)
+- `GET /api/projects/:id/artifacts/:aid/relations` — loads all relations (from and to this artifact), including linked artifact metadata
+- `POST /api/projects/:id/artifacts/:aid/relations` — creates a new relation (duplicate check, self-reference check)
+- `DELETE /api/projects/:id/artifacts/:aid/relations/:rid` — deletes relation (verifies it belongs to the artifact)
 
 **Frontend:**
-- `RelationList` — zeigt alle Verknüpfungen unterhalb des Artefakt-Formulars; jede Zeile mit Löschen-Button und `ConfirmDialog`
-- `RelationAddDialog` — Modal zur Auswahl von Beziehungstyp und Ziel-Artefakt
-- `ExplorerDetail` — integriert `RelationList` unterhalb des Formulars
+- `RelationList` — displays all links below the artifact form; each row with delete button and `ConfirmDialog`
+- `RelationAddDialog` — modal for selecting relation type and target artifact
+- `ExplorerDetail` — integrates `RelationList` below the form
 
 **Shared:**
-- `src/lib/validators/relation.js` — Zod-Schema für Relation anlegen
+- `src/lib/validators/relation.js` — Zod schema for creating a relation
 
 ---
 
-### Schritt 2 — Kommentare (G1, G2) ✅
+### Step 2 — Comments (G1, G2) ✅
 
 **API:**
-- `GET /api/projects/:id/artifacts/:aid/comments` — lädt alle Kommentare chronologisch (älteste zuerst), inkl. Autorendaten
-- `POST /api/projects/:id/artifacts/:aid/comments` — fügt neuen Kommentar hinzu (VIEWER+ darf kommentieren)
+- `GET /api/projects/:id/artifacts/:aid/comments` — loads all comments chronologically (oldest first), including author data
+- `POST /api/projects/:id/artifacts/:aid/comments` — adds a new comment (VIEWER+ may comment)
 
 **Frontend:**
-- `CommentList` — zeigt Kommentarthread unterhalb der Verknüpfungen; Avatar-Initialen, Name und Zeitstempel pro Eintrag
-- `CommentForm` — Textarea mit Senden-Button, optimistisches Update via SWR mutate
-- `ExplorerDetail` — integriert `CommentList` nach `RelationList`
+- `CommentList` — displays comment thread below relations; avatar initials, name, and timestamp per entry
+- `CommentForm` — textarea with send button, optimistic update via SWR mutate
+- `ExplorerDetail` — integrates `CommentList` after `RelationList`
 
 **Shared:**
-- `src/lib/validators/comment.js` — Zod-Schema (min 1, max 2000 Zeichen)
+- `src/lib/validators/comment.js` — Zod schema (min 1, max 2000 characters)
 
 ---
 
----
+### Step 3 — Role-Based Access Control (L1, L2) ✅
 
-### Schritt 3 — Rollenbasierte Zugriffsprüfung (L1, L2) ✅
-
-**Konzept:** VIEWER = Lesezugriff, EDITOR = Bearbeiten, OWNER = Projekteinstellungen
+**Concept:** VIEWER = read access, EDITOR = edit, OWNER = project settings
 
 **`ProjectRoleContext`** (`src/lib/ProjectRoleContext.js`):
-- React Context mit `ProjectRoleProvider` + `useProjectRole()` Hook
-- `hasRole(userRole, requiredRole)` prüft Rollenhierarchie (VIEWER < EDITOR < OWNER)
+- React context with `ProjectRoleProvider` + `useProjectRole()` hook
+- `hasRole(userRole, requiredRole)` checks role hierarchy (VIEWER < EDITOR < OWNER)
 
-**Frontend-Anpassungen:**
-| Komponente | VIEWER | EDITOR | OWNER |
+**Frontend gating:**
+| Component | VIEWER | EDITOR | OWNER |
 |---|---|---|---|
-| Settings-Button | versteckt | versteckt | sichtbar |
-| `+`-Button im Baum | versteckt | sichtbar | sichtbar |
-| Status-Toggle + Löschen | versteckt | sichtbar | sichtbar |
-| Formular-Felder | disabled | editierbar | editierbar |
-| Speichern-Button | versteckt | sichtbar | sichtbar |
-| Relation hinzufügen/löschen | versteckt | sichtbar | sichtbar |
-| Kommentieren | möglich | möglich | möglich |
+| Settings button | hidden | hidden | visible |
+| `+` button in tree | hidden | visible | visible |
+| Status toggle + delete | hidden | visible | visible |
+| Form fields | disabled | editable | editable |
+| Save button | hidden | visible | visible |
+| Add/remove relations | hidden | visible | visible |
+| Comment | allowed | allowed | allowed |
 
-**Backend:** Bereits in `requireProjectAccess()` implementiert — alle Schreib-Endpoints erfordern EDITOR+, Projektverwaltung erfordert OWNER.
-
----
-
-## Sprint 2 abgeschlossen ✅
+**Backend:** Already implemented in `requireProjectAccess()` — all write endpoints require EDITOR+, project management requires OWNER.
 
 ---
 
-## Fortschritt: Sprint 3
+## Sprint 2 Complete ✅
 
-### Schritt 1 — KI-Provider Adapter + Vorschläge (F1–F5) ✅
+---
+
+## Progress: Sprint 3
+
+### Step 1 — AI Provider Adapter + Suggestions (F1–F5) ✅
 
 **Backend:**
-- `src/lib/ai/provider.js` — Basis-Interface `AiProvider`
-- `src/lib/ai/claude-adapter.js` — Claude-Adapter (`claude-sonnet-4-6`), Timeout-Handling
-- `src/lib/ai/provider-factory.js` — `getAiProvider()` + `isAiAvailable()` (prüft API-Key)
-- `src/lib/ai/prompts/` — 6 Prompt-Templates (je Artefakttyp), JSON-Output-Format
-- `src/lib/ai/prompts/index.js` — `buildPrompt()` + `parseSuggestions()` mit JSON-Parse-Fallback
-- `POST /api/.../ai` — Vorschläge anfordern, verknüpfte Artefakte als Kontext, AiSession-Logging (F4)
+- `src/lib/ai/provider.js` — base interface `AiProvider`
+- `src/lib/ai/claude-adapter.js` — Claude adapter (`claude-sonnet-4-6`), timeout handling
+- `src/lib/ai/provider-factory.js` — `getAiProvider()` + `isAiAvailable()` (checks API key)
+- `src/lib/ai/prompts/` — 6 prompt templates (one per artifact type), JSON output format
+- `src/lib/ai/prompts/index.js` — `buildPrompt()` + `parseSuggestions()` with JSON parse fallback
+- `POST /api/.../ai` — request suggestions, linked artifacts as context, AiSession logging (F4)
 
 **Frontend:**
-- `AiSuggestButton` — lila Button im Formular (nur Edit-Modus, nur EDITOR+); zeigt Ladeindikator
-- `AiSuggestionPanel` — separates Panel mit allen Vorschlägen, „Alle übernehmen"-Button (F2, F3)
-- `AiSuggestionItem` — einzelner Vorschlag mit ✓-Button; nach Übernahme aus Panel entfernt (F3)
-- Guardrails (F5): KI überschreibt nie automatisch; jeder Vorschlag wird explizit übernommen
+- `AiSuggestButton` — purple button in the form (edit mode only, EDITOR+ only); shows loading indicator
+- `AiSuggestionPanel` — separate panel with all suggestions, "Accept all" button (F2, F3)
+- `AiSuggestionItem` — individual suggestion with ✓ button; removed from panel after acceptance (F3)
+- Guardrails (F5): AI never auto-applies changes; every suggestion requires explicit acceptance
 
-**Konfiguration:**
-- `AI_CLAUDE_API_KEY` in `.env` setzen — ohne Key bleibt der Button deaktiviert (503)
-- `@anthropic-ai/sdk` zu `serverExternalPackages` in `next.config.mjs` hinzugefügt
-
----
+**Configuration:**
+- Set `AI_CLAUDE_API_KEY` in `.env` — without a key the button stays disabled (503)
+- `@anthropic-ai/sdk` added to `serverExternalPackages` in `next.config.mjs`
 
 ---
 
-### Schritt 2 — Versionshistorie (H1, H2, H3) ✅
+### Step 2 — Version History (H1, H2, H3) ✅
 
-**H1** — Versionierung bei Speicherung: bereits in Sprint 1 implementiert — jeder PATCH erzeugt automatisch eine neue `ArtifactVersion`.
+**H1** — Versioning on save: already implemented in Sprint 1 — every PATCH automatically creates a new `ArtifactVersion`.
 
 **API:**
-- `GET /api/.../versions` — alle Versionen (neueste zuerst) inkl. Autorendaten und geparsten Feldern
-- `POST /api/.../versions/:vid` — Version wiederherstellen: setzt Artefakt-Inhalt zurück und legt neue Version an
+- `GET /api/.../versions` — all versions (newest first) including author data and parsed fields
+- `POST /api/.../versions/:vid` — restore version: resets artifact content and creates a new version
 
 **Frontend (`VersionList`):**
-- Einklappbare Sektion unterhalb der Kommentare
-- Aktuelle Version mit blauem „Aktuell"-Badge
-- Jede Version aufklappbar → zeigt Felder als Vorschau
-- Wiederherstellen-Button (nur EDITOR+) mit `ConfirmDialog`
-- Nach Wiederherstellung: SWR-Cache für Artefakt, Versionen und Baum invalidiert
+- Collapsible section below comments
+- Current version with blue "Current" badge
+- Each version expandable → shows fields as preview
+- Restore button (EDITOR+ only) with `ConfirmDialog`
+- After restore: SWR cache for artifact, versions, and tree invalidated
 
 ---
 
-### Schritt 3 — Fortschrittsansicht (I1, I2) ✅
+### Step 3 — Progress View (I1, I2) ✅
 
 **API:**
-- `GET /api/projects/:id/progress` — aggregiert Stats pro Artefakttyp: `total`, `done`, `inReview`, `draft`, `progress%`, `missing`-Flag; plus Gesamt-Stats (`overallProgress`, `missingTypes`)
+- `GET /api/projects/:id/progress` — aggregates stats per artifact type: `total`, `done`, `inReview`, `draft`, `progress%`, `missing` flag; plus overall stats (`overallProgress`, `missingTypes`)
 
 **Frontend:**
-- `ProgressOverview` — Summary-Bar (Gesamtfortschritt %, Anzahl fertig, fehlende Phasen) + Grid der Phasenkarten
-- `PhaseCard` — pro Artefakttyp: Fortschrittsbalken, Status-Aufschlüsselung (Punkte in grün/gelb/grau), orange Warnung für fehlende Phasen, CTA-Link zum Anlegen
-- `/projects/:id/progress` — Server-seitig gerendertes Page.js für schnelles Initial-Rendering
-- „Fortschritt"-Button (BarChart3-Icon) im Explorer-Header für alle Rollen sichtbar
+- `ProgressOverview` — summary bar (overall progress %, count done, missing phases) + grid of phase cards
+- `PhaseCard` — per artifact type: progress bar, status breakdown (dots in green/yellow/grey), orange warning for missing phases, CTA link to create
+- `/projects/:id/progress` — server-rendered page for fast initial render
+- "Progress" button (BarChart3 icon) in explorer header visible to all roles
 
 ---
 
-## Sprint 3 abgeschlossen ✅
+## Sprint 3 Complete ✅
 
 ---
 
-## Fortschritt: Sprint 4
+## Progress: Sprint 4
 
-### Schritt 1 — Volltextsuche (K1) ✅
+### Step 1 — Full-Text Search (K1) ✅
 
-- `GET /api/projects/:id/search?q=&type=&status=&tag=` — LIKE-Suche über Titel und `fields`-JSON, kombinierbar mit Typ-, Status- und Tag-Filter
-- `SearchDialog` — Command-Palette-Modal mit 250ms Debounce, Keyboard-Navigation (↑↓↵Esc), Snippet-Vorschau aus Feldinhalten
-- `SearchButton` — Öffnet Dialog; globaler ⌘K/Ctrl+K Shortcut
-- Suchen-Button im Explorer-Header für alle Rollen sichtbar
-
----
-
-### Schritt 2 — Tags vergeben und Filter nach Tags (K2, K3) ✅
-
-- `GET/POST /api/projects/:id/tags` — Projekt-Tags verwalten (upsert by name)
-- `GET/POST/DELETE /api/projects/:id/artifacts/:aid/tags` — Tags zuweisen/entfernen
-- `TagEditor` — inline Tag-Chip-Editor im ArtifactHeader: Dropdown mit bestehenden Tags, „Tag erstellen"-Option, Entfernen per X
-- Tag-Filter-Dropdown in SearchDialog (erscheint wenn Projekt-Tags vorhanden)
+- `GET /api/projects/:id/search?q=&type=&status=&tag=` — LIKE search over title and `fields` JSON, combinable with type, status, and tag filters
+- `SearchDialog` — command palette modal with 250ms debounce, keyboard navigation (↑↓↵Esc), snippet preview from field content
+- `SearchButton` — opens dialog; global ⌘K/Ctrl+K shortcut
+- Search button in explorer header visible to all roles
 
 ---
 
-### Schritt 3 — Status-Filter im Explorer-Tree (K3) ✅
+### Step 2 — Tags and Tag Filtering (K2, K3) ✅
 
-- Filterleiste oben im Artefakt-Baum: Alle / Entwurf / In Prüfung / Fertig
-- Client-seitiger Filter ohne extra API-Call
-- Aktiver Filter mit blauem Pill-Badge hervorgehoben
-
----
-
-### Schritt 4 — Board View mit Drag & Drop (J1, J2) ✅
-
-- `BoardCard` — draggable Karte mit nativer HTML5 Drag & Drop API
-- `BoardColumn` — Drop-Zone pro Status, visuelles Highlight bei Drag-Over, Leer-Zustand
-- `BoardView` — 3 Spalten (Entwurf / In Prüfung / Fertig), optimistisches Status-Update via PATCH, Typ-Filter-Toolbar
-- Klick auf Karte öffnet Artefakt im Explorer (`/projects/:id?artifact=ID`)
-- `/projects/:id/board` — Board-Seite mit Breadcrumb; Board-Button im Explorer-Header
+- `GET/POST /api/projects/:id/tags` — manage project tags (upsert by name)
+- `GET/POST/DELETE /api/projects/:id/artifacts/:aid/tags` — assign/remove tags
+- `TagEditor` — inline tag chip editor in ArtifactHeader: dropdown with existing tags, "Create tag" option, remove via X
+- Tag filter dropdown in SearchDialog (shown when project has tags)
 
 ---
 
-### Schritt 5 — Error Boundaries und Hardening (L3) ✅
+### Step 3 — Status Filter in Explorer Tree (K3) ✅
 
-- `(dashboard)/error.js` — React Error Boundary für alle Dashboard-Seiten mit Reset/Zurück-Button
-- `(dashboard)/not-found.js` — 404-Seite für unbekannte Projekt/Artefakt-IDs
-- `app/not-found.js` — minimales Root-404 für unbekannte Top-Level-Routen
-- Backend-Validierung (Zod), Tenant-Isolation und Rollen bereits vollständig implementiert
+- Filter bar at the top of the artifact tree: All / Draft / In Review / Done
+- Client-side filter with no extra API call
+- Active filter highlighted with a blue pill badge
 
 ---
 
-## Sprint 4 abgeschlossen ✅
+### Step 4 — Board View with Drag & Drop (J1, J2) ✅
 
-## MVP vollständig implementiert ✅
+- `BoardCard` — draggable card using the native HTML5 Drag & Drop API
+- `BoardColumn` — drop zone per status, visual highlight on drag-over, empty state
+- `BoardView` — 3 columns (Draft / In Review / Done), optimistic status update via PATCH, type filter toolbar
+- Clicking a card opens the artifact in the explorer (`/projects/:id?artifact=ID`)
+- `/projects/:id/board` — board page with breadcrumb; board button in explorer header
 
-Alle P0-Features aus der Spec sind umgesetzt:
+---
+
+### Step 5 — Error Boundaries and Hardening (L3) ✅
+
+- `(dashboard)/error.js` — React error boundary for all dashboard pages with reset/back button
+- `(dashboard)/not-found.js` — 404 page for unknown project/artifact IDs
+- `app/not-found.js` — minimal root 404 for unknown top-level routes
+- Backend validation (Zod), tenant isolation, and roles fully implemented
+
+---
+
+## Sprint 4 Complete ✅
+
+## MVP Fully Implemented ✅
+
+All P0 features from the spec are implemented:
 
 | Sprint | Features |
 |---|---|
-| Sprint 1 | Auth (A1–A3), Projektverwaltung (B1–B4), Explorer (C1–C3), Artefakt-CRUD (D1–D5) |
-| Sprint 2 | Relationen (E1–E3), Kommentare (G1–G2), Rollen (L1–L2) |
-| Sprint 3 | KI-Vorschläge (F1–F5), Versionshistorie (H1–H3), Fortschrittsansicht (I1–I2) |
-| Sprint 4 | Suche (K1), Tags (K2), Filter (K3), Board View (J1–J2), Error Handling (L3) |
+| Sprint 1 | Auth (A1–A3), project management (B1–B4), explorer (C1–C3), artifact CRUD (D1–D5) |
+| Sprint 2 | Relations (E1–E3), comments (G1–G2), roles (L1–L2) |
+| Sprint 3 | AI suggestions (F1–F5), version history (H1–H3), progress view (I1–I2) |
+| Sprint 4 | Search (K1), tags (K2), filters (K3), board view (J1–J2), error handling (L3) |
 
 ---
 
-## Erweiterung: Vollständiges Produktmodell
+## Extension: Full Product Model
 
-### Erweiterungsschritt 1 — Admin-only Benutzerverwaltung ✅
+### Extension Step 1 — Admin-Only User Management ✅
 
-**Neu umgesetzt:**
-- Globales Rollenkonzept `systemRole` (`ADMIN` | `USER`) am User-Modell, getrennt von Projekt-Rollen
-- Benutzer-`status` (`ACTIVE` | `INACTIVE`) — Soft-Deaktivierung statt physischer Löschung
-- Inaktive Benutzer können sich nicht einloggen (Auth-Check in `authorize()`)
-- Admin-only Middleware (`requireAdmin`) schützt alle Admin-Routen serverseitig
+**What was implemented:**
+- Global role concept `systemRole` (`ADMIN` | `USER`) on the User model, separate from project roles
+- User `status` (`ACTIVE` | `INACTIVE`) — soft deactivation instead of physical deletion
+- Inactive users cannot log in (auth check in `authorize()`)
+- Admin-only middleware (`requireAdmin`) protects all admin routes server-side
 
-**Neue Domänen-Felder am User-Objekt:**
-- `firstName`, `lastName` — strukturierter Name
-- `systemRole` — systemweite Rolle (`ADMIN` / `USER`)
-- `status` — Kontostatus (`ACTIVE` / `INACTIVE`)
+**New domain fields on User:**
+- `firstName`, `lastName` — structured name
+- `systemRole` — system-wide role (`ADMIN` / `USER`)
+- `status` — account status (`ACTIVE` / `INACTIVE`)
 
-**Neue API-Endpunkte (alle Admin-only):**
-- `GET  /api/admin/users` — Benutzerliste
-- `POST /api/admin/users` — Benutzer anlegen
-- `GET  /api/admin/users/:id` — Benutzerdetail
-- `PATCH /api/admin/users/:id` — Benutzer bearbeiten (inkl. Passwort-Reset)
-- `DELETE /api/admin/users/:id` — Benutzer deaktivieren (Soft Delete)
+**New API endpoints (admin-only):**
+- `GET  /api/admin/users` — user list
+- `POST /api/admin/users` — create user
+- `GET  /api/admin/users/:id` — user detail
+- `PATCH /api/admin/users/:id` — edit user (incl. password reset)
+- `DELETE /api/admin/users/:id` — deactivate user (soft delete)
 
-**Neue UI-Bereiche:**
-- `/admin/users` — Benutzerliste mit Status-Badges, Reaktivieren/Deaktivieren
-- `/admin/users/new` — Benutzer anlegen (Vorname, Nachname, E-Mail, Passwort, Rolle, Status)
-- `/admin/users/:id/edit` — Benutzer bearbeiten
-- Sidebar: Admin-Bereich nur für Admins sichtbar (`Administration > Benutzerverwaltung`)
+**New UI areas:**
+- `/admin/users` — user list with status badges, activate/deactivate
+- `/admin/users/new` — create user (first name, last name, email, password, role, status)
+- `/admin/users/:id/edit` — edit user
+- Sidebar: admin section visible only to admins (`Administration > User Management`)
 
-**Bekannte Einschränkungen:**
-- Keine E-Mail-Flows (kein Passwort-Reset per Mail, keine Einladungslogik)
-- Self-Service-Registrierung bleibt aktiv (kann optional deaktiviert werden)
-- Kein Audit-Log für Admin-Aktionen (geplant für spätere Schritte)
-
-**Nächster Schritt:**
-- Schritt 2: Domänenmodell erweitern — zusätzliche PRD-/Produktobjekttypen ✅ (siehe unten)
+**Known limitations:**
+- No email flows (no password reset by email, no invitation logic)
+- Self-service registration remains active (can optionally be disabled)
+- No audit log for admin actions (planned for later steps)
 
 ---
 
-### Erweiterungsschritt 2 — Domänenmodell: 26 PRD-Objekttypen ✅
+### Extension Step 2 — Domain Model: 26 PRD Object Types ✅
 
-**Neu umgesetzt:**
-- 20 neue Artefakttypen (kein DB-Migration nötig — Typen als String gespeichert)
-- Fachliche Gruppenstruktur (7 Gruppen) statt alphabetischer Typliste
-- Explorer-Navigation mit zweistufiger Struktur: Gruppe → Typ → Artefakte
-- Felddefinitionen für alle 26 Typen
+**What was implemented:**
+- 20 new artifact types (no DB migration needed — types stored as strings)
+- Domain group structure (7 groups) instead of an alphabetical type list
+- Explorer navigation with two-level structure: Group → Type → Artifacts
+- Field definitions for all 26 types
 
-**Neue Domänenobjekte:**
+**New domain objects:**
 
-| Gruppe | Typen |
+| Group | Types |
 |---|---|
-| Research | Marktanalyse, Wettbewerber, Research Finding, Problem Statement, Opportunity, Hypothese |
-| Audience | User Persona *(bestehend)*, Buyer Persona |
-| Strategy | Produktvision *(bestehend)*, Value Proposition, Positionierung, Geschäftsmodell, KPI/OKR |
-| Discovery & Design | Use Case *(bestehend)*, User Journey, Feature, Epic |
-| Delivery | User Story *(bestehend)*, Funktionale Anforderung *(bestehend)*, NFR, Akzeptanzkriterien, Abhängigkeit, Risiko, Entscheidung |
+| Research | Market Analysis, Competitor, Research Finding, Problem Statement, Opportunity, Hypothesis |
+| Audience | User Persona *(existing)*, Buyer Persona |
+| Strategy | Product Vision *(existing)*, Value Proposition, Positioning, Business Model, KPI/OKR |
+| Discovery & Design | Use Case *(existing)*, User Journey, Feature, Epic |
+| Delivery | User Story *(existing)*, Functional Requirement *(existing)*, NFR, Acceptance Criteria, Dependency, Risk, Decision |
 | Planning & Release | Roadmap Item, Release, Launch Task |
 | Feedback & Iteration | Feedback Item, Iteration |
 
-**Neue UI-Bereiche:**
-- Explorer-Baum: zweistufige Gruppennavigation — aufklappbare Gruppe → aufklappbarer Typ
-- `ExplorerGroupSection` — neue Komponente für Gruppen-Header mit Gesamt-Count
-- Alle neuen Typen sofort im Explorer anlegbar und bearbeitbar (generisches Formular)
+**New UI areas:**
+- Explorer tree: two-level group navigation — collapsible group → collapsible type
+- `ExplorerGroupSection` — new component for group headers with total count
+- All new types immediately creatable and editable in the explorer (generic form)
 
-**Keine API-Änderung nötig** — bestehende Artifact-CRUD-Endpunkte funktionieren für alle Typen.
+**No API change needed** — existing artifact CRUD endpoints work for all types.
 
-**Bekannte Einschränkungen:**
-- Typ-spezifische Feldkomponenten (mit besonderem UX) noch nicht für alle neuen Typen — generisches Formular wird verwendet
-- Fortschrittsansicht zeigt jetzt alle 26 Typen (wird bei vielen leeren Phasen sehr lang)
-
----
-
-### Erweiterungsschritt 3 — Relationsmodell generalisieren + Traceability ✅
-
-**Neu umgesetzt:**
-
-**Intelligente Relation-Vorschläge:**
-- `RELATION_SUGGESTIONS` in `constants.js` — Karte `[Quelltyp][Zieltyp] → empfohlener Relationstyp` für alle 26 Artefakttypen
-- `RelationAddDialog` überarbeitet:
-  - Ziel-Artefakt wird zuerst ausgewählt (Reihenfolge für bessere UX)
-  - Kandidaten nach Gruppe (Research / Audience / Strategy / …) gruppiert via `<optgroup>`
-  - Relationstyp wird automatisch vorgeschlagen, sobald Ziel gewählt wird; Hinweis "(empfohlen)" sichtbar
-  - Manuelle Überschreibung jederzeit möglich
-
-**Neue Traceability-Ansicht:**
-- `GET /api/projects/:id/traceability` — gibt alle Artefakte + alle Relationen zurück (nur eingehende Richtung für Effizienz)
-- `TraceabilityView` Komponente — gruppierte Übersicht aller Artefakte mit ihren Verbindungen:
-  - Summary-Bar: Gesamt / verbunden / isoliert / Relationen-Anzahl
-  - Pro Gruppe (7 fachliche Gruppen) eine aufklappbare Sektion mit farblicher Kennzeichnung
-  - Pro Artefakt: Verbindungen als farbige Badges mit Pfeilrichtung, klickbar → Explorer
-  - Isolierte Artefakte (keine Verbindungen) sichtbar aber gedimmt
-- `/projects/:id/traceability` — neue Seite, serverseitig gerendert
-- Neuer "Traceability"-Button (`GitBranch`-Icon) im Explorer-Header
-
-**Nächster Schritt:**
-- Schritt 4: Explorer/Navigation anpassen ✅ (siehe unten)
-- Schritt 5: Detailansichten und Editoren für neue Objekttypen ✅ (siehe unten)
+**Known limitations:**
+- Type-specific field components (with specialized UX) not yet available for all new types — generic form used as fallback
+- Progress view now shows all 26 types (can become long with many empty phases)
 
 ---
 
-### Erweiterungsschritt 7 — Review / Hardening ✅
+### Extension Step 3 — Generalized Relations + Traceability ✅
 
-**Kritischer Bugfix — AI-Prompts für alle 26 Artefakttypen:**
+**What was implemented:**
 
-Das war der schwerwiegendste verbleibende Fehler: Alle 20 neuen Artefakttypen hatten **keine Prompt-Templates** — jeder KI-Vorschlag-Request für einen neuen Typ führte zu einem 500-Fehler ("No prompt builder for type: FEATURE").
+**Smart relation suggestions:**
+- `RELATION_SUGGESTIONS` in `constants.js` — map `[sourceType][targetType] → recommended relation type` for all 26 artifact types
+- `RelationAddDialog` revised:
+  - Target artifact selected first (better UX ordering)
+  - Candidates grouped by domain group (Research / Audience / Strategy / …) via `<optgroup>`
+  - Relation type auto-suggested once target is chosen; "(recommended)" hint shown
+  - Manual override always possible
 
-**20 neue Prompt-Templates erstellt** (`src/lib/ai/prompts/`):
+**New Traceability view:**
+- `GET /api/projects/:id/traceability` — returns all artifacts + all relations (source direction only for efficiency)
+- `TraceabilityView` component — grouped overview of all artifacts with their connections:
+  - Summary bar: total / connected / isolated / relation count
+  - Per group (7 domain groups): collapsible section with color coding
+  - Per artifact: connections as colored badges with arrow direction, clickable → explorer
+  - Isolated artifacts (no connections) visible but dimmed
+- `/projects/:id/traceability` — new page, server-rendered
+- New "Traceability" button (`GitBranch` icon) in explorer header
 
-| Gruppe | Neue Templates |
+---
+
+### Extension Step 7 — Review / Hardening ✅
+
+**Critical bugfix — AI prompts for all 26 artifact types:**
+
+This was the most severe remaining bug: all 20 new artifact types had **no prompt templates** — every AI suggestion request for a new type resulted in a 500 error ("No prompt builder for type: FEATURE").
+
+**20 new prompt templates created** (`src/lib/ai/prompts/`):
+
+| Group | New templates |
 |---|---|
 | Research | market-analysis, competitor, research-finding, problem-statement, opportunity, hypothesis |
 | Audience | buyer-persona |
@@ -578,209 +567,209 @@ Das war der schwerwiegendste verbleibende Fehler: Alle 20 neuen Artefakttypen ha
 | Planning | roadmap-item, release, launch-task |
 | Feedback | feedback-item, iteration |
 
-**Jedes Template enthält:**
-- Rollenbeschreibung als Product Manager
-- Aktuelle Feldwerte im Prompt-Kontext
-- Exaktes JSON-Ausgabeformat mit den richtigen Feld-Keys
-- Typ-spezifische Qualitätsregeln (z. B. OKR-Format, Given/When/Then, Mitigation-Strategien)
+**Each template includes:**
+- Product Manager role description
+- Current field values in prompt context
+- Exact JSON output format with the correct field keys
+- Type-specific quality rules (e.g. OKR format, Given/When/Then, mitigation strategies)
 
-**Upstream-Validation in AI-Route:**
+**Upstream validation in AI route:**
 - `hasPromptBuilder()` export in `prompts/index.js`
-- AI-Route prüft jetzt den Typ **vor** dem Provider-Call
-- Gibt 400 mit klarer Nachricht zurück statt 500 bei unbekanntem Typ (Sicherheitsnetz)
+- AI route now checks the type **before** the provider call
+- Returns 400 with a clear message instead of 500 for unknown types (safety net)
 
 ---
 
-### Erweiterungsschritt 6 — Traceability verbessern ✅
+### Extension Step 6 — Improved Traceability ✅
 
-**Neu umgesetzt:**
+**What was implemented:**
 
-**Bugfix — SQLite-Query:**
-- `traceability/page.js` verwendete `OR: [{ source: { projectId } }, { target: { projectId } }]` — dieselbe Nested-Filter-Pattern, die beim Traceability-API-Route zum SQLite-Hang geführt hatte
-- Fix: Zwei-Schritt-Query (erst Artefakt-IDs, dann `sourceId: { in: [...] }`) — konsistent mit der API-Route
+**Bugfix — SQLite query:**
+- `traceability/page.js` was using `OR: [{ source: { projectId } }, { target: { projectId } }]` — the same nested filter pattern that caused SQLite hangs in the traceability API route
+- Fix: two-step query (fetch artifact IDs first, then `sourceId: { in: [...] }`) — consistent with the API route
 
-**Filter-Toolbar:**
-- **Sichtbarkeitsfilter** (Alle / Nur verbunden / Nur isoliert) — klickbare Pills, auch die Summary-Bar-Zahlen sind anklickbar und setzen den Filter
-- **Gruppen-Filter** — farbige Pill-Buttons für alle 7 fachlichen Gruppen (erscheinen nur wenn Gruppe Artefakte hat); Toggle-Logik (erneuter Klick = zurück zu Alle)
-- **Expand/Collapse-All** — zwei Buttons ("Alle auf" / "Alle zu") steuern alle Gruppen-Sektionen gleichzeitig über `forceOpen`-Prop
+**Filter toolbar:**
+- **Visibility filter** (All / Connected only / Isolated only) — clickable pills; summary bar numbers are also clickable and set the filter
+- **Group filter** — colored pill buttons for all 7 domain groups (only shown when group has artifacts); toggle logic (click again = back to All)
+- **Expand/Collapse All** — two buttons ("Expand all" / "Collapse all") control all group sections simultaneously via `forceOpen` prop
 
-**Relationstyp sichtbar im Badge:**
-- Connection-Badges zeigen jetzt explizit den Relationstyp ("Abgeleitet von:", "Validiert:", "Abhängig von:") vor dem Artefakttitel
-- Richtungspfeil (← / →) weiterhin sichtbar
-- Typ-Label des verlinkten Artefakts direkt im Titel für bessere Orientierung
+**Relation type visible in badge:**
+- Connection badges now explicitly show the relation type ("Derived from:", "Validates:", "Depends on:") before the artifact title
+- Direction arrow (← / →) still visible
+- Type label of the linked artifact shown inline for better orientation
 
-**Isolierte Artefakte:**
-- Summary-Bar: Isoliert-Zahl in orange (wenn > 0) statt grau — klickbar als Schnell-Filter
-- Gruppe-Header: zeigt separates "X isoliert"-Badge wenn Gruppe isolierte Artefakte enthält
+**Isolated artifacts:**
+- Summary bar: isolated count in orange (when > 0) instead of grey — clickable as quick filter
+- Group header: shows a separate "X isolated" badge when the group has isolated artifacts
 
 ---
 
-### Erweiterungsschritt 4 — Explorer/Navigation anpassen ✅
+### Extension Step 4 — Explorer / Navigation Improvements ✅
 
-**Problem:** Mit 26 Artefakttypen in 7 Gruppen wurde der Explorer-Baum unübersichtlich — alle Typen-Gruppen starteten offen, auch bei 0 Einträgen.
+**Problem:** With 26 artifact types across 7 groups, the explorer tree became unwieldy — all type groups started expanded, even with 0 entries.
 
-**Neu umgesetzt:**
+**What was implemented:**
 
-**Explorer-Baum:**
-- `ExplorerTreeGroup` — Typen-Gruppen mit 0 Artefakten starten jetzt **kollabiert** (vorher: immer offen → 26 "Keine Einträge"-Zeilen sichtbar)
-- `ExplorerGroupSection` — Fachliche Gruppen starten ebenfalls kollabiert wenn leer
-- Gruppen-Header mit farbcodierten Typ-Akzenten (je Gruppe eigene Farbe) und colored Count-Badge
-- `ARTIFACT_GROUP_COLORS` in `constants.js` — zentrales Color-Token-Schema für alle 7 Gruppen (bg, text, dot, border, header, badge); einheitlich in Explorer, Progress und Traceability verwendet
+**Explorer tree:**
+- `ExplorerTreeGroup` — type groups with 0 artifacts now start **collapsed** (previously: always open → 26 "No entries" rows visible)
+- `ExplorerGroupSection` — domain groups also start collapsed when empty
+- Group headers with color-coded type accents (one color per group) and colored count badge
+- `ARTIFACT_GROUP_COLORS` in `constants.js` — central color token schema for all 7 groups (bg, text, dot, border, header, badge); used consistently across explorer, progress, and traceability
 
-**Fortschrittsansicht:**
-- `ProgressOverview` umgebaut: statt 26 Typ-Karten in einem flachen Grid werden die Karten jetzt **nach den 7 fachlichen Gruppen gruppiert**
-- Jede Gruppe hat einen farbigen Header mit Gesamt-Artefaktzahl und Gruppen-Fortschrittsbalken (% done)
-- Leere Gruppen zeigen "Keine Einträge" im Header, erscheinen aber nicht gar nicht
+**Progress view:**
+- `ProgressOverview` rebuilt: instead of 26 type cards in a flat grid, cards are now **grouped by the 7 domain groups**
+- Each group has a colored header with total artifact count and group-level progress bar (% done)
+- Empty groups show "No entries" in the header rather than disappearing entirely
 
-**Board-Ansicht:**
-- Typ-Filter zeigt nur noch Typen, die **tatsächlich Artefakte** haben (statt alle 26 als flache Button-Leiste)
-- Kanonische Typenreihenfolge (via `ARTIFACT_GROUPS`) statt alphabetisch
+**Board view:**
+- Type filter now only shows types that **actually have artifacts** (instead of all 26 as a flat button row)
+- Canonical type order (via `ARTIFACT_GROUPS`) instead of alphabetical
 
 **Traceability:**
-- `TraceabilityView` nutzt nun `ARTIFACT_GROUP_COLORS` aus `constants.js` statt lokaler Farb-Maps — konsistente Farbgebung sichergestellt
+- `TraceabilityView` now uses `ARTIFACT_GROUP_COLORS` from `constants.js` instead of local color maps — consistent coloring guaranteed
 
 ---
 
-### Erweiterungsschritt 5 — Detailansichten und Editoren für alle Objekttypen ✅
+### Extension Step 5 — Detail Views and Editors for All Object Types ✅
 
-**Neu umgesetzt:**
+**What was implemented:**
 
-Für alle 20 neuen Artefakttypen wurden dedizierte, typ-spezifische Feldkomponenten erstellt. Jeder Typ hat eine auf seinen fachlichen Kontext zugeschnittene UX — mit Hervorhebungen, Rasterlay­outs und strukturierten Eingabeformaten.
+Dedicated, type-specific field components were created for all 20 new artifact types. Each type has a UX tailored to its domain context — with highlights, grid layouts, and structured input formats.
 
-**Neue Feldkomponenten (20 Typen, 24 Komponenten gesamt):**
+**New field components (20 types, 24 components total):**
 
-| Gruppe | Komponente | Besonderheit |
+| Group | Component | Highlight |
 |---|---|---|
-| Research | `MarketAnalysisFields` | Zusammenfassung + Marktgröße + Trends/Quellen-Grid |
-| Research | `CompetitorFields` | Name + SWOT-Grid (Stärken/Schwächen nebeneinander) + Positionierung |
-| Research | `ResearchFindingFields` | Insight + Methode/Teilnehmer-Grid + Implikationen |
-| Research | `ProblemStatementFields` | Problem + Kontext-Trenner + Auswirkung/Workaround-Grid |
-| Research | `OpportunityFields` | Beschreibung + Zielgruppe + Wert/Timing-Grid |
-| Research | `HypothesisFields` | Strukturierter Karten-Flow: "Wir glauben → weil → Test: → Bestätigt, wenn" mit Verbindungspfeilen |
-| Audience | `BuyerPersonaFields` | Name/Rolle-Grid + Profil-Trenner + Ziele/Pain Points/Kaufkriterien |
-| Strategy | `ValuePropositionFields` | Hervorgehobener blauer Statement-Kasten + Zielkunde + Nutzen/Differenzierung-Grid |
-| Strategy | `PositioningFields` | Hervorgehobener violetter Statement-Kasten mit Template-Hinweis + Segement/Vorteil/Kernbotschaft |
-| Strategy | `BusinessModelFields` | Einnahmen/Kosten-Grid + Kanäle/Partner-Grid |
-| Strategy | `KpiOkrFields` | Hervorgehobener amber Objective-Kasten + Key Results + Metriken + Zeitraum/Owner-Grid |
-| Discovery | `UserJourneyFields` | Akteur/Szenario-Grid + Journey-Schritte (groß) + Pain Points/Verbesserungen nebeneinander |
-| Discovery | `FeatureFields` | Beschreibung + Nutzen + Scope-Trenner + In-Scope/Out-of-Scope-Grid + Priorität |
-| Discovery | `EpicFields` | Beschreibung + Ziele + Abgrenzung-Trenner + Scope + Erfolgskriterien |
-| Delivery | `NonFunctionalRequirementFields` | Beschreibung + Kategorie/Metrik-Grid + Akzeptanz-Trenner |
-| Delivery | `AcceptanceCriteriaFields` | Hervorgehobener teal Given/When/Then-Kasten (Monospace) + Vorbedingungen + Ergebnis |
-| Delivery | `DependencyFields` | Beschreibung + Von/Typ-Grid + Konsequenzen-Trenner + Auswirkung + Owner |
-| Delivery | `RiskFields` | Beschreibung + Wahrscheinlichkeit/Auswirkung-Grid + Maßnahmen-Trenner + Mitigation + Owner |
-| Delivery | `DecisionFields` | Kontext + Hervorgehobener indigo Entscheidungs-Kasten + Begründung + Alternativen/Konsequenzen |
-| Planning | `RoadmapItemFields` | Beschreibung + Zeitraum + Kontext-Trenner + Features + Begründung |
-| Planning | `ReleaseFields` | Version/Datum-Grid + Beschreibung + Inhalt-Trenner + Scope + Release Notes |
-| Planning | `LaunchTaskFields` | Beschreibung + Owner/Datum-Grid + Checkliste-Trenner |
-| Feedback | `FeedbackItemFields` | Quelle/Sentiment-Grid + Inhalt + Maßnahmen-Trenner |
-| Feedback | `IterationFields` | Beschreibung + Learnings + Nächste-Schritte-Trenner + Verbesserungen + Next Steps |
+| Research | `MarketAnalysisFields` | Summary + market size + trends/sources grid |
+| Research | `CompetitorFields` | Name + SWOT grid (strengths/weaknesses side by side) + positioning |
+| Research | `ResearchFindingFields` | Insight + method/participants grid + implications |
+| Research | `ProblemStatementFields` | Problem + context divider + impact/workaround grid |
+| Research | `OpportunityFields` | Description + target audience + value/timing grid |
+| Research | `HypothesisFields` | Structured card flow: "We believe → because → Test: → Confirmed when" with connecting arrows |
+| Audience | `BuyerPersonaFields` | Name/role grid + profile divider + goals/pain points/buying criteria |
+| Strategy | `ValuePropositionFields` | Highlighted blue statement box + target customer + benefits/differentiation grid |
+| Strategy | `PositioningFields` | Highlighted purple statement box with template hint + segment/advantage/key message |
+| Strategy | `BusinessModelFields` | Revenue/cost grid + channels/partners grid |
+| Strategy | `KpiOkrFields` | Highlighted amber objective box + key results + metrics + period/owner grid |
+| Discovery | `UserJourneyFields` | Actor/scenario grid + journey steps (large) + pain points/opportunities side by side |
+| Discovery | `FeatureFields` | Description + benefit + scope divider + in-scope/out-of-scope grid + priority |
+| Discovery | `EpicFields` | Description + goals + scope divider + scope + success criteria |
+| Delivery | `NonFunctionalRequirementFields` | Description + category/metric grid + acceptance divider |
+| Delivery | `AcceptanceCriteriaFields` | Highlighted teal Given/When/Then box (monospace) + preconditions + outcome |
+| Delivery | `DependencyFields` | Description + from/type grid + consequences divider + impact + owner |
+| Delivery | `RiskFields` | Description + probability/impact grid + mitigation divider + mitigation + owner |
+| Delivery | `DecisionFields` | Context + highlighted indigo decision box + rationale + alternatives/consequences |
+| Planning | `RoadmapItemFields` | Description + timeframe + context divider + features + rationale |
+| Planning | `ReleaseFields` | Version/date grid + description + content divider + scope + release notes |
+| Planning | `LaunchTaskFields` | Description + owner/date grid + checklist divider |
+| Feedback | `FeedbackItemFields` | Source/sentiment grid + content + actions divider |
+| Feedback | `IterationFields` | Description + learnings + next steps divider + improvements + next steps |
 
-**Infrastruktur:**
-- `fields/index.js` — `FIELD_COMPONENTS`-Map vollständig auf alle 30 Typen erweitert (6 Legacy + 24 neue)
-- `ArtifactForm` nutzt `FIELD_COMPONENTS[type]` — alle Typen werden automatisch mit ihrem Spezialformular gerendert
-- Kein generisches Fallback-Rendering mehr nötig
+**Infrastructure:**
+- `fields/index.js` — `FIELD_COMPONENTS` map fully extended to all 30 types (6 legacy + 24 new)
+- `ArtifactForm` uses `FIELD_COMPONENTS[type]` — all types automatically rendered with their specialized form
+- No generic fallback rendering needed
 
 ---
 
-### Bugfix — Projekteinstellungen: Event-Handler-Prop-Fehler ✅
+### Bugfix — Project Settings: Event Handler Prop Error ✅
 
-**Problem:** Die Einstellungsseite `/projects/:id/settings` warf den Fehler „Event handlers cannot be passed to Client Component props" beim Laden. Ursache: Die Server Component `page.js` übergab eine Funktion (`onInvited`) direkt an die Client Component `InviteMember`.
+**Problem:** The settings page `/projects/:id/settings` threw "Event handlers cannot be passed to Client Component props" on load. Cause: the Server Component `page.js` was passing a function (`onInvited`) directly to the Client Component `InviteMember`.
 
 **Fix:**
-- Neue Client Component `MembersSection` als Wrapper erstellt — hält den SWR-`mutate`-Aufruf intern
-- `page.js` übergibt nur serialisierbare Props (`projectId`, `isOwner`) an `MembersSection`
-- `MembersSection` invalidiert den SWR-Cache (`/api/projects/:id/members`) nach erfolgreicher Einladung selbst
+- New Client Component `MembersSection` created as a wrapper — holds the SWR `mutate` call internally
+- `page.js` only passes serializable props (`projectId`, `isOwner`) to `MembersSection`
+- `MembersSection` invalidates the SWR cache (`/api/projects/:id/members`) itself after a successful invitation
 
 ---
 
-### Erweiterungsschritt 8 — Mehrsprachigkeit (DE / EN) ✅
+### Extension Step 8 — Multilingual Support (DE / EN) ✅
 
-**Ziel:** Admins verwalten verfügbare Sprachen; Nutzer wählen ihre bevorzugte Anzeigesprache. Kein URL-Prefix — Locale wird per Cookie gesetzt.
+**Goal:** Admins manage available languages; users choose their preferred display language. No URL prefix — locale is set via cookie.
 
-**Datenmodell:**
-- Neues `Language`-Modell: `code`, `name`, `nativeName`, `isActive`, `isDefault`
-- `User.preferredLanguage` — gespeicherte Sprachpräferenz pro Nutzer
-- Seed: Deutsch (`de`, Standard) + Englisch (`en`)
+**Data model:**
+- New `Language` model: `code`, `name`, `nativeName`, `isActive`, `isDefault`
+- `User.preferredLanguage` — stored language preference per user
+- Seed: German (`de`, default) + English (`en`)
 
-**Infrastruktur (next-intl):**
-- `next-intl` installiert und mit `createNextIntlPlugin` in `next.config.mjs` integriert
-- `src/i18n/request.js` — liest `NEXT_LOCALE`-Cookie, fällt auf `de` zurück
-- `src/app/layout.js` — `NextIntlClientProvider` wrappet die gesamte App
-- `messages/de.json` + `messages/en.json` — Übersetzungskeys für Nav, Auth, Common, Admin, Projekte, Artefaktstatus
+**Infrastructure (next-intl):**
+- `next-intl` installed and integrated via `createNextIntlPlugin` in `next.config.mjs`
+- `src/i18n/request.js` — reads `NEXT_LOCALE` cookie, falls back to `de`
+- `src/app/layout.js` — `NextIntlClientProvider` wraps the entire app
+- `messages/de.json` + `messages/en.json` — translation keys for nav, auth, common, admin, projects, artifact status
 
-**Admin — Sprachverwaltung (`/admin/languages`):**
-- Tabelle aller Sprachen mit Status-Badge und Standard-Markierung
-- Aktionen pro Sprache: als Standard setzen (⭐), aktivieren/deaktivieren (👁), löschen (🗑)
-- Schutz: Standardsprache kann nicht deaktiviert oder gelöscht werden
-- Formular zum Hinzufügen neuer Sprachen (Code / Name Englisch / Name Nativ)
+**Admin — Language management (`/admin/languages`):**
+- Table of all languages with status badge and default marker
+- Actions per language: set as default (⭐), activate/deactivate (👁), delete (🗑)
+- Guard: default language cannot be deactivated or deleted
+- Form for adding new languages (code / English name / native name)
 - API: `GET/POST /api/admin/languages`, `PATCH/DELETE /api/admin/languages/[code]`
 
-**Nutzer — Sprachauswahl:**
-- `LanguagePicker` im Sidebar-Footer — Popover mit allen aktiven Sprachen, Häkchen bei aktueller
-- Sprachwechsel: `PATCH /api/users/me/language` → schreibt `User.preferredLanguage` in DB + setzt `NEXT_LOCALE`-Cookie (30 Tage)
-- Sofortige Wirkung via `router.refresh()` ohne Reload
+**User — Language selection:**
+- `LanguagePicker` in sidebar footer — popover with all active languages, checkmark on current
+- Language switch: `PATCH /api/users/me/language` → writes `User.preferredLanguage` to DB + sets `NEXT_LOCALE` cookie (30 days)
+- Takes effect immediately via `router.refresh()` without a full reload
 
-**Übersetzungen angewendet:**
-- `Sidebar` — alle Nav-Labels via `useTranslations()`
-- `LogoutButton` — „Abmelden" / „Log out"
+**Translations applied:**
+- `Sidebar` — all nav labels via `useTranslations()`
+- `LogoutButton` — "Abmelden" / "Log out"
 
 ---
 
-### Erweiterungsschritt 9 — Datenbank-Konfiguration UI ✅
+### Extension Step 9 — Database Configuration UI ✅
 
-**Ziel:** Admins können die Datenbankverbindung für den Produktivbetrieb konfigurieren — direkt in der UI, ohne Dateien manuell editieren zu müssen.
+**Goal:** Admins can configure the database connection for production deployment — directly in the UI, without manually editing files.
 
-**Admin-Seite (`/admin/database`):**
-- **DB-Typ-Auswahl:** SQLite / PostgreSQL / MariaDB (Card-Style-Picker mit Beschreibungen)
-- **SQLite:** Dateipfad-Eingabe (relativ oder absolut)
-- **PostgreSQL / MariaDB:** Host, Port, Datenbankname, Benutzername, Passwort — oder Umschalten auf direkte Connection-URL-Eingabe
-- **Vorschau der `DATABASE_URL`** — live generiert, Passwort maskiert, Copy-Button
-- **Verbindung testen** — stellt echte Verbindung her (`pg` / `mysql2`, 5s Timeout), meldet Serverversion bei Erfolg
-- **Konfiguration speichern** — schreibt `DATABASE_URL` in `.env.local` (überschreibt `.env` ohne es zu verändern)
-- **Post-Save-Checkliste** — aufklappbar, mit Copy-Buttons für alle nötigen Folgeschritte:
-  1. `prisma/schema.prisma` Provider anpassen
-  2. Adapter installieren (`@prisma/adapter-pg` / `@prisma/adapter-mysql`)
+**Admin page (`/admin/database`):**
+- **DB type selector:** SQLite / PostgreSQL / MariaDB (card-style picker with descriptions)
+- **SQLite:** file path input (relative or absolute)
+- **PostgreSQL / MariaDB:** host, port, database name, username, password — or toggle to enter a raw connection URL directly
+- **`DATABASE_URL` preview** — generated live, password masked, copy button
+- **Test connection** — establishes a real connection (`pg` / `mysql2`, 5s timeout), reports server version on success
+- **Save configuration** — writes `DATABASE_URL` to `.env.local` (overrides `.env` without modifying it)
+- **Post-save checklist** — collapsible, with copy buttons for all required follow-up steps:
+  1. Update `prisma/schema.prisma` provider
+  2. Install adapter (`@prisma/adapter-pg` / `@prisma/adapter-mysql`)
   3. `npx prisma migrate deploy`
-  4. Server neu starten
+  4. Restart the server
 
-**Neue Pakete:** `pg`, `mysql2`
+**New packages:** `pg`, `mysql2`
 
-**Neue Hilfsbibliothek:** `src/lib/env-config.js` — Parsen und Schreiben von `.env`-Dateien, URL-Builder/Parser, DB-Typ-Erkennung
+**New utility:** `src/lib/env-config.js` — parse and write `.env` files, URL builder/parser, DB type detection
 
 **API:** `GET/PATCH /api/admin/database`, `POST /api/admin/database/test`
 
-> **Einschränkung:** Ein Datenbankwechsel erfordert weiterhin einen Neustart des Servers und manuelle Anpassung des Prisma-Schemas. Die UI deckt die Konfiguration ab, nicht die automatische Migration.
+> **Limitation:** Switching databases still requires a server restart and manual Prisma schema update. The UI covers configuration, not automatic migration.
 
 ---
 
-### Erweiterungsschritt 10 — KI-Provider Konfiguration UI ✅
+### Extension Step 10 — AI Provider Configuration UI ✅
 
-**Ziel:** Admins wählen KI-Provider, Modell und API-Key direkt in der UI. Änderungen wirken **sofort ohne Neustart** — die Konfiguration wird in der Datenbank gespeichert und bei jeder KI-Anfrage dynamisch geladen.
+**Goal:** Admins select the AI provider, model, and API key directly in the UI. Changes take effect **immediately without a restart** — configuration is stored in the database and loaded dynamically on every AI request.
 
-**Datenmodell:**
-- Neues `AiConfig`-Modell (Singleton, `id = "singleton"`): `provider`, `model`, `apiKey`, `timeoutMs`, `maxTokens`
-- Provider-Factory liest zuerst aus DB, fällt auf Env-Variablen zurück
+**Data model:**
+- New `AiConfig` model (singleton, `id = "singleton"`): `provider`, `model`, `apiKey`, `timeoutMs`, `maxTokens`
+- Provider factory reads from DB first, falls back to environment variables
 
-**Admin-Seite (`/admin/ai`):**
-- **Provider-Auswahl:** Anthropic Claude / OpenAI / Deaktiviert
-- **Modellauswahl** (Radio-Buttons mit Empfehlungs-Badges):
-  - Claude: Opus 4.6 (Leistungsstark), **Sonnet 4.6 (Empfohlen)**, Haiku 4.5 (Schnell)
-  - OpenAI: GPT-4o (Leistungsstark), **GPT-4o mini (Empfohlen)**, GPT-4 Turbo
-- **API-Key-Eingabe** mit Show/Hide-Toggle; leer lassen = bestehenden Key behalten; „Key hinterlegt"-Indikator
-- **Erweiterte Einstellungen** (einklappbar): Timeout (ms) und Max Tokens
-- **Verbindung testen** — echter Mini-Call (max. 10 Tokens) zur Key-Verifikation
-- **Speichern** — schreibt in DB, wirkt sofort für alle nachfolgenden KI-Anfragen
-- **Wenn deaktiviert** — Info-Banner; KI-Button für alle Nutzer ausgeblendet (503-Response)
+**Admin page (`/admin/ai`):**
+- **Provider selection:** Anthropic Claude / OpenAI / Disabled
+- **Model selection** (radio buttons with recommendation badges):
+  - Claude: Opus 4.6 (Powerful), **Sonnet 4.6 (Recommended)**, Haiku 4.5 (Fast)
+  - OpenAI: GPT-4o (Powerful), **GPT-4o mini (Recommended)**, GPT-4 Turbo
+- **API key input** with show/hide toggle; leave empty = keep existing key; "Key stored" indicator
+- **Advanced settings** (collapsible): timeout (ms) and max tokens
+- **Test connection** — real mini-call (max 10 tokens) to verify the key
+- **Save** — writes to DB, takes effect immediately for all subsequent AI requests
+- **When disabled** — info banner; AI button hidden for all users (503 response)
 
-**Architektur-Änderungen:**
-- `provider-factory.js` — `getAiConfig()` (async, liest aus DB), `isAiAvailable(config)`, `getAiProvider(config)` — alle Funktionen nehmen jetzt ein Config-Objekt entgegen
-- `claude-adapter.js` — nimmt Config-Objekt statt Env-Variablen
-- `openai-adapter.js` — neu implementiert (OpenAI SDK), analog zu Claude-Adapter
-- AI-Route `artifacts/:aid/ai` — ruft `getAiConfig()` auf und übergibt Config an Provider
-- `AiSession`-Logging verwendet dynamischen Provider-Namen aus Config
+**Architecture changes:**
+- `provider-factory.js` — `getAiConfig()` (async, reads from DB), `isAiAvailable(config)`, `getAiProvider(config)` — all functions now accept a config object
+- `claude-adapter.js` — accepts config object instead of environment variables
+- `openai-adapter.js` — newly implemented (OpenAI SDK), analogous to Claude adapter
+- AI route `artifacts/:aid/ai` — calls `getAiConfig()` and passes config to provider
+- `AiSession` logging uses dynamic provider name from config
 
-**Neue Pakete:** `openai`
+**New packages:** `openai`
 
 **API:** `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test`
 
