@@ -2,22 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderOpen, LayoutDashboard, Users } from "lucide-react";
+import { FolderOpen, LayoutDashboard, Users, Globe2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import LogoutButton from "@/components/auth/LogoutButton.jsx";
+import LanguagePicker from "@/components/layout/LanguagePicker.jsx";
 
-const navItems = [
-  { label: "Projekte", href: "/projects", icon: FolderOpen },
-];
-
-const adminNavItems = [
-  { label: "Benutzerverwaltung", href: "/admin/users", icon: Users },
-];
-
-export default function Sidebar() {
+export default function Sidebar({ languages = [], currentLocale = "de" }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAdmin = session?.user?.systemRole === "ADMIN";
+  const t = useTranslations();
+
+  const navItems = [
+    { label: t("nav.projects"), href: "/projects", icon: FolderOpen },
+  ];
+
+  const adminNavItems = [
+    { label: t("nav.users"), href: "/admin/users", icon: Users },
+    { label: t("nav.languages"), href: "/admin/languages", icon: Globe2 },
+  ];
 
   return (
     <aside className="flex h-screen w-56 flex-col border-r border-gray-200 bg-white">
@@ -55,7 +59,7 @@ export default function Sidebar() {
         {isAdmin && (
           <div>
             <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Administration
+              {t("nav.administration")}
             </p>
             <ul className="flex flex-col gap-1">
               {adminNavItems.map(({ label, href, icon: Icon }) => {
@@ -82,7 +86,10 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-200 p-3">
+      <div className="border-t border-gray-200 p-3 flex flex-col gap-1">
+        {languages.length > 1 && (
+          <LanguagePicker languages={languages} currentLocale={currentLocale} />
+        )}
         <LogoutButton className="w-full justify-start" />
       </div>
     </aside>

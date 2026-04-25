@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "projects": "Projects",
+    "administration": "Administration",
+    "users": "User Management",
+    "languages": "Language Management"
+  },
+  "auth": {
+    "logout": "Log out",
+    "login": "Log in",
+    "register": "Register",
+    "email": "Email address",
+    "password": "Password",
+    "name": "Name",
+    "loginTitle": "Sign in to PM Copilot",
+    "registerTitle": "Create an account",
+    "loginButton": "Sign in",
+    "registerButton": "Register",
+    "loginLink": "Already have an account? Sign in",
+    "registerLink": "Don't have an account? Register"
+  },
+  "common": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "search": "Search",
+    "back": "Back",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "description": "Description",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "inactive": "Inactive",
+    "default": "Default",
+    "language": "Language"
+  },
+  "projects": {
+    "title": "Projects",
+    "new": "New project",
+    "empty": "No projects yet",
+    "emptyHint": "Create your first project to get started.",
+    "settings": "Settings",
+    "archive": "Archive",
+    "delete": "Delete project",
+    "status": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    }
+  },
+  "artifacts": {
+    "status": {
+      "DRAFT": "Draft",
+      "IN_REVIEW": "In review",
+      "DONE": "Done"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "users": {
+      "title": "User Management",
+      "new": "Add user",
+      "roles": {
+        "ADMIN": "Administrator",
+        "USER": "User"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive"
+      }
+    },
+    "languages": {
+      "title": "Language Management",
+      "subtitle": "Manage the available languages of the application.",
+      "new": "Add language",
+      "code": "Language code",
+      "name": "Name (English)",
+      "nativeName": "Name (Native)",
+      "isActive": "Active",
+      "isDefault": "Default",
+      "setDefault": "Set as default",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "empty": "No languages configured.",
+      "addTitle": "Add new language",
+      "codePlaceholder": "e.g. en, fr, es",
+      "namePlaceholder": "e.g. English, French",
+      "nativeNamePlaceholder": "e.g. English, Français",
+      "cannotDeactivateDefault": "The default language cannot be deactivated.",
+      "deleteConfirm": "Really delete language \"{name}\"?"
+    }
+  },
+  "languagePicker": {
+    "label": "Language",
+    "tooltip": "Change display language"
+  }
+}

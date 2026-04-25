@@ -9,21 +9,35 @@ datasource db {
 // ─── Auth & Users ───
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  name          String?
-  firstName     String?
-  lastName      String?
-  systemRole    String    @default("USER")   // "ADMIN" | "USER"
-  status        String    @default("ACTIVE") // "ACTIVE" | "INACTIVE"
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  name              String?
+  firstName         String?
+  lastName          String?
+  systemRole        String    @default("USER")   // "ADMIN" | "USER"
+  status            String    @default("ACTIVE") // "ACTIVE" | "INACTIVE"
+  preferredLanguage String?                      // "de", "en", etc.
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   memberships   ProjectMember[]
   comments      Comment[]
   versions      ArtifactVersion[]
   aiSessions    AiSession[]
+}
+
+// ─── Languages ───
+
+model Language {
+  id         String   @id @default(cuid())
+  code       String   @unique  // "de", "en", etc.
+  name       String            // "German", "English"
+  nativeName String            // "Deutsch", "English"
+  isActive   Boolean  @default(true)
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 // ─── Projects ───

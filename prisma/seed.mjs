@@ -24,6 +24,16 @@ async function main() {
   await prisma.projectMember.deleteMany();
   await prisma.project.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.language.deleteMany();
+
+  // Seed languages
+  await prisma.language.create({
+    data: { code: "de", name: "German", nativeName: "Deutsch", isActive: true, isDefault: true },
+  });
+  await prisma.language.create({
+    data: { code: "en", name: "English", nativeName: "English", isActive: true, isDefault: false },
+  });
+  console.log("Languages created: de, en");
 
   // Create users
   const passwordHash = await bcrypt.hash("password123", 10);

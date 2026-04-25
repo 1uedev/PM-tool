@@ -6,5 +6,6 @@ export const config = {
     "/api/projects/:path*",
     "/admin/:path*",
     "/api/admin/:path*",
+    "/api/users/:path*",
   ],
 };

@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "projects": "Projekte",
+    "administration": "Administration",
+    "users": "Benutzerverwaltung",
+    "languages": "Sprachverwaltung"
+  },
+  "auth": {
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "name": "Name",
+    "loginTitle": "Anmelden bei PM Copilot",
+    "registerTitle": "Konto erstellen",
+    "loginButton": "Anmelden",
+    "registerButton": "Registrieren",
+    "loginLink": "Bereits ein Konto? Anmelden",
+    "registerLink": "Noch kein Konto? Registrieren"
+  },
+  "common": {
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "add": "Hinzufügen",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "loading": "Lädt...",
+    "search": "Suchen",
+    "back": "Zurück",
+    "actions": "Aktionen",
+    "status": "Status",
+    "name": "Name",
+    "description": "Beschreibung",
+    "createdAt": "Erstellt am",
+    "updatedAt": "Aktualisiert am",
+    "yes": "Ja",
+    "no": "Nein",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "default": "Standard",
+    "language": "Sprache"
+  },
+  "projects": {
+    "title": "Projekte",
+    "new": "Neues Projekt",
+    "empty": "Noch keine Projekte",
+    "emptyHint": "Erstelle dein erstes Projekt, um loszulegen.",
+    "settings": "Einstellungen",
+    "archive": "Archivieren",
+    "delete": "Projekt löschen",
+    "status": {
+      "ACTIVE": "Aktiv",
+      "ARCHIVED": "Archiviert"
+    }
+  },
+  "artifacts": {
+    "status": {
+      "DRAFT": "Entwurf",
+      "IN_REVIEW": "In Prüfung",
+      "DONE": "Fertig"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "users": {
+      "title": "Benutzerverwaltung",
+      "new": "Benutzer anlegen",
+      "roles": {
+        "ADMIN": "Administrator",
+        "USER": "Benutzer"
+      },
+      "status": {
+        "ACTIVE": "Aktiv",
+        "INACTIVE": "Inaktiv"
+      }
+    },
+    "languages": {
+      "title": "Sprachverwaltung",
+      "subtitle": "Verwalte die verfügbaren Sprachen der Anwendung.",
+      "new": "Sprache hinzufügen",
+      "code": "Sprachcode",
+      "name": "Name (Englisch)",
+      "nativeName": "Name (Nativ)",
+      "isActive": "Aktiv",
+      "isDefault": "Standard",
+      "setDefault": "Als Standard setzen",
+      "activate": "Aktivieren",
+      "deactivate": "Deaktivieren",
+      "empty": "Keine Sprachen konfiguriert.",
+      "addTitle": "Neue Sprache hinzufügen",
+      "codePlaceholder": "z.B. en, fr, es",
+      "namePlaceholder": "z.B. English, French",
+      "nativeNamePlaceholder": "z.B. English, Français",
+      "cannotDeactivateDefault": "Die Standardsprache kann nicht deaktiviert werden.",
+      "deleteConfirm": "Sprache \"{name}\" wirklich löschen?"
+    }
+  },
+  "languagePicker": {
+    "label": "Sprache",
+    "tooltip": "Anzeigesprache ändern"
+  }
+}
