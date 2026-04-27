@@ -743,6 +743,38 @@ Dedicated, type-specific field components were created for all 20 new artifact t
 
 ---
 
+### Extension Step 10 — AI Provider Configuration UI ✅
+
+**Goal:** Admins select the AI provider, model, and API key directly in the UI. Changes take effect **immediately without a restart** — configuration is stored in the database and loaded dynamically on every AI request.
+
+**Data model:**
+- New `AiConfig` model (singleton, `id = "singleton"`): `provider`, `model`, `apiKey`, `timeoutMs`, `maxTokens`
+- Provider factory reads from DB first, falls back to environment variables
+
+**Admin page (`/admin/ai`):**
+- **Provider selection:** Anthropic Claude / OpenAI / Disabled
+- **Model selection** (radio buttons with recommendation badges):
+  - Claude: Opus 4.6 (Powerful), **Sonnet 4.6 (Recommended)**, Haiku 4.5 (Fast)
+  - OpenAI: GPT-4o (Powerful), **GPT-4o mini (Recommended)**, GPT-4 Turbo
+- **API key input** with show/hide toggle; leave empty = keep existing key; "Key stored" indicator
+- **Advanced settings** (collapsible): timeout (ms) and max tokens
+- **Test connection** — real mini-call (max 10 tokens) to verify the key
+- **Save** — writes to DB, takes effect immediately for all subsequent AI requests
+- **When disabled** — info banner; AI button hidden for all users (503 response)
+
+**Architecture changes:**
+- `provider-factory.js` — `getAiConfig()` (async, reads from DB), `isAiAvailable(config)`, `getAiProvider(config)` — all functions now accept a config object
+- `claude-adapter.js` — accepts config object instead of environment variables
+- `openai-adapter.js` — newly implemented (OpenAI SDK), analogous to Claude adapter
+- AI route `artifacts/:aid/ai` — calls `getAiConfig()` and passes config to provider
+- `AiSession` logging uses dynamic provider name from config
+
+**New packages:** `openai`
+
+**API:** `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test`
+
+---
+
 ### Extension Step 11 — PRD Gap Analysis: 9 Additional Artifact Types ✅
 
 **Goal:** Fill structural gaps in the domain model so a complete PRD can be represented — foundations, governance, measurement, and quality assurance.
@@ -794,37 +826,5 @@ Dedicated, type-specific field components were created for all 20 new artifact t
 
 **Connection badges:**
 - Relation type filter applies to the badge list — per-artifact row shows only connections of the selected type; shows a note if connections exist but none match the filter
-
----
-
-### Extension Step 10 — AI Provider Configuration UI ✅
-
-**Goal:** Admins select the AI provider, model, and API key directly in the UI. Changes take effect **immediately without a restart** — configuration is stored in the database and loaded dynamically on every AI request.
-
-**Data model:**
-- New `AiConfig` model (singleton, `id = "singleton"`): `provider`, `model`, `apiKey`, `timeoutMs`, `maxTokens`
-- Provider factory reads from DB first, falls back to environment variables
-
-**Admin page (`/admin/ai`):**
-- **Provider selection:** Anthropic Claude / OpenAI / Disabled
-- **Model selection** (radio buttons with recommendation badges):
-  - Claude: Opus 4.6 (Powerful), **Sonnet 4.6 (Recommended)**, Haiku 4.5 (Fast)
-  - OpenAI: GPT-4o (Powerful), **GPT-4o mini (Recommended)**, GPT-4 Turbo
-- **API key input** with show/hide toggle; leave empty = keep existing key; "Key stored" indicator
-- **Advanced settings** (collapsible): timeout (ms) and max tokens
-- **Test connection** — real mini-call (max 10 tokens) to verify the key
-- **Save** — writes to DB, takes effect immediately for all subsequent AI requests
-- **When disabled** — info banner; AI button hidden for all users (503 response)
-
-**Architecture changes:**
-- `provider-factory.js` — `getAiConfig()` (async, reads from DB), `isAiAvailable(config)`, `getAiProvider(config)` — all functions now accept a config object
-- `claude-adapter.js` — accepts config object instead of environment variables
-- `openai-adapter.js` — newly implemented (OpenAI SDK), analogous to Claude adapter
-- AI route `artifacts/:aid/ai` — calls `getAiConfig()` and passes config to provider
-- `AiSession` logging uses dynamic provider name from config
-
-**New packages:** `openai`
-
-**API:** `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test`
 
 ---
