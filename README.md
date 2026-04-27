@@ -2,6 +2,54 @@
 
 AI-powered product management system for structured PM artifacts, traceability, and contextual assistance.
 
+## What is PM Copilot?
+
+PM Copilot is a structured product management workspace. It helps product managers capture, organise, and connect all the artifacts that make up a product — from the first problem statement to the final launch task — in a single, navigable system.
+
+### Core idea
+
+Traditional PM work is scattered across documents, Notion pages, and Jira tickets with no consistent structure and no traceability between decisions. PM Copilot gives every piece of information a **type**, a **status**, and **explicit links** to other artifacts. The result is a living graph of the product, where you can see how a business goal connects to a persona, a hypothesis, a feature, a user story, and an acceptance criterion — and spot what is missing.
+
+### Domain model: 35 artifact types across 8 groups
+
+Every item in the system is an **Artifact** with a type-specific set of fields, a status (Draft / In Review / Done), version history, comments, and relations to other artifacts.
+
+| Group | Artifact types |
+|---|---|
+| **Foundations** | Goals & Non-Goals, Stakeholder, Assumption, Constraint, Open Question |
+| **Research** | Market Analysis, Competitor, Research Finding, Problem Statement, Opportunity, Hypothesis, Problem Hypothesis |
+| **Audience** | User Persona, Buyer Persona |
+| **Strategy** | Product Vision, Value Proposition, Positioning, Business Model, KPI/OKR, Measurement Plan |
+| **Discovery & Design** | Use Case, User Journey, Feature, Epic |
+| **Delivery** | User Story, Functional Requirement, Non-Functional Requirement, Acceptance Criteria, Dependency, Risk, Decision, Test Plan, Compliance Requirement |
+| **Planning & Release** | Roadmap Item, Release, Launch Task, Milestone |
+| **Feedback & Iteration** | Feedback Item, Iteration |
+
+### Key features
+
+- **Explorer** — two-column view: artifact tree on the left (grouped, collapsible), structured edit form on the right; deep-linkable via URL params (`?artifact=ID`, `?new=TYPE`)
+- **Relations** — explicit typed links between any two artifacts (Derives From / Depends On / Relates To / Validates); smart type suggestions based on source/target pair
+- **Traceability view** — full artifact graph with gap detection, coverage bars per group, and filters by status, relation type, and visibility
+- **Progress view** — completion overview per group and type; highlights missing or empty phases
+- **Board view** — Kanban board (Draft / In Review / Done) with drag & drop; filterable by artifact type
+- **AI suggestions** — per-artifact AI assist button (Claude or OpenAI); suggestions shown in a separate panel, never auto-applied; every suggestion requires explicit user acceptance
+- **Version history** — every save creates a version; full diff and restore available
+- **Search** — full-text search across all artifacts with type, status, and tag filters
+- **Admin panel** — user management (create / edit / deactivate), language management (DE/EN), database configuration, AI provider configuration (provider + model + API key, effective without restart)
+- **Role-based access** — system roles (Admin / User) and project roles (Owner / Editor / Viewer) with full enforcement in API and UI
+- **Multilingual** — next-intl, cookie-based locale, no URL prefix; currently DE + EN
+
+### Architecture notes for AI assistants
+
+- **App Router only** — all pages are in `src/app/(dashboard)/` or `src/app/(auth)/`; no Pages Router
+- **Server Components by default** — data fetching happens in page-level Server Components; Client Components are the leaf nodes that need interactivity
+- **`src/lib/constants.js`** — single source of truth for all artifact types, groups, colors, status labels, relation types, and relation suggestions; always check here before adding new enums anywhere
+- **`src/components/artifacts/fields/index.js`** — `FIELD_COMPONENTS` map; adding a new artifact type requires a new field component registered here
+- **`src/lib/ai/prompts/index.js`** — `PROMPT_BUILDERS` map; every artifact type needs a prompt template here for the AI button to work
+- **API pattern** — every route calls `requireAuth()` + `requireProjectAccess()` before any logic; responses are always `{ data }` or `{ error: { code, message } }`
+- **Prisma + SQLite** — `fields` column is JSON (stored as TEXT in SQLite, Prisma handles serialisation); no raw SQL, all queries through Prisma client
+- **SWR for client state** — mutations call the API, then `mutate()` the relevant SWR keys; no global state store
+
 ## Tech Stack
 
 | Layer | Technology |
