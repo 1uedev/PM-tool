@@ -1,25 +1,23 @@
 export function buildProblemStatementPrompt(fields, context) {
-  return `Du bist ein erfahrener Product Manager. Erstelle oder verbessere ein Problem Statement.
+  return `You are a senior product manager helping to define a Problem Statement artifact.
 
-Aktuelle Felder (können leer sein):
-- Problem: ${fields.problem || "(leer)"}
-- Kontext: ${fields.context || "(leer)"}
-- Auswirkung: ${fields.impact || "(leer)"}
-- Aktuelle Lösung / Workaround: ${fields.currentSolution || "(leer)"}
+Current content:
+- Problem: ${fields.problem || "(empty)"}
+- Context: ${fields.context || "(empty)"}
+- Impact: ${fields.impact || "(empty)"}
+- How users solve it today: ${fields.currentSolution || "(empty)"}
+- Why the current solution is insufficient: ${fields.whyInsufficient || "(empty)"}
 
-${context ? `Zusätzlicher Projektkontext:\n${context}\n` : ""}
+${context ? `Related artifacts context:\n${context}\n` : ""}
 
-Antworte ausschließlich mit einem validen JSON-Objekt in diesem Format:
+Improve this Problem Statement. The problem should be user-centric and specific, not technical. The impact should reference both user pain and business consequence. The current solution field should describe the actual workaround (manual process, spreadsheet, existing tool). The "why insufficient" field should clearly articulate the gap that justifies building something new (too slow, expensive, unreliable, doesn't scale, poor UX, risky, etc.).
+
+Respond with a JSON object using exactly these keys:
 {
-  "problem": "...",
-  "context": "...",
-  "impact": "...",
-  "currentSolution": "..."
-}
-
-Regeln:
-- Alle Felder ausfüllen, auch wenn sie bereits vorhanden sind (verbessern/erweitern)
-- Problem klar und nutzerzentriert beschreiben (nicht technisch)
-- Auswirkung mit Bezug auf Nutzer und Business quantifizieren wo möglich
-- Deutsch, kein Markdown, kein Text außerhalb des JSON`;
+  "problem": "improved problem statement",
+  "context": "improved context",
+  "impact": "improved impact description",
+  "currentSolution": "how users solve it today",
+  "whyInsufficient": "why the current solution falls short"
+}`;
 }
