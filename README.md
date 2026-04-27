@@ -855,6 +855,53 @@ Dedicated, type-specific field components were created for all 20 new artifact t
 
 ---
 
+### Bugfix — FieldHelpers dual API + PRD question 5 coverage ✅
+
+**FieldHelpers API bug (critical):**
+
+The 9 new Foundations field components (GoalsNonGoals, Stakeholder, Assumption, Constraint, OpenQuestion, MeasurementPlan, Milestone, TestPlan, ComplianceRequirement) used a value-based calling convention (`value=`, `onChange(v)`, inline `label=`) that `FieldHelpers` didn't support. All new fields rendered blank and edits were silently dropped.
+
+`FieldHelpers.jsx` now supports both conventions side by side:
+
+| Convention | When used | Pattern |
+|---|---|---|
+| A — key-based | Original 6 types + most Step 5 types | `<FieldTextarea fieldKey="x" fields={fields} onChange={onChange} />` |
+| B — value-based | 9 new Foundations types | `<FieldTextarea label="X" value={fields.x} onChange={(v) => onChange("x", v)} />` |
+
+`FieldTextarea` and `FieldInput` detect which convention is active via the presence of `fieldKey` and route accordingly. The `label` prop renders a `FieldLabel` inline when provided.
+
+**PRD coverage — Question 5:**
+
+A gap analysis against the 10 minimum PRD questions revealed one missing field: *"Why is the current solution insufficient?"* The `Problem Statement` artifact had `currentSolution` (how users solve it today) but no field for the gap that justifies building something new.
+
+- New field `whyInsufficient` added to `ProblemStatementFields`
+- AI prompt for `problem-statement` updated to include the field and guide the model to articulate the gap (too slow / expensive / unreliable / doesn't scale / poor UX / risky)
+
+**All 10 PRD starter questions are now covered:**
+
+| # | Question | Artifact / field |
+|---|---|---|
+| 1 | What is the product idea? | Product Vision → `oneLiner` |
+| 2 | What problem does it solve? | Problem Statement → `problem` |
+| 3 | Who has this problem? | User Persona + Buyer Persona |
+| 4 | How do users solve it today? | Problem Statement → `currentSolution` |
+| 5 | Why is the current solution insufficient? | Problem Statement → `whyInsufficient` |
+| 6 | What is the desired outcome? | Goals & Non-Goals → `goals` |
+| 7 | What is the first use case? | Use Case |
+| 8 | Must-have features for v1? | Feature → `priority` + Goals & Non-Goals |
+| 9 | What is out of scope for v1? | Goals & Non-Goals → `nonGoals` |
+| 10 | How will success be measured? | KPI/OKR + Measurement Plan |
+
+**German → English label translation:**
+
+The original 4 field components still had German UI labels:
+- `UserPersonaFields` — Name, Goals, Pain points, Context/Background
+- `ProblemStatementFields` — all labels
+- `ProductVisionFields` — One-liner, Target users, Value proposition
+- `FeatureFields` — Description, User value, In/Out of scope, Priority
+
+---
+
 ### Extension Step 12 — Traceability View Enhancements ✅
 
 **Goal:** Make the traceability view actionable — surface gaps in the artifact graph and let users drill into specific relation types and statuses.
