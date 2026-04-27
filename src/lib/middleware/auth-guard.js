@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import { errorResponse } from "@/lib/errors.js";
+import prisma from "@/lib/prisma.js";
 
 /**
  * Retrieves the current session or returns a 401 response.
- * Usage in API routes:
- *   const { session, response } = await requireAuth();
- *   if (response) return response;
+ * Also verifies the session user still exists in the DB —
+ * catches stale JWTs after a DB reset without exposing a 500.
  */
 export async function requireAuth() {
   const session = await getServerSession(authOptions);
@@ -14,7 +14,20 @@ export async function requireAuth() {
   if (!session?.user?.id) {
     return {
       session: null,
-      response: errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401),
+      response: errorResponse("AUTH_ERROR", "Not authenticated", 401),
+    };
+  }
+
+  // Verify the user still exists (guards against stale JWTs after DB migrations)
+  const exists = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+
+  if (!exists) {
+    return {
+      session: null,
+      response: errorResponse("AUTH_ERROR", "Session expired — please log in again", 401),
     };
   }
 
