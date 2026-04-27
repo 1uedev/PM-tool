@@ -75,9 +75,9 @@ function ArtifactRow({ artifact, connections, projectId, relationTypeFilter }) {
         </Link>
         {hasFiltered ? (
           <div className="mt-1.5 flex flex-wrap gap-1">
-            {filteredConnections.map(({ artifact: connected, relationType, direction }, i) => (
+            {filteredConnections.map(({ artifact: connected, relationType, direction }) => (
               <ConnectionBadge
-                key={i}
+                key={`${direction}-${connected.id}-${relationType}`}
                 artifact={connected}
                 relationType={relationType}
                 direction={direction}

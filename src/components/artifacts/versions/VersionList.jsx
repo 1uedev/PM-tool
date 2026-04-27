@@ -25,6 +25,7 @@ function VersionRow({ version, index, isLatest, projectId, artifactId, onRestore
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [restoreError, setRestoreError] = useState("");
   const role = useProjectRole();
   const canEdit = hasRole(role, "EDITOR");
 
@@ -33,6 +34,7 @@ function VersionRow({ version, index, isLatest, projectId, artifactId, onRestore
 
   async function handleRestore() {
     setRestoring(true);
+    setRestoreError("");
     try {
       const res = await fetch(
         `/api/projects/${projectId}/artifacts/${artifactId}/versions/${version.id}`,
@@ -40,15 +42,18 @@ function VersionRow({ version, index, isLatest, projectId, artifactId, onRestore
       );
       const json = await res.json();
       if (res.ok) {
-        // Invalidate artifact and versions cache
         globalMutate(`/api/projects/${projectId}/artifacts/${artifactId}`);
         globalMutate(`/api/projects/${projectId}/artifacts/${artifactId}/versions`);
         globalMutate(`/api/projects/${projectId}/artifacts`);
         onRestored?.(json.data);
+        setConfirmOpen(false);
+      } else {
+        setRestoreError(json.error?.message ?? "Wiederherstellung fehlgeschlagen");
       }
+    } catch {
+      setRestoreError("Netzwerkfehler — bitte erneut versuchen");
     } finally {
       setRestoring(false);
-      setConfirmOpen(false);
     }
   }
 
@@ -120,6 +125,12 @@ function VersionRow({ version, index, isLatest, projectId, artifactId, onRestore
           </div>
         )}
       </div>
+
+      {restoreError && (
+        <div className="mt-1 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          {restoreError}
+        </div>
+      )}
 
       <ConfirmDialog
         open={confirmOpen}

@@ -31,7 +31,9 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
   const canEdit = hasRole(role, "EDITOR");
 
   const [statusLoading, setStatusLoading] = useState(false);
+  const [statusError, setStatusError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const currentIndex = STATUS_FLOW.indexOf(artifact.status);
@@ -39,6 +41,7 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
 
   async function handleStatusChange() {
     setStatusLoading(true);
+    setStatusError("");
     try {
       const res = await fetch(
         `/api/projects/${projectId}/artifacts/${artifact.id}`,
@@ -53,7 +56,11 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
         mutate(`/api/projects/${projectId}/artifacts`);
         mutate(`/api/projects/${projectId}/artifacts/${artifact.id}`);
         onStatusChange?.(json.data);
+      } else {
+        setStatusError(json.error?.message ?? "Status konnte nicht geändert werden");
       }
+    } catch {
+      setStatusError("Netzwerkfehler — bitte erneut versuchen");
     } finally {
       setStatusLoading(false);
     }
@@ -61,17 +68,25 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
 
   async function handleDelete() {
     setDeleteLoading(true);
+    setDeleteError("");
     try {
-      await fetch(`/api/projects/${projectId}/artifacts/${artifact.id}`, {
+      const res = await fetch(`/api/projects/${projectId}/artifacts/${artifact.id}`, {
         method: "DELETE",
       });
-      mutate(`/api/projects/${projectId}/artifacts`);
-      // Clear artifact from URL, go back to empty explorer
-      router.push(`/projects/${projectId}`);
-      router.refresh();
+      if (res.ok) {
+        mutate(`/api/projects/${projectId}/artifacts`);
+        router.push(`/projects/${projectId}`);
+        router.refresh();
+      } else {
+        const json = await res.json();
+        setDeleteError(json.error?.message ?? "Löschen fehlgeschlagen");
+        setShowDeleteConfirm(false);
+      }
+    } catch {
+      setDeleteError("Netzwerkfehler — bitte erneut versuchen");
+      setShowDeleteConfirm(false);
     } finally {
       setDeleteLoading(false);
-      setShowDeleteConfirm(false);
     }
   }
 
@@ -120,6 +135,18 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
           </div>
         )}
       </div>
+
+      {/* Error banners */}
+      {statusError && (
+        <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          {statusError}
+        </div>
+      )}
+      {deleteError && (
+        <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          {deleteError}
+        </div>
+      )}
 
       {/* Tags */}
       <div className="pt-2">

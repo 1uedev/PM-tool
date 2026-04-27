@@ -27,6 +27,14 @@ export async function requireProjectAccess(userId, projectId, requiredRole = "VI
     };
   }
 
+  // Archived projects are read-only — block any write operations
+  if (membership.project?.status === "ARCHIVED" && requiredRole !== "VIEWER") {
+    return {
+      membership: null,
+      response: errorResponse("FORBIDDEN", "Dieses Projekt ist archiviert und kann nicht bearbeitet werden", 403),
+    };
+  }
+
   const userLevel = ROLE_LEVELS[membership.role] ?? -1;
   const requiredLevel = ROLE_LEVELS[requiredRole] ?? 0;
 

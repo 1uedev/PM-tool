@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma.js";
 import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
-import { requireArtifactAccess } from "@/lib/middleware/project-access.js";
+import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
 import { validateBody } from "@/lib/validators/index.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { z } from "zod";
@@ -71,6 +70,8 @@ export async function DELETE(request, { params }) {
   const { projectId, artifactId } = await params;
   const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
   if (accessErr) return accessErr;
+  const { response: artErr } = await requireArtifactAccess(artifactId, projectId);
+  if (artErr) return artErr;
 
   const { searchParams } = new URL(request.url);
   const tagId = searchParams.get("tagId");

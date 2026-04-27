@@ -26,15 +26,8 @@ export async function GET(request, { params }) {
   const { artifact, response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
   if (artifactErr) return artifactErr;
 
-  try {
-    const full = await prisma.artifact.findUnique({
-      where: { id: artifactId },
-    });
-    return successResponse(parseArtifact(full));
-  } catch (error) {
-    console.error("[GET artifact]", error);
-    return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
-  }
+  // artifact is already fetched by requireArtifactAccess — return it directly
+  return successResponse(parseArtifact(artifact));
 }
 
 // PATCH /api/projects/:id/artifacts/:aid — update + auto-version

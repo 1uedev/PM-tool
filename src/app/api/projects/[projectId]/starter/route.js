@@ -17,7 +17,16 @@ export async function GET(request, { params }) {
     select: { prdStarter: true },
   });
 
-  const starter = project?.prdStarter ? JSON.parse(project.prdStarter) : STARTER_DEFAULTS;
+  let starter = STARTER_DEFAULTS;
+  if (project?.prdStarter) {
+    try {
+      starter = JSON.parse(project.prdStarter);
+    } catch {
+      // Corrupted JSON — fall back to defaults silently
+      starter = STARTER_DEFAULTS;
+    }
+  }
+
   return successResponse({ starter });
 }
 

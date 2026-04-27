@@ -12,9 +12,15 @@ export default function StarterContextPanel({ projectId, artifactType }) {
   const [open, setOpen] = useState(true);
 
   const relevantKeys = STARTER_ARTIFACT_CONTEXT[artifactType] ?? [];
+
+  // Always call hooks before any conditional return (Rules of Hooks)
+  const { data } = useSWR(
+    relevantKeys.length > 0 ? `/api/projects/${projectId}/starter` : null,
+    fetcher
+  );
+
   if (relevantKeys.length === 0) return null;
 
-  const { data } = useSWR(`/api/projects/${projectId}/starter`, fetcher);
   const starter = data?.starter;
 
   // Only show if at least one relevant answer exists

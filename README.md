@@ -923,3 +923,99 @@ The original 4 field components still had German UI labels:
 - Relation type filter applies to the badge list — per-artifact row shows only connections of the selected type; shows a note if connections exist but none match the filter
 
 ---
+
+### Bug-fix Pass — Code Review Findings ✅
+
+A full codebase review identified and fixed 9 bugs across all severity levels.
+
+**Critical fixes:**
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 1 | `StarterContextPanel.jsx` | Rules of Hooks violation — `useSWR` was called after a conditional `return null`, causing React to throw when the artifact type changed | Moved hook before early return; passes `null` SWR key when type has no mapping |
+| 2 | `ArtifactForm.jsx` | Status de-sync — `ArtifactHeader`'s quick-cycle button PATCHes status directly; `ArtifactForm`'s local state only resets on artifact ID change, so saving the form could overwrite the toggle | Status `<Select>` hidden in edit mode; `status` removed from PATCH body — `ArtifactHeader` exclusively owns status in edit mode |
+
+**High fixes (silent failures):**
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 3 | `ArtifactHeader.jsx` | `handleDelete` never checked `res.ok` — on 403/500 the UI still redirected and cleared the artifact | Now checks response; only redirects on success; shows error banner on failure |
+| 4 | `ArtifactHeader.jsx` | `handleStatusChange` had no `else` branch — API errors were silently discarded with no user feedback | Added error state, error banner, and `catch` for network errors |
+| 5 | `VersionList.jsx` | `handleRestore` closed the confirm dialog on both success and failure — user had no way to know a restore failed | Error shown inline; dialog only closes on success |
+
+**Medium fixes:**
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 6 | `starter/route.js` | `JSON.parse(project.prdStarter)` was unguarded — corrupted DB data would throw a 500 with no proper error shape | Wrapped in try/catch; falls back to `STARTER_DEFAULTS` |
+| 7 | `project-access.js` | Archived projects were read-only in the UI but fully writable via the API — `project.status` was fetched but never checked | Write operations on `ARCHIVED` projects now return 403 |
+| 8 | `artifacts/[artifactId]/route.js` | `GET` called `requireArtifactAccess` (one DB fetch) then immediately did a second `findUnique` for the same row | GET now returns the artifact already fetched by `requireArtifactAccess` |
+| 9 | `tags/route.js` | `DELETE /artifact/tags` skipped `requireArtifactAccess` — project membership was checked but not artifact ownership; duplicate import | Added artifact access check; merged duplicate import |
+
+**Low fixes:**
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 10 | `TraceabilityView.jsx` | Connection badges used array index as React key — unstable when filter order changes | Replaced with stable key `${direction}-${artifact.id}-${relationType}` |
+
+---
+
+### Extension Step 13 — PRD Starter (10-Question Onboarding) ✅
+
+**Goal:** Capture the minimum information needed to start a PRD at project creation — 10 structured questions — and surface relevant answers inline while editing each artifact, so high-level decisions stay consistent with detailed content.
+
+**Data model:**
+- `Project.prdStarter String?` — the 10 starter answers stored as a JSON string
+- Migration: `prisma/migrations/20260427172426_add_prd_starter`
+
+**API:**
+- `GET  /api/projects/:id/starter` — returns parsed answers (VIEWER+), falls back to empty defaults if not filled in yet
+- `PATCH /api/projects/:id/starter` — saves 10 known keys, strips unknown keys (EDITOR+)
+
+**Starter page (`/projects/:id/starter`):**
+- Server-rendered page; accessible via the "Starter" button (Rocket icon) in the explorer header for all roles
+- `StarterForm` client component:
+  - 10 questions with label, hint text, and a multi-line textarea per question
+  - Completion bar: X/10 answered, with CheckCircle2 / Circle icon per question
+  - Each question shows which artifact types use that answer as **colored type badges** (existing artifacts) or **dashed "+ Create" links** (missing artifacts)
+  - Save button with "✓ Saved" confirmation; form fields disabled for VIEWERs
+
+**Project creation flow:**
+- After creating a new project, `ProjectForm` now redirects to `/projects/:id/starter` instead of the explorer — so users fill in the 10 questions before creating their first artifact
+
+**Inline context panel (`StarterContextPanel`):**
+- Thin collapsible blue panel shown above the artifact form when editing or creating an artifact
+- Fetches starter answers via SWR (cached, no extra round-trip after first load)
+- Shows only the answers relevant to the current artifact type (e.g. `productIdea` for Product Vision, `problemSolved + currentSolution + whyInsufficient` for Problem Statement)
+- If the relevant answers are empty, shows a "Complete the starter →" prompt with a link
+- Renders nothing when the artifact type has no starter mapping — zero noise
+
+**Starter → artifact mapping (`src/lib/starterContext.js`):**
+
+| Artifact type | Starter questions shown |
+|---|---|
+| Product Vision | What is the product idea? |
+| Problem Statement | What problem does it solve? + How do users solve it today? + Why insufficient? |
+| User Persona | Who has this problem? |
+| Buyer Persona | Who has this problem? |
+| Goals & Non-Goals | What is the desired outcome? + What is out of scope? |
+| Use Case | What is the first use case? |
+| Feature | Must-have features for v1? + What is out of scope? |
+| Epic | Must-have features for v1? |
+| KPI/OKR | How will success be measured? |
+| Measurement Plan | How will success be measured? |
+
+**Bugfixes shipped with this step:**
+
+*Session expiry on reseed:*
+- Seed users now have **stable fixed IDs** (`seed-user-admin`, `seed-user-alice`, `seed-user-bob`) so JWT sessions remain valid after a reseed — no forced logout on every `npm run db:seed`
+
+*Stale JWT → 500 instead of 401:*
+- `requireAuth()` now verifies the session user still exists in the DB after reading the JWT
+- If the user ID is not found (stale token after a DB reset), a clean 401 "Session expired — please log in again" is returned instead of a FK constraint violation crashing the request
+
+*PrismaClientValidationError after schema change:*
+- Root cause: `prisma migrate dev` runs migrations but does not always regenerate the client
+- Fix: `npx prisma generate` must be run explicitly after every schema change — documented in dev workflow
+
+---

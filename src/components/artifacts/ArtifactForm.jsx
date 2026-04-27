@@ -28,6 +28,8 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
   const artifactType = type ?? artifact?.type;
 
   const [title, setTitle] = useState(artifact?.title ?? "");
+  // Status in edit mode is owned by ArtifactHeader (quick-cycle button).
+  // We only track it locally for the create form.
   const [status, setStatus] = useState(artifact?.status ?? "DRAFT");
   const [fields, setFields] = useState(
     artifact?.fields ?? getDefaultFields(artifactType)
@@ -93,8 +95,11 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         ? `/api/projects/${projectId}/artifacts/${artifact.id}`
         : `/api/projects/${projectId}/artifacts`;
       const method = isEdit ? "PATCH" : "POST";
+      // In edit mode, status is managed by ArtifactHeader — omit it from the
+      // form PATCH to avoid overwriting a status change the user made via the
+      // quick-cycle button without saving the form first.
       const body = isEdit
-        ? { title, status, fields }
+        ? { title, fields }
         : { type: artifactType, title, status, fields };
 
       const res = await fetch(url, {
@@ -139,7 +144,7 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 h-full" noValidate>
-      {/* Header: title + status */}
+      {/* Header: title (+ status only when creating — in edit mode ArtifactHeader owns status) */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex-1">
           <Input
@@ -152,15 +157,17 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
             disabled={!canEdit}
           />
         </div>
-        <div className="w-36 flex-shrink-0">
-          <Select
-            label="Status"
-            value={status}
-            onChange={handleStatusChange}
-            options={STATUS_OPTIONS}
-            disabled={!canEdit}
-          />
-        </div>
+        {!isEdit && (
+          <div className="w-36 flex-shrink-0">
+            <Select
+              label="Status"
+              value={status}
+              onChange={handleStatusChange}
+              options={STATUS_OPTIONS}
+              disabled={!canEdit}
+            />
+          </div>
+        )}
       </div>
 
       {globalError && (
