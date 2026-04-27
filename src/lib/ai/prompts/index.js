@@ -1,3 +1,10 @@
+// Foundations
+import { buildGoalsNonGoalsPrompt } from "./goals-non-goals.js";
+import { buildStakeholderPrompt } from "./stakeholder.js";
+import { buildAssumptionPrompt } from "./assumption.js";
+import { buildConstraintPrompt } from "./constraint.js";
+import { buildOpenQuestionPrompt } from "./open-question.js";
+
 // Original 6 types
 import { buildUserPersonaPrompt } from "./user-persona.js";
 import { buildProblemHypothesisPrompt } from "./problem-hypothesis.js";
@@ -22,6 +29,7 @@ import { buildValuePropositionPrompt } from "./value-proposition.js";
 import { buildPositioningPrompt } from "./positioning.js";
 import { buildBusinessModelPrompt } from "./business-model.js";
 import { buildKpiOkrPrompt } from "./kpi-okr.js";
+import { buildMeasurementPlanPrompt } from "./measurement-plan.js";
 
 // Discovery & Design
 import { buildUserJourneyPrompt } from "./user-journey.js";
@@ -34,17 +42,27 @@ import { buildAcceptanceCriteriaPrompt } from "./acceptance-criteria.js";
 import { buildDependencyPrompt } from "./dependency.js";
 import { buildRiskPrompt } from "./risk.js";
 import { buildDecisionPrompt } from "./decision.js";
+import { buildTestPlanPrompt } from "./test-plan.js";
+import { buildComplianceRequirementPrompt } from "./compliance-requirement.js";
 
 // Planning & Release
 import { buildRoadmapItemPrompt } from "./roadmap-item.js";
 import { buildReleasePrompt } from "./release.js";
 import { buildLaunchTaskPrompt } from "./launch-task.js";
+import { buildMilestonePrompt } from "./milestone.js";
 
 // Feedback & Iteration
 import { buildFeedbackItemPrompt } from "./feedback-item.js";
 import { buildIterationPrompt } from "./iteration.js";
 
 const PROMPT_BUILDERS = {
+  // Foundations
+  GOALS_NON_GOALS: buildGoalsNonGoalsPrompt,
+  STAKEHOLDER: buildStakeholderPrompt,
+  ASSUMPTION: buildAssumptionPrompt,
+  CONSTRAINT: buildConstraintPrompt,
+  OPEN_QUESTION: buildOpenQuestionPrompt,
+
   // Original types
   USER_PERSONA: buildUserPersonaPrompt,
   PROBLEM_HYPOTHESIS: buildProblemHypothesisPrompt,
@@ -69,6 +87,7 @@ const PROMPT_BUILDERS = {
   POSITIONING: buildPositioningPrompt,
   BUSINESS_MODEL: buildBusinessModelPrompt,
   KPI_OKR: buildKpiOkrPrompt,
+  MEASUREMENT_PLAN: buildMeasurementPlanPrompt,
 
   // Discovery & Design
   USER_JOURNEY: buildUserJourneyPrompt,
@@ -81,11 +100,14 @@ const PROMPT_BUILDERS = {
   DEPENDENCY: buildDependencyPrompt,
   RISK: buildRiskPrompt,
   DECISION: buildDecisionPrompt,
+  TEST_PLAN: buildTestPlanPrompt,
+  COMPLIANCE_REQUIREMENT: buildComplianceRequirementPrompt,
 
   // Planning & Release
   ROADMAP_ITEM: buildRoadmapItemPrompt,
   RELEASE: buildReleasePrompt,
   LAUNCH_TASK: buildLaunchTaskPrompt,
+  MILESTONE: buildMilestonePrompt,
 
   // Feedback & Iteration
   FEEDBACK_ITEM: buildFeedbackItemPrompt,
