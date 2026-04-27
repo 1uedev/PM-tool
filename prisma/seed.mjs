@@ -38,8 +38,10 @@ async function main() {
   // Create users
   const passwordHash = await bcrypt.hash("password123", 10);
 
+  // Fixed IDs so active sessions stay valid across reseeds
   const admin = await prisma.user.create({
     data: {
+      id: "seed-user-admin",
       email: "admin@example.com",
       passwordHash,
       firstName: "System",
@@ -52,6 +54,7 @@ async function main() {
 
   const alice = await prisma.user.create({
     data: {
+      id: "seed-user-alice",
       email: "alice@example.com",
       passwordHash,
       firstName: "Alice",
@@ -64,6 +67,7 @@ async function main() {
 
   const bob = await prisma.user.create({
     data: {
+      id: "seed-user-bob",
       email: "bob@example.com",
       passwordHash,
       firstName: "Bob",
