@@ -47,6 +47,7 @@ model Project {
   name        String
   description String?
   status      String        @default("ACTIVE")
+  prdStarter  String?       // JSON: 10 PRD starter question answers
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

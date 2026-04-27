@@ -60,7 +60,11 @@ export default function ProjectForm({ project }) {
         return;
       }
 
-      router.push(`/projects/${json.data.id}`);
+      if (isEdit) {
+        router.push(`/projects/${json.data.id}`);
+      } else {
+        router.push(`/projects/${json.data.id}/starter`);
+      }
       router.refresh();
     } catch {
       setGlobalError("Netzwerkfehler — bitte versuche es erneut");

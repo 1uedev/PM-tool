@@ -10,6 +10,7 @@ import RelationList from "@/components/artifacts/relations/RelationList.jsx";
 import CommentList from "@/components/artifacts/comments/CommentList.jsx";
 import VersionList from "@/components/artifacts/versions/VersionList.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
+import StarterContextPanel from "@/components/starter/StarterContextPanel.jsx";
 
 const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
 
@@ -58,6 +59,7 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
         onStatusChange={(updated) => mutate(updated, false)}
       />
       <div className="mt-5 flex-1">
+        <StarterContextPanel projectId={projectId} artifactType={artifact.type} />
         <ArtifactForm
           artifact={artifact}
           projectId={projectId}
@@ -76,9 +78,10 @@ function NewArtifactPanel({ type, projectId }) {
     <div className="flex flex-1 flex-col overflow-y-auto p-6">
       <div className="mb-4">
         <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Neue {ARTIFACT_TYPE_LABELS[type] ?? type}
+          New {ARTIFACT_TYPE_LABELS[type] ?? type}
         </span>
       </div>
+      <StarterContextPanel projectId={projectId} artifactType={type} />
       <ArtifactForm type={type} projectId={projectId} />
     </div>
   );
