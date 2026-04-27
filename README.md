@@ -743,6 +743,60 @@ Dedicated, type-specific field components were created for all 20 new artifact t
 
 ---
 
+### Extension Step 11 — PRD Gap Analysis: 9 Additional Artifact Types ✅
+
+**Goal:** Fill structural gaps in the domain model so a complete PRD can be represented — foundations, governance, measurement, and quality assurance.
+
+**New "Foundations" group** (slate color, first in explorer):
+
+| Type | Field component | Highlight |
+|---|---|---|
+| Goals & Non-Goals | `GoalsNonGoalsFields` | Green "In Scope" box + red "Out of Scope" box + rationale |
+| Stakeholder | `StakeholderFields` | RACI radio card selector (Responsible / Accountable / Consulted / Informed) + name/role grid |
+| Assumption | `AssumptionFields` | Amber highlighted assumption box + rationale + impact if wrong + validation approach |
+| Constraint | `ConstraintFields` | Orange highlighted constraint box + type selector (Technical / Budget / Regulatory / Time / Resource) + impact |
+| Open Question | `OpenQuestionFields` | Yellow question box + context + owner/due date grid + resolution field |
+
+**Extended existing groups:**
+
+| Group | Type | Highlight |
+|---|---|---|
+| Strategy | Measurement Plan | Objective + key metrics + baseline/target + instrumentation + review cadence |
+| Delivery | Test Plan | Scope + approach + entry/exit criteria grid + test risks + owner |
+| Delivery | Compliance Requirement | Red highlighted requirement box + regulation/deadline grid + scope + implementation |
+| Planning & Release | Milestone | Description + target date/owner grid + success criteria + status pill selector |
+
+**Infrastructure:**
+- `ARTIFACT_GROUPS` extended with "foundations" as the first group
+- `ARTIFACT_GROUP_COLORS` — slate color token set for foundations group
+- `RELATION_SUGGESTIONS` extended to connect all 9 new types into the artifact graph
+- 9 new AI prompt templates (`goals-non-goals.js`, `stakeholder.js`, `assumption.js`, `constraint.js`, `open-question.js`, `measurement-plan.js`, `test-plan.js`, `compliance-requirement.js`, `milestone.js`)
+- `fields/index.js` and `prompts/index.js` updated — all new types fully registered
+
+---
+
+### Extension Step 12 — Traceability View Enhancements ✅
+
+**Goal:** Make the traceability view actionable — surface gaps in the artifact graph and let users drill into specific relation types and statuses.
+
+**Summary bar:**
+- New **domain coverage** stat — shows what % of all 35 artifact types have at least one instance in the project, with a color-coded progress bar (orange → blue → green at 100%)
+
+**Filter toolbar** (3 rows):
+- Row 1: All / Linked / Isolated (unchanged)
+- Row 2: **Status filter** — All statuses / Draft / In Review / Done
+- Row 3: **Relation type filter** — All / Derives From (n) / Depends On (n) / Relates To (n) / Validates (n); only shows types that exist in the project, with counts
+
+**Per-group improvements:**
+- **Coverage bar** in each group header — thin bar showing what % of the group's artifact types have at least one artifact, with color-coded threshold (green ≥ 100%, blue ≥ 50%, orange < 50%)
+- **Gap detection (missing types)** — collapsible section at the bottom of each group listing which types are absent, with direct "+ [Type name]" links that open the Explorer pre-set to create that type
+- Empty groups show a dashed placeholder with a "Create first" call to action instead of being hidden
+
+**Connection badges:**
+- Relation type filter applies to the badge list — per-artifact row shows only connections of the selected type; shows a note if connections exist but none match the filter
+
+---
+
 ### Extension Step 10 — AI Provider Configuration UI ✅
 
 **Goal:** Admins select the AI provider, model, and API key directly in the UI. Changes take effect **immediately without a restart** — configuration is stored in the database and loaded dynamically on every AI request.
