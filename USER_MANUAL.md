@@ -18,12 +18,13 @@
 10. [Version History](#10-version-history)
 11. [Tags](#11-tags)
 12. [Search](#12-search)
-13. [Board View](#13-board-view)
-14. [Progress View](#14-progress-view)
-15. [Traceability View](#15-traceability-view)
-16. [Roles and Permissions](#16-roles-and-permissions)
-17. [Admin Area](#17-admin-area)
-18. [Keyboard Shortcuts](#18-keyboard-shortcuts)
+13. [Artifact Graph](#13-artifact-graph)
+14. [Board View](#14-board-view)
+15. [Progress View](#15-progress-view)
+16. [Traceability View](#16-traceability-view)
+17. [Roles and Permissions](#17-roles-and-permissions)
+18. [Admin Area](#18-admin-area)
+19. [Keyboard Shortcuts](#19-keyboard-shortcuts)
 
 ---
 
@@ -458,7 +459,62 @@ Use **arrow keys** to move between results, **Enter** to open the selected artif
 
 ---
 
-## 13. Board View
+## 13. Artifact Graph
+
+The Artifact Graph is an interactive canvas where every artifact is a **node** and every relation is a **directed edge**. It gives you a bird's-eye view of the entire product knowledge graph and lets you create new connections by dragging directly on the canvas.
+
+### Opening the Graph
+
+Click **Graph** (network icon) in the explorer header.
+
+### Reading the graph
+
+**Nodes** — each artifact is a card showing:
+- A group-colored header with the artifact type
+- The artifact title
+- A status dot (green = Done, yellow = In Review, grey = Draft)
+
+**Edges** — each relation is a directed arrow with a label:
+
+| Color | Animated | Relation type |
+|---|---|---|
+| Blue | No | Derived from |
+| Orange | Yes (dashes) | Depends on |
+| Grey | No | Related to |
+| Green | No | Validates |
+
+The **legend panel** (top-right) shows relation colors. The **group color legend** (bottom-left) shows the domain group of each node color.
+
+### Navigating
+
+- **Pan** — click and drag on the canvas background
+- **Zoom** — scroll wheel, or use the zoom controls (bottom-left)
+- **Fit view** — click the fit-view button in the controls to center all nodes
+- **MiniMap** (bottom-right) — click to jump to any area of the graph
+
+### Opening an artifact
+
+**Double-click** any node to open that artifact in the Explorer.
+
+### Creating a relation on the canvas
+
+1. Hover over any node — small grey circles appear on its left and right edges (connection handles)
+2. **Drag** from the **right handle** of the source artifact
+3. **Drop** on the **left handle** of the target artifact
+4. A dialog appears showing the two artifacts and asking for the relation type
+5. The relation type is pre-suggested based on the artifact types (same smart suggestions as in the Explorer)
+6. Click **Create relation** — the edge appears on the canvas immediately
+
+> Relations created on the graph are immediately visible in the Explorer's Relations section as well.
+
+### Layout
+
+Artifacts are arranged in **columns by domain group** (Foundations → Research → Audience → Strategy → Discovery & Design → Delivery → Planning & Release → Feedback & Iteration). Within each column, artifacts are stacked vertically. You can **drag nodes** to reposition them anywhere on the canvas.
+
+---
+
+## 14. Board View
+
 
 The Board shows all artifacts as cards organised in three columns by status.
 
@@ -480,7 +536,7 @@ Click any card title to open it in the Explorer detail panel.
 
 ---
 
-## 14. Progress View
+## 15. Progress View
 
 The Progress view shows how complete the product definition is across all 35 artifact types.
 
@@ -497,7 +553,7 @@ Click **Progress** (bar chart icon) in the explorer header.
 
 ---
 
-## 15. Traceability View
+## 16. Traceability View
 
 Traceability shows the entire artifact graph — who connects to whom, and what is isolated.
 
@@ -548,7 +604,7 @@ Click any badge to open the linked artifact in the Explorer.
 
 ---
 
-## 16. Roles and Permissions
+## 17. Roles and Permissions
 
 Every project member has one of three roles.
 
@@ -573,7 +629,7 @@ Every project member has one of three roles.
 
 ---
 
-## 17. Admin Area
+## 18. Admin Area
 
 The Admin area is accessible only to users with the **Admin** system role. It is visible in the sidebar under **Administration**.
 
@@ -623,7 +679,7 @@ When disabled, the Ask AI button is hidden for all users.
 
 ---
 
-## 18. Keyboard Shortcuts
+## 19. Keyboard Shortcuts
 
 | Shortcut | Action |
 |---|---|

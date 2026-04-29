@@ -924,6 +924,61 @@ The original 4 field components still had German UI labels:
 
 ---
 
+### Extension Step 14 — Interactive Artifact Graph ✅
+
+**Goal:** Make artifact relations a first-class visual feature — a full interactive node graph where artifacts are nodes, relations are directed edges, and new connections can be created by dragging directly on the canvas.
+
+**New dependency:** `@xyflow/react` (React Flow v12)
+
+**API:**
+- `GET /api/projects/:id/graph` — returns `{ artifacts: [...], relations: [...] }` using a two-step SQLite-safe query (no nested OR)
+
+**Graph page (`/projects/:id/graph`):**
+- Server-rendered page, accessible via the **Graph** button (network icon) in the explorer header
+- Full-viewport canvas with pan, zoom (0.15×–2×), and fit-view on load
+- Header with breadcrumb back to the Explorer
+
+**`ArtifactGraph` client component:**
+- All artifacts rendered as custom nodes, laid out in **columns by domain group** (one column per group, artifacts stacked vertically — empty groups skipped)
+- All relations rendered as directed smooth-step edges, color-coded by type:
+  - Derived from → blue
+  - Depends on → orange (animated dashes)
+  - Related to → gray
+  - Validates → green
+- **MiniMap** for overview navigation
+- **Controls** (zoom in/out/fit) in bottom-left
+- **Legend panel** (top-right) — relation type colors + interaction hints
+- **Group color legend** (bottom-left) — one dot per domain group
+
+**Interaction model:**
+- **Double-click** a node → opens the artifact in the Explorer (`/projects/:id?artifact=ID`)
+- **Drag** from a node's right handle to another node's left handle → opens `GraphRelationDialog`
+- **Pan/zoom** — standard touch and mouse gestures
+
+**`ArtifactNode` custom node:**
+- Group-colored header bar (matches Explorer, Progress, Traceability colors)
+- Artifact type label (uppercase, small)
+- Artifact title (bold, 2-line clamp)
+- Status dot + label
+- Source handle (right) and target handle (left) for drag-connect
+
+**`GraphRelationDialog`:**
+- Shows source artifact → target artifact with type labels
+- Relation type dropdown, pre-populated with a smart suggestion (same `RELATION_SUGGESTIONS` map used in the Explorer)
+- Recommended type marked
+- On confirm: POSTs to the existing relations API; new edge appears on canvas immediately without a full refetch
+- On duplicate or error: inline error message
+
+**Files added/changed:**
+- `src/app/api/projects/[projectId]/graph/route.js` (new)
+- `src/app/(dashboard)/projects/[projectId]/graph/page.js` (new)
+- `src/components/graph/ArtifactGraph.jsx` (new)
+- `src/components/graph/ArtifactNode.jsx` (new)
+- `src/components/graph/GraphRelationDialog.jsx` (new)
+- `src/app/(dashboard)/projects/[projectId]/page.js` — Graph button added to header
+
+---
+
 ### Bug-fix Pass — Code Review Findings ✅
 
 A full codebase review identified and fixed 9 bugs across all severity levels.
