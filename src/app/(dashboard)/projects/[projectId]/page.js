@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
 import Link from "next/link";
-import { Settings, BarChart3, Columns3, GitBranch, Rocket, Network } from "lucide-react";
+import { Settings, BarChart3, Columns3, GitBranch, Rocket, Network, Upload } from "lucide-react";
 import Button from "@/components/ui/Button.jsx";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
@@ -57,6 +57,12 @@ export default async function ProjectPage({ params }) {
         </div>
         <div className="flex items-center gap-2">
           <SearchButton projectId={projectId} />
+          {role !== "VIEWER" && (
+            <Button href={`/projects/${projectId}/import`} variant="ghost">
+              <Upload className="h-4 w-4" />
+              Import
+            </Button>
+          )}
           <Button href={`/projects/${projectId}/starter`} variant="ghost">
             <Rocket className="h-4 w-4" />
             Starter

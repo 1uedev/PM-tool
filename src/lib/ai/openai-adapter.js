@@ -27,6 +27,18 @@ export class OpenAiAdapter extends AiProvider {
     return parseSuggestions(text, artifact.type);
   }
 
+  async extractFromDocument(prompt) {
+    const response = await this.client.chat.completions.create(
+      {
+        model: this.model,
+        max_tokens: 4096,
+        messages: [{ role: "user", content: prompt }],
+      },
+      { timeout: this.timeoutMs }
+    );
+    return response.choices[0]?.message?.content ?? "";
+  }
+
   async testConnection() {
     const response = await this.client.chat.completions.create(
       {

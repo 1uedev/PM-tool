@@ -1,6 +1,6 @@
 # PM Copilot — User Manual
 
-> Version 1.0 · April 2026
+> Version 1.1 · April 2026
 
 ---
 
@@ -19,12 +19,13 @@
 11. [Tags](#11-tags)
 12. [Search](#12-search)
 13. [Artifact Graph](#13-artifact-graph)
-14. [Board View](#14-board-view)
-15. [Progress View](#15-progress-view)
-16. [Traceability View](#16-traceability-view)
-17. [Roles and Permissions](#17-roles-and-permissions)
-18. [Admin Area](#18-admin-area)
-19. [Keyboard Shortcuts](#19-keyboard-shortcuts)
+14. [Document Import](#14-document-import)
+15. [Board View](#15-board-view)
+16. [Progress View](#16-progress-view)
+17. [Traceability View](#17-traceability-view)
+18. [Roles and Permissions](#18-roles-and-permissions)
+19. [Admin Area](#19-admin-area)
+20. [Keyboard Shortcuts](#20-keyboard-shortcuts)
 
 ---
 
@@ -513,7 +514,67 @@ Artifacts are arranged in **columns by domain group** (Foundations → Research 
 
 ---
 
-## 14. Board View
+## 14. Document Import
+
+Import an existing PRD, specification, or any other project document and let the AI extract structured artifacts automatically.
+
+### Opening the importer
+
+Click **Import** (upload icon) in the project header. The button is visible to **Editors** and **Owners** only.
+
+### Step 1 — Upload documents
+
+Drag and drop files onto the upload area, or click to open the file picker. Supported formats:
+
+| Format | Extension |
+|---|---|
+| PDF | `.pdf` |
+| Word document | `.docx` |
+| Plain text | `.txt` |
+| Markdown | `.md` |
+
+Limits: up to **5 files**, max **10 MB per file**. You can upload multiple files at once — the AI analyzes all of them together.
+
+To remove a file before analyzing, click the **×** next to it.
+
+### Step 2 — Analyze with AI
+
+Click **Mit KI analysieren**. The AI reads the document text and extracts the following artifact types when it finds relevant content:
+
+- Product Vision
+- Problem Statement
+- Goals & Non-Goals
+- User Persona / Buyer Persona
+- Stakeholder
+- Assumption
+- Market Analysis
+- Competitor
+- Value Proposition
+- KPI / OKR
+- Use Case
+- Feature
+
+Each extracted artifact gets a suggested **title** and pre-filled **fields** based on what was found in the document.
+
+> **Note:** The AI only extracts content that is actually present in the document — it does not invent information.
+
+### Step 3 — Review proposals
+
+The AI returns a list of proposed artifacts. For each one:
+
+- A **checkbox** on the left lets you include or exclude it
+- Click the **arrow icon** on the right to expand the card and preview the extracted field values
+- Use **Alle auswählen / Alle abwählen** to select or deselect everything at once
+
+If the results are not satisfactory, click **Neu analysieren** to discard the proposals and try again (e.g. after removing a noisy file).
+
+### Step 4 — Create artifacts
+
+Once you are happy with the selection, click **X Artefakte erstellen**. All selected artifacts are created in one batch with status **Draft** and a version history entry. You are then redirected to the Explorer where you can edit and refine each one.
+
+---
+
+## 15. Board View
 
 
 The Board shows all artifacts as cards organised in three columns by status.
@@ -536,7 +597,7 @@ Click any card title to open it in the Explorer detail panel.
 
 ---
 
-## 15. Progress View
+## 16. Progress View
 
 The Progress view shows how complete the product definition is across all 35 artifact types.
 
@@ -553,7 +614,7 @@ Click **Progress** (bar chart icon) in the explorer header.
 
 ---
 
-## 16. Traceability View
+## 17. Traceability View
 
 Traceability shows the entire artifact graph — who connects to whom, and what is isolated.
 
@@ -604,7 +665,7 @@ Click any badge to open the linked artifact in the Explorer.
 
 ---
 
-## 17. Roles and Permissions
+## 18. Roles and Permissions
 
 Every project member has one of three roles.
 
@@ -619,6 +680,7 @@ Every project member has one of three roles.
 | Add / remove tags | No | Yes | Yes |
 | Request AI suggestions | No | Yes | Yes |
 | Restore versions | No | Yes | Yes |
+| Import documents (AI pre-fill) | No | Yes | Yes |
 | Edit PRD Starter | No | Yes | Yes |
 | Invite / remove members | No | No | Yes |
 | Change member roles | No | No | Yes |
@@ -629,7 +691,7 @@ Every project member has one of three roles.
 
 ---
 
-## 18. Admin Area
+## 19. Admin Area
 
 The Admin area is accessible only to users with the **Admin** system role. It is visible in the sidebar under **Administration**.
 
@@ -679,7 +741,7 @@ When disabled, the Ask AI button is hidden for all users.
 
 ---
 
-## 19. Keyboard Shortcuts
+## 20. Keyboard Shortcuts
 
 | Shortcut | Action |
 |---|---|
@@ -695,18 +757,19 @@ When disabled, the Ask AI button is hidden for all users.
 Here is a recommended flow for a new project:
 
 1. **Create the project** — enter name and description
-2. **Fill in the PRD Starter** — answer the 10 foundation questions
-3. **Create a Product Vision** — the starter context panel shows your product idea answer
-4. **Create a Problem Statement** — the panel shows questions 2, 4, and 5
-5. **Create User Personas** — the panel shows the target users answer
-6. **Create Goals & Non-Goals** — derived from the vision; link them with a "Derived from" relation
-7. **Create Use Cases and Features** — link back to personas and goals
-8. **Create Epics and User Stories** — derived from features
-9. **Add Acceptance Criteria and Functional Requirements** — link to stories
-10. **Use AI suggestions** at any step to get field suggestions based on what you have already written
-11. **Check Progress** to see which types are missing
-12. **Check Traceability** to find isolated artifacts and close gaps with relations
-13. **Use the Board** to move artifacts through Draft → In Review → Done as the team reviews them
+2. **Import existing documents** (optional) — upload a PRD or spec and let the AI pre-fill artifacts
+3. **Fill in the PRD Starter** — answer the 10 foundation questions
+4. **Create a Product Vision** — the starter context panel shows your product idea answer
+5. **Create a Problem Statement** — the panel shows questions 2, 4, and 5
+6. **Create User Personas** — the panel shows the target users answer
+7. **Create Goals & Non-Goals** — derived from the vision; link them with a "Derived from" relation
+8. **Create Use Cases and Features** — link back to personas and goals
+9. **Create Epics and User Stories** — derived from features
+10. **Add Acceptance Criteria and Functional Requirements** — link to stories
+11. **Use AI suggestions** at any step to get field suggestions based on what you have already written
+12. **Check Progress** to see which types are missing
+13. **Check Traceability** to find isolated artifacts and close gaps with relations
+14. **Use the Board** to move artifacts through Draft → In Review → Done as the team reviews them
 
 ---
 

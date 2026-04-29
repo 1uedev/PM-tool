@@ -27,6 +27,18 @@ export class ClaudeAdapter extends AiProvider {
     return parseSuggestions(text, artifact.type);
   }
 
+  async extractFromDocument(prompt) {
+    const response = await this.client.messages.create(
+      {
+        model: this.model,
+        max_tokens: 4096,
+        messages: [{ role: "user", content: prompt }],
+      },
+      { timeout: this.timeoutMs }
+    );
+    return response.content[0]?.text ?? "";
+  }
+
   async testConnection() {
     const response = await this.client.messages.create(
       {
