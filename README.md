@@ -32,6 +32,7 @@ Every item in the system is an **Artifact** with a type-specific set of fields, 
 - **Traceability view** — full artifact graph with gap detection, coverage bars per group, and filters by status, relation type, and visibility
 - **Progress view** — completion overview per group and type; highlights missing or empty phases
 - **Board view** — Kanban board (Draft / In Review / Done) with drag & drop; filterable by artifact type
+- **Document import** — upload PDF, DOCX, TXT, or MD files; AI scans the content and proposes pre-filled artifacts (personas, vision, features, etc.); user reviews and selects which to create
 - **AI suggestions** — per-artifact AI assist button (Claude or OpenAI); suggestions shown in a separate panel, never auto-applied; every suggestion requires explicit user acceptance
 - **Version history** — every save creates a version; full diff and restore available
 - **Search** — full-text search across all artifacts with type, status, and tag filters
@@ -1072,5 +1073,45 @@ A full codebase review identified and fixed 9 bugs across all severity levels.
 *PrismaClientValidationError after schema change:*
 - Root cause: `prisma migrate dev` runs migrations but does not always regenerate the client
 - Fix: `npx prisma generate` must be run explicitly after every schema change — documented in dev workflow
+
+---
+
+### Extension Step 15 — Document Import with AI Pre-fill ✅
+
+**Goal:** Let users upload existing PRDs, specs, or any project documents and have the AI automatically extract structured artifacts from the content — reducing the cold-start problem for new projects.
+
+**New dependencies:** `pdf-parse` (PDF text extraction), `mammoth` (DOCX text extraction). Both added to `serverExternalPackages` in `next.config.mjs` to prevent bundling.
+
+**User flow:**
+1. Click **Import** (upload icon) in the project header — visible to Editors and Owners only
+2. Upload up to 5 files (PDF / DOCX / TXT / MD, max 10 MB each) via drag-and-drop or file picker
+3. Click **Mit KI analysieren** — server extracts text, calls AI, returns proposed artifacts
+4. Review the proposal list: expand any card to preview field content, check/uncheck individual artifacts
+5. Click **X Artefakte erstellen** — all selected artifacts are created in one bulk transaction and the user is redirected to the Explorer
+
+**Extractable artifact types (13):**
+`PRODUCT_VISION`, `PROBLEM_STATEMENT`, `GOALS_NON_GOALS`, `USER_PERSONA`, `BUYER_PERSONA`, `STAKEHOLDER`, `ASSUMPTION`, `MARKET_ANALYSIS`, `COMPETITOR`, `VALUE_PROPOSITION`, `KPI_OKR`, `USE_CASE`, `FEATURE`
+
+**API:**
+- `POST /api/projects/:id/import` — accepts `multipart/form-data` with `files[]`; extracts text per file type; calls AI with a structured extraction prompt; returns `{ proposals: [{ type, title, fields }] }` — **does not save anything**
+- `POST /api/projects/:id/artifacts/bulk` — accepts `{ artifacts: [...] }`; creates all in a single Prisma transaction with version records; max 50 per call
+
+**AI extraction layer (`src/lib/ai/document-extractor.js`):**
+- `buildExtractionPrompt(text)` — constructs a prompt with type schemas, field descriptions, and output format instructions; truncates input at 20 000 chars to stay within context limits
+- `parseExtractionResponse(text)` — extracts the JSON code block from the AI reply, validates each proposal against the type schema, sanitises field keys, caps title length at 80 chars
+- All adapters (Claude + OpenAI) gained an `extractFromDocument(prompt)` method via the base `AiProvider` interface
+
+**Files added/changed:**
+- `src/lib/ai/document-extractor.js` (new)
+- `src/lib/ai/provider.js` — `extractFromDocument()` added to base interface
+- `src/lib/ai/claude-adapter.js` — `extractFromDocument()` implemented (4096 max tokens)
+- `src/lib/ai/openai-adapter.js` — `extractFromDocument()` implemented
+- `src/app/api/projects/[projectId]/import/route.js` (new)
+- `src/app/api/projects/[projectId]/artifacts/bulk/route.js` (new)
+- `src/components/import/DocumentImport.jsx` (new)
+- `src/app/(dashboard)/projects/[projectId]/import/page.js` (new)
+- `src/app/(dashboard)/projects/[projectId]/page.js` — Import button added
+- `next.config.mjs` — `pdf-parse` and `mammoth` added to `serverExternalPackages`
+- `USER_MANUAL.md` — Section 14: Document Import added (v1.1)
 
 ---
