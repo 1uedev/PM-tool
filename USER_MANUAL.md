@@ -57,6 +57,8 @@ Product managers, product owners, and their immediate collaborators (designers, 
 2. Enter your name, email address, and a password (min. 8 characters)
 3. Click **Register** — you are logged in immediately
 
+![Registrierung](public/screenshots/02-register.png)
+
 > If self-registration is restricted in your organisation, ask your system admin to create an account for you via the Admin area.
 
 ### Logging in
@@ -64,6 +66,8 @@ Product managers, product owners, and their immediate collaborators (designers, 
 1. Go to `http://localhost:3000/login`
 2. Enter your email and password
 3. Click **Log in**
+
+![Login-Seite](public/screenshots/01-login.png)
 
 ### Logging out
 
@@ -89,6 +93,8 @@ The Projects page shows two sections:
 - **Archived projects** — read-only, shown below active projects
 
 Each card shows the project name, description, your role, and how many artifacts it contains.
+
+![Projektübersicht](public/screenshots/03-projects.png)
 
 ### Editing a project
 
@@ -132,6 +138,8 @@ The PRD Starter captures the **10 minimum questions** needed before writing a PR
 | 9 | What is out of scope for v1? | Goals & Non-Goals |
 | 10 | How will success be measured? | KPI/OKR, Measurement Plan |
 
+![PRD Starter](public/screenshots/12-prd-starter.png)
+
 ### Completion bar
 
 The top of the Starter page shows how many of the 10 questions have been answered. A progress bar fills as you answer questions.
@@ -164,6 +172,8 @@ The Explorer is the main workspace for a project. It uses a two-column layout:
 |    Problem...    |  Version history                         |
 +------------------+------------------------------------------+
 ```
+
+![Explorer-Ansicht](public/screenshots/04-explorer-tree.png)
 
 ### Left panel — Artifact tree
 
@@ -312,6 +322,8 @@ Click any artifact in the tree to open it. Edit fields directly in the form. Cli
 
 Every save creates a new entry in the version history automatically.
 
+![Artefakt-Detailansicht](public/screenshots/05-artifact-detail.png)
+
 ### Changing status
 
 The status button in the artifact header cycles through statuses with one click:
@@ -351,6 +363,8 @@ Relations connect artifacts to build the product knowledge graph. Every relation
 ### Viewing relations
 
 The Relations section shows all connections — both outgoing (this artifact → other) and incoming (other → this artifact). Each entry shows the relation type, the linked artifact's title and type, and its status dot.
+
+![Verknüpfungen und Kommentare](public/screenshots/06-relations-comments.png)
 
 ### Removing a relation
 
@@ -407,6 +421,8 @@ Scroll to **Version history** at the bottom of the artifact detail panel. Click 
 
 Click the chevron next to any version to expand a preview of its field content.
 
+![Versionshistorie](public/screenshots/07-version-history.png)
+
 ### Restoring a version
 
 1. Expand the version you want to restore
@@ -442,6 +458,8 @@ Press **Cmd+K** (Mac) or **Ctrl+K** (Windows/Linux) to open the search dialog fr
 
 Type at least one character. Results update as you type (250ms debounce). Each result shows:
 
+![Suche](public/screenshots/13-search.png)
+
 - Artifact title and type
 - Status dot
 - A snippet of matching field content with the match highlighted in context
@@ -467,6 +485,8 @@ The Artifact Graph is an interactive canvas where every artifact is a **node** a
 ### Opening the Graph
 
 Click **Graph** (network icon) in the explorer header.
+
+![Artefakt-Graph](public/screenshots/11-artifact-graph.png)
 
 ### Reading the graph
 
@@ -583,6 +603,8 @@ The Board shows all artifacts as cards organised in three columns by status.
 
 Click **Board** (columns icon) in the explorer header.
 
+![Board-Ansicht](public/screenshots/08-board.png)
+
 ### Moving cards
 
 Drag a card from one column to another to change its status. The change is applied immediately (optimistic update).
@@ -605,6 +627,8 @@ The Progress view shows how complete the product definition is across all 35 art
 
 Click **Progress** (bar chart icon) in the explorer header.
 
+![Fortschrittsansicht](public/screenshots/09-progress.png)
+
 ### Reading the view
 
 - **Summary bar** at the top — overall progress percentage, count of completed types, count of missing types
@@ -621,6 +645,8 @@ Traceability shows the entire artifact graph — who connects to whom, and what 
 ### Opening Traceability
 
 Click **Traceability** (branch icon) in the explorer header.
+
+![Traceability-Ansicht](public/screenshots/10-traceability.png)
 
 ### Summary bar
 
@@ -705,6 +731,8 @@ Admins can:
 
 Admins cannot deactivate themselves or remove their own Admin role.
 
+![Benutzerverwaltung](public/screenshots/14-admin-users.png)
+
 ### Language Management (`/admin/languages`)
 
 Manage which languages are available for the UI:
@@ -738,6 +766,8 @@ Configure the AI assistant without a server restart:
 - **Save** — takes effect immediately for all subsequent AI requests
 
 When disabled, the Ask AI button is hidden for all users.
+
+![KI-Konfiguration](public/screenshots/15-admin-ai.png)
 
 ---
 
