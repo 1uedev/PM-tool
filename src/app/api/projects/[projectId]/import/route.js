@@ -18,8 +18,9 @@ async function extractText(file) {
   const mime = file.type;
 
   if (mime === "application/pdf") {
-    const pdfParse = (await import("pdf-parse")).default;
-    const result = await pdfParse(buffer);
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: buffer });
+    const result = await parser.getText();
     return result.text;
   }
 
