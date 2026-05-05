@@ -78,7 +78,7 @@ function NewArtifactPanel({ type, projectId }) {
     <div className="flex flex-1 flex-col overflow-y-auto p-6">
       <div className="mb-4">
         <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-          New {ARTIFACT_TYPE_LABELS[type] ?? type}
+          Neues {ARTIFACT_TYPE_LABELS[type] ?? type}
         </span>
       </div>
       <StarterContextPanel projectId={projectId} artifactType={type} />

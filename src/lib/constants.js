@@ -64,51 +64,51 @@ export const ARTIFACT_TYPE = {
 
 export const ARTIFACT_TYPE_LABELS = {
   // Foundations
-  GOALS_NON_GOALS: "Goals & Non-Goals",
+  GOALS_NON_GOALS: "Ziele & Nicht-Ziele",
   STAKEHOLDER: "Stakeholder",
-  ASSUMPTION: "Assumption",
-  CONSTRAINT: "Constraint",
-  OPEN_QUESTION: "Open Question",
+  ASSUMPTION: "Annahme",
+  CONSTRAINT: "Rahmenbedingung",
+  OPEN_QUESTION: "Offene Frage",
   // Research
-  MARKET_ANALYSIS: "Market Analysis",
-  COMPETITOR: "Competitor",
-  RESEARCH_FINDING: "Research Finding",
-  PROBLEM_STATEMENT: "Problem Statement",
-  OPPORTUNITY: "Opportunity",
-  HYPOTHESIS: "Hypothesis",
-  PROBLEM_HYPOTHESIS: "Problem Hypothesis",
+  MARKET_ANALYSIS: "Marktanalyse",
+  COMPETITOR: "Wettbewerber",
+  RESEARCH_FINDING: "Forschungsergebnis",
+  PROBLEM_STATEMENT: "Problemstellung",
+  OPPORTUNITY: "Chance",
+  HYPOTHESIS: "Hypothese",
+  PROBLEM_HYPOTHESIS: "Problemhypothese",
   // Audience
-  USER_PERSONA: "User Persona",
-  BUYER_PERSONA: "Buyer Persona",
+  USER_PERSONA: "Nutzer-Persona",
+  BUYER_PERSONA: "Käufer-Persona",
   // Strategy
-  PRODUCT_VISION: "Product Vision",
-  VALUE_PROPOSITION: "Value Proposition",
-  POSITIONING: "Positioning",
-  BUSINESS_MODEL: "Business Model",
+  PRODUCT_VISION: "Produktvision",
+  VALUE_PROPOSITION: "Wertversprechen",
+  POSITIONING: "Positionierung",
+  BUSINESS_MODEL: "Geschäftsmodell",
   KPI_OKR: "KPI / OKR",
-  MEASUREMENT_PLAN: "Measurement Plan",
+  MEASUREMENT_PLAN: "Messplan",
   // Discovery & Design
-  USE_CASE: "Use Case",
+  USE_CASE: "Anwendungsfall",
   USER_JOURNEY: "User Journey",
   FEATURE: "Feature",
   EPIC: "Epic",
   // Delivery
   USER_STORY: "User Story",
-  FUNCTIONAL_REQUIREMENT: "Functional Requirement",
-  NON_FUNCTIONAL_REQUIREMENT: "Non-Functional Requirement",
-  ACCEPTANCE_CRITERIA: "Acceptance Criteria",
-  DEPENDENCY: "Dependency",
-  RISK: "Risk",
-  DECISION: "Decision",
-  TEST_PLAN: "Test Plan",
-  COMPLIANCE_REQUIREMENT: "Compliance Requirement",
+  FUNCTIONAL_REQUIREMENT: "Funktionale Anforderung",
+  NON_FUNCTIONAL_REQUIREMENT: "Nichtfunktionale Anforderung",
+  ACCEPTANCE_CRITERIA: "Abnahmekriterien",
+  DEPENDENCY: "Abhängigkeit",
+  RISK: "Risiko",
+  DECISION: "Entscheidung",
+  TEST_PLAN: "Testplan",
+  COMPLIANCE_REQUIREMENT: "Compliance-Anforderung",
   // Planning & Release
-  ROADMAP_ITEM: "Roadmap Item",
+  ROADMAP_ITEM: "Roadmap-Eintrag",
   RELEASE: "Release",
-  LAUNCH_TASK: "Launch Task",
-  MILESTONE: "Milestone",
+  LAUNCH_TASK: "Launch-Aufgabe",
+  MILESTONE: "Meilenstein",
   // Feedback & Iteration
-  FEEDBACK_ITEM: "Feedback Item",
+  FEEDBACK_ITEM: "Feedback",
   ITERATION: "Iteration",
 };
 
@@ -129,7 +129,7 @@ export const ARTIFACT_GROUP_COLORS = {
 export const ARTIFACT_GROUPS = [
   {
     key: "foundations",
-    label: "Foundations",
+    label: "Grundlagen",
     types: [
       "GOALS_NON_GOALS",
       "STAKEHOLDER",
@@ -140,7 +140,7 @@ export const ARTIFACT_GROUPS = [
   },
   {
     key: "research",
-    label: "Research",
+    label: "Recherche",
     types: [
       "MARKET_ANALYSIS",
       "COMPETITOR",
@@ -153,12 +153,12 @@ export const ARTIFACT_GROUPS = [
   },
   {
     key: "audience",
-    label: "Audience",
+    label: "Zielgruppe",
     types: ["USER_PERSONA", "BUYER_PERSONA"],
   },
   {
     key: "strategy",
-    label: "Strategy",
+    label: "Strategie",
     types: [
       "PRODUCT_VISION",
       "VALUE_PROPOSITION",
@@ -170,12 +170,12 @@ export const ARTIFACT_GROUPS = [
   },
   {
     key: "discovery",
-    label: "Discovery & Design",
+    label: "Discovery & Gestaltung",
     types: ["USE_CASE", "USER_JOURNEY", "FEATURE", "EPIC"],
   },
   {
     key: "delivery",
-    label: "Delivery",
+    label: "Lieferung",
     types: [
       "USER_STORY",
       "FUNCTIONAL_REQUIREMENT",
@@ -190,12 +190,12 @@ export const ARTIFACT_GROUPS = [
   },
   {
     key: "planning",
-    label: "Planning & Release",
+    label: "Planung & Release",
     types: ["ROADMAP_ITEM", "RELEASE", "LAUNCH_TASK", "MILESTONE"],
   },
   {
     key: "feedback",
-    label: "Feedback & Iteration",
+    label: "Feedback & Iteration", // kept as-is — same in German
     types: ["FEEDBACK_ITEM", "ITERATION"],
   },
 ];
@@ -210,9 +210,9 @@ export const ARTIFACT_STATUS = {
 };
 
 export const ARTIFACT_STATUS_LABELS = {
-  DRAFT: "Draft",
-  IN_REVIEW: "In Review",
-  DONE: "Done",
+  DRAFT: "Entwurf",
+  IN_REVIEW: "In Prüfung",
+  DONE: "Fertig",
 };
 
 export const RELATION_TYPE = {
@@ -223,10 +223,10 @@ export const RELATION_TYPE = {
 };
 
 export const RELATION_TYPE_LABELS = {
-  DERIVES_FROM: "Derived from",
-  DEPENDS_ON: "Depends on",
-  RELATES_TO: "Related to",
-  VALIDATES: "Validates",
+  DERIVES_FROM: "Abgeleitet von",
+  DEPENDS_ON: "Abhängig von",
+  RELATES_TO: "Verknüpft mit",
+  VALIDATES: "Validiert",
 };
 
 // Smart relation type suggestions: RELATION_SUGGESTIONS[sourceType][targetType] = recommended type

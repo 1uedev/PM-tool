@@ -176,7 +176,7 @@ export default function ArtifactGraph({ projectId }) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 text-gray-400">
         <FileText className="h-10 w-10" />
-        <p className="text-sm">No artifacts yet — create your first one in the Explorer.</p>
+        <p className="text-sm">Noch keine Artefakte — erstelle das erste im Explorer.</p>
       </div>
     );
   }
@@ -211,7 +211,7 @@ export default function ArtifactGraph({ projectId }) {
         {/* Legend + instructions */}
         <Panel position="top-right">
           <div className="w-52 rounded-lg border border-gray-200 bg-white/95 p-3 shadow-sm text-xs backdrop-blur-sm">
-            <p className="mb-2 font-semibold text-gray-700">Relation types</p>
+            <p className="mb-2 font-semibold text-gray-700">Verknüpfungstypen</p>
             <div className="space-y-1.5">
               {Object.entries(RELATION_TYPE_LABELS).map(([type, label]) => (
                 <div key={type} className="flex items-center gap-2">
@@ -224,8 +224,8 @@ export default function ArtifactGraph({ projectId }) {
               ))}
             </div>
             <div className="mt-3 border-t border-gray-100 pt-2.5 space-y-1 text-gray-400 leading-snug">
-              <p><span className="font-medium text-gray-500">Connect:</span> drag from a node&apos;s right edge to another node&apos;s left edge</p>
-              <p><span className="font-medium text-gray-500">Open:</span> double-click any node</p>
+              <p><span className="font-medium text-gray-500">Verbinden:</span> rechten Handle ziehen zum linken Handle eines anderen Knotens</p>
+              <p><span className="font-medium text-gray-500">Öffnen:</span> Doppelklick auf einen Knoten</p>
             </div>
           </div>
         </Panel>
@@ -233,7 +233,7 @@ export default function ArtifactGraph({ projectId }) {
         {/* Group color legend */}
         <Panel position="bottom-left">
           <div className="rounded-lg border border-gray-200 bg-white/95 p-3 shadow-sm text-xs backdrop-blur-sm">
-            <p className="mb-2 font-semibold text-gray-700">Groups</p>
+            <p className="mb-2 font-semibold text-gray-700">Gruppen</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
               {ARTIFACT_GROUPS.map((g) => (
                 <div key={g.key} className="flex items-center gap-1.5">

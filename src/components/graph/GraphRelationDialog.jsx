@@ -50,10 +50,10 @@ export default function GraphRelationDialog({
           targetId: targetArtifact.id,
         });
       } else {
-        setError(json.error?.message ?? "Could not create relation");
+        setError(json.error?.message ?? "Verknüpfung konnte nicht erstellt werden");
       }
     } catch {
-      setError("Network error — please try again");
+      setError("Netzwerkfehler — bitte erneut versuchen");
     } finally {
       setSaving(false);
     }
@@ -63,9 +63,9 @@ export default function GraphRelationDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
       <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-        <h2 className="mb-1 text-base font-semibold text-gray-900">Create relation</h2>
+        <h2 className="mb-1 text-base font-semibold text-gray-900">Verknüpfung erstellen</h2>
         <p className="mb-4 text-xs text-gray-400">
-          Choose the relation type between these two artifacts.
+          Wähle den Verknüpfungstyp zwischen diesen beiden Artefakten.
         </p>
 
         {/* Source → Target preview */}
@@ -88,9 +88,9 @@ export default function GraphRelationDialog({
         {/* Relation type selector */}
         <div className="mb-5 flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700">
-            Relation type
+            Verknüpfungstyp
             {relationType === suggested && (
-              <span className="ml-2 text-xs font-normal text-blue-600">(recommended)</span>
+              <span className="ml-2 text-xs font-normal text-blue-600">(empfohlen)</span>
             )}
           </label>
           <select
@@ -114,10 +114,10 @@ export default function GraphRelationDialog({
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="secondary" onClick={onCancel} disabled={saving}>
-            Cancel
+            Abbrechen
           </Button>
           <Button type="button" onClick={handleConfirm} disabled={saving}>
-            {saving ? <><Spinner className="h-4 w-4" /> Creating…</> : "Create relation"}
+            {saving ? <><Spinner className="h-4 w-4" /> Erstellen…</> : "Erstellen"}
           </Button>
         </div>
       </div>

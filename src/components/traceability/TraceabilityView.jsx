@@ -88,8 +88,8 @@ function ArtifactRow({ artifact, connections, projectId, relationTypeFilter }) {
         ) : (
           <p className="mt-0.5 text-xs text-gray-400 italic">
             {hasAny && relationTypeFilter !== "all"
-              ? `no "${RELATION_TYPE_LABELS[relationTypeFilter]}" links`
-              : "no connections"}
+              ? `keine „${RELATION_TYPE_LABELS[relationTypeFilter]}"-Verknüpfungen`
+              : "keine Verknüpfungen"}
           </p>
         )}
       </div>
@@ -116,7 +116,7 @@ function CoverageBar({ typesInGroup, presentTypes, colorKey }) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs opacity-70">{pct}% covered</span>
+      <span className="text-xs opacity-70">{pct}% abgedeckt</span>
     </div>
   );
 }
@@ -134,7 +134,7 @@ function MissingTypes({ missingTypes, projectId }) {
         className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
       >
         <ChevronRight className={`h-3 w-3 transition-transform ${open ? "rotate-90" : ""}`} />
-        {missingTypes.length} missing type{missingTypes.length !== 1 ? "s" : ""}
+        {missingTypes.length} fehlende{missingTypes.length !== 1 ? " Typen" : "r Typ"}
       </button>
       {open && (
         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -172,12 +172,12 @@ function GroupSection({ group, artifacts, connectionMap, projectId, forceOpen, r
         >
           <span className="font-semibold">{group.label}</span>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-normal">0 artifacts</span>
+            <span className="text-xs font-normal">0 Artefakte</span>
             <Link
               href={`/projects/${projectId}?newType=${group.types[0]}`}
               className="rounded-full bg-white/30 px-2 py-0.5 text-xs hover:bg-white/60 transition-colors"
             >
-              + Create first
+              + Erstes anlegen
             </Link>
           </div>
         </div>
@@ -205,7 +205,7 @@ function GroupSection({ group, artifacts, connectionMap, projectId, forceOpen, r
           />
           {group.label}
           <span className="font-normal opacity-70">
-            {groupArtifacts.length} artifact{groupArtifacts.length !== 1 ? "s" : ""}
+            {groupArtifacts.length} Artefakt{groupArtifacts.length !== 1 ? "e" : ""}
           </span>
         </div>
         <div className="flex items-center gap-3 font-normal text-xs opacity-70">
@@ -214,10 +214,10 @@ function GroupSection({ group, artifacts, connectionMap, projectId, forceOpen, r
             presentTypes={presentTypeSet.size}
             colorKey={group.key}
           />
-          <span>{connectedCount}/{groupArtifacts.length} linked</span>
+          <span>{connectedCount}/{groupArtifacts.length} verknüpft</span>
           {isolatedCount > 0 && (
             <span className="rounded-full bg-white/40 px-1.5 py-0.5">
-              {isolatedCount} isolated
+              {isolatedCount} isoliert
             </span>
           )}
         </div>
@@ -335,14 +335,14 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
           className={`text-center transition-opacity ${visibilityFilter !== "all" ? "opacity-50 hover:opacity-80" : ""}`}
         >
           <p className="text-2xl font-bold text-gray-900">{totalArtifacts}</p>
-          <p className="text-xs text-gray-500">artifacts</p>
+          <p className="text-xs text-gray-500">Artefakte</p>
         </button>
         <button
           onClick={() => setVisibilityFilter(visibilityFilter === "connected" ? "all" : "connected")}
           className={`text-center transition-opacity ${visibilityFilter === "isolated" ? "opacity-50 hover:opacity-80" : ""}`}
         >
           <p className="text-2xl font-bold text-green-600">{connectedArtifacts}</p>
-          <p className="text-xs text-gray-500">linked</p>
+          <p className="text-xs text-gray-500">verknüpft</p>
         </button>
         <button
           onClick={() => setVisibilityFilter(visibilityFilter === "isolated" ? "all" : "isolated")}
@@ -351,16 +351,16 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
           <p className={`text-2xl font-bold ${isolatedArtifacts > 0 ? "text-orange-500" : "text-gray-400"}`}>
             {isolatedArtifacts}
           </p>
-          <p className="text-xs text-gray-500">isolated</p>
+          <p className="text-xs text-gray-500">isoliert</p>
         </button>
         <div className="text-center">
           <p className="text-2xl font-bold text-blue-600">{relations.length}</p>
-          <p className="text-xs text-gray-500">relations</p>
+          <p className="text-xs text-gray-500">Verknüpfungen</p>
         </div>
         {/* Domain coverage */}
         <div className="ml-auto flex flex-col items-end justify-center gap-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">Domain coverage</span>
+            <span className="text-xs text-gray-500">Domänenabdeckung</span>
             <span className={`text-sm font-bold ${coveragePct === 100 ? "text-green-600" : coveragePct >= 50 ? "text-blue-600" : "text-orange-500"}`}>
               {coveragePct}%
             </span>
@@ -371,15 +371,15 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
               style={{ width: `${coveragePct}%` }}
             />
           </div>
-          <p className="text-xs text-gray-400">{presentTypes} of {totalTypes} types used</p>
+          <p className="text-xs text-gray-400">{presentTypes} von {totalTypes} Typen genutzt</p>
         </div>
       </div>
 
       {totalArtifacts === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-16 text-center">
-          <p className="text-sm font-medium text-gray-600">No artifacts yet</p>
+          <p className="text-sm font-medium text-gray-600">Noch keine Artefakte</p>
           <p className="text-xs text-gray-400">
-            Create artifacts in the Explorer and link them together.
+            Erstelle Artefakte im Explorer und verknüpfe sie miteinander.
           </p>
         </div>
       ) : (
@@ -390,9 +390,9 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
               {/* Visibility filter */}
               <div className="flex gap-1">
                 {[
-                  { value: "all", label: "All" },
-                  { value: "connected", label: "Linked" },
-                  { value: "isolated", label: "Isolated" },
+                  { value: "all", label: "Alle" },
+                  { value: "connected", label: "Verknüpft" },
+                  { value: "isolated", label: "Isoliert" },
                 ].map((opt) => (
                   <Pill
                     key={opt.value}
@@ -407,7 +407,7 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
               {/* Status filter */}
               <div className="flex gap-1">
                 <Pill active={statusFilter === "all"} onClick={() => setStatusFilter("all")}>
-                  All statuses
+                  Alle Status
                 </Pill>
                 {Object.entries(ARTIFACT_STATUS_LABELS).map(([key, label]) => (
                   <Pill
@@ -434,7 +434,7 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
                   onClick={() => setRelationTypeFilter("all")}
                   activeClass="bg-blue-600 font-medium text-white"
                 >
-                  All relations
+                  Alle Verknüpfungen
                 </Pill>
                 {Object.entries(RELATION_TYPE).map(([key]) => {
                   const count = relationTypeCounts[key] ?? 0;
@@ -463,7 +463,7 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
                     onClick={() => setGroupFilter("all")}
                     activeClass="bg-gray-600 font-medium text-white"
                   >
-                    All groups
+                    Alle Gruppen
                   </Pill>
                   {presentGroups.map((g) => {
                     const colors = ARTIFACT_GROUP_COLORS[g.key];
@@ -486,14 +486,14 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
                   className="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 hover:bg-gray-50"
                 >
                   <ChevronsUpDown className="h-3.5 w-3.5" />
-                  Expand all
+                  Alle aufklappen
                 </button>
                 <button
                   onClick={handleCollapseAll}
                   className="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 hover:bg-gray-50"
                 >
                   <ChevronsDownUp className="h-3.5 w-3.5" />
-                  Collapse all
+                  Alle zuklappen
                 </button>
               </div>
             </div>
@@ -520,7 +520,7 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
 
           {filteredArtifacts.length === 0 && (
             <div className="rounded-xl border border-gray-200 bg-white py-10 text-center text-sm text-gray-400">
-              No artifacts match the selected filters.
+              Keine Artefakte entsprechen den gewählten Filtern.
             </div>
           )}
         </>

@@ -10,7 +10,7 @@ import {
 import { ARTIFACT_TYPE_LABELS, ARTIFACT_GROUP_COLORS, ARTIFACT_GROUPS } from "@/lib/constants.js";
 
 const STATUS_DOT = { DONE: "text-green-500", IN_REVIEW: "text-yellow-500", DRAFT: "text-gray-400" };
-const STATUS_LABEL = { DONE: "Done", IN_REVIEW: "In Review", DRAFT: "Draft" };
+const STATUS_LABEL = { DONE: "Fertig", IN_REVIEW: "In Prüfung", DRAFT: "Entwurf" };
 
 function getGroupKey(type) {
   return ARTIFACT_GROUPS.find((g) => g.types.includes(type))?.key;
@@ -84,7 +84,7 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch {
-      setError("Could not save — please try again.");
+      setError("Speichern fehlgeschlagen — bitte erneut versuchen.");
     } finally {
       setSaving(false);
     }
@@ -100,8 +100,8 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
             <h1 className="text-base font-semibold text-gray-900">PRD Starter</h1>
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            Answer these 10 questions to establish the foundation of your PRD.
-            Your answers are shown as context when editing related artifacts.
+            Beantworte diese 10 Fragen, um die Grundlage deines PRDs zu schaffen.
+            Deine Antworten werden als Kontext beim Bearbeiten verwandter Artefakte angezeigt.
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
             disabled={saving}
             className="flex-shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
           >
-            {saving ? "Saving…" : saved ? <><CheckCircle2 className="h-4 w-4" /> Saved</> : "Save"}
+            {saving ? "Wird gespeichert…" : saved ? <><CheckCircle2 className="h-4 w-4" /> Gespeichert</> : "Speichern"}
           </button>
         )}
       </div>
@@ -119,9 +119,9 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
       {/* Completion bar */}
       <div className="rounded-xl border border-gray-200 bg-white p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Completion</span>
+          <span className="text-sm font-medium text-gray-700">Fortschritt</span>
           <span className={`text-sm font-semibold ${completionPct === 100 ? "text-green-600" : "text-blue-600"}`}>
-            {answeredCount} / {STARTER_QUESTIONS.length} questions answered
+            {answeredCount} / {STARTER_QUESTIONS.length} Fragen beantwortet
           </span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
@@ -172,7 +172,7 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
                   {/* Linked artifact types */}
                   {linkedTypes.length > 0 && (
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      <span className="text-xs text-gray-400">Elaborated in:</span>
+                      <span className="text-xs text-gray-400">Ausgearbeitet in:</span>
                       {linkedTypes.map((type) => (
                         <TypeChip
                           key={type}
@@ -197,7 +197,7 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
             disabled={saving}
             className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
           >
-            {saving ? "Saving…" : saved ? <><CheckCircle2 className="h-4 w-4" /> Saved</> : "Save"}
+            {saving ? "Wird gespeichert…" : saved ? <><CheckCircle2 className="h-4 w-4" /> Gespeichert</> : "Speichern"}
           </button>
         </div>
       )}

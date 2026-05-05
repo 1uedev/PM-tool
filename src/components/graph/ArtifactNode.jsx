@@ -10,9 +10,9 @@ const STATUS_DOT = {
 };
 
 const STATUS_LABEL = {
-  DONE: "Done",
-  IN_REVIEW: "In Review",
-  DRAFT: "Draft",
+  DONE: "Fertig",
+  IN_REVIEW: "In Prüfung",
+  DRAFT: "Entwurf",
 };
 
 export default function ArtifactNode({ data, selected }) {
