@@ -71,7 +71,9 @@ export default function AiSuggestButton({ projectId, artifactId, artifactType, o
       </button>
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
       )}
 
       {suggestions && (

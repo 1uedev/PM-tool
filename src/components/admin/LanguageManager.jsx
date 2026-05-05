@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Plus, Globe, Star, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Check, CheckCircle2, Plus, Globe, Star, Eye, EyeOff, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -13,6 +13,7 @@ export default function LanguageManager({ initialLanguages }) {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [saved, setSaved] = useState(false);
 
   async function patch(code, data) {
     const res = await fetch(`/api/admin/languages/${code}`, {
@@ -84,6 +85,8 @@ export default function LanguageManager({ initialLanguages }) {
       setLanguages((prev) => [...prev, json.data].sort((a, b) => a.code.localeCompare(b.code)));
       setForm({ code: "", name: "", nativeName: "" });
       setShowAdd(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -96,6 +99,12 @@ export default function LanguageManager({ initialLanguages }) {
       {error && (
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error}
+        </div>
+      )}
+      {saved && (
+        <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+          Sprache hinzugefügt
         </div>
       )}
 

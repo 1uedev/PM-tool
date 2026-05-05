@@ -111,7 +111,7 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
             disabled={saving}
             className="flex-shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
           >
-            {saving ? "Saving…" : saved ? "✓ Saved" : "Save"}
+            {saving ? "Saving…" : saved ? <><CheckCircle2 className="h-4 w-4" /> Saved</> : "Save"}
           </button>
         )}
       </div>
@@ -197,7 +197,7 @@ export default function StarterForm({ projectId, initialStarter, artifacts, canE
             disabled={saving}
             className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
           >
-            {saving ? "Saving…" : saved ? "✓ Saved" : "Save"}
+            {saving ? "Saving…" : saved ? <><CheckCircle2 className="h-4 w-4" /> Saved</> : "Save"}
           </button>
         </div>
       )}

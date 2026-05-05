@@ -76,7 +76,7 @@ function RelationRow({ relation, artifact, direction, projectId, artifactId, onD
 
 export default function RelationList({ projectId, artifactId, artifactType }) {
   const relationsKey = `/api/projects/${projectId}/artifacts/${artifactId}/relations`;
-  const { data, isLoading, mutate } = useSWR(relationsKey, fetcher);
+  const { data, isLoading, error: fetchError, mutate } = useSWR(relationsKey, fetcher);
   const [addOpen, setAddOpen] = useState(false);
   const role = useProjectRole();
   const canEdit = hasRole(role, "EDITOR");
@@ -131,6 +131,8 @@ export default function RelationList({ projectId, artifactId, artifactType }) {
         <div className="flex items-center gap-2 py-2 text-sm text-gray-400">
           <Spinner className="h-4 w-4" /> Lade Verknüpfungen…
         </div>
+      ) : fetchError ? (
+        <p className="px-1 text-sm text-red-600">Verknüpfungen konnten nicht geladen werden.</p>
       ) : !hasAny ? (
         <p className="text-sm text-gray-400 italic px-1">Keine Verknüpfungen vorhanden</p>
       ) : (

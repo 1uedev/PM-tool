@@ -110,12 +110,14 @@ export default function DatabaseConfig({ initial }) {
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   function field(key) {
     return (e) => {
       setFields((f) => ({ ...f, [key]: e.target.value }));
       setTestResult(null);
       setSaved(false);
+      setError("");
     };
   }
 
@@ -123,6 +125,7 @@ export default function DatabaseConfig({ initial }) {
     setType(newType);
     setTestResult(null);
     setSaved(false);
+    setError("");
     if (!fields.port) {
       setFields((f) => ({ ...f, port: DEFAULT_PORTS[newType] ?? "" }));
     }
@@ -164,7 +167,7 @@ export default function DatabaseConfig({ initial }) {
       if (!res.ok) throw new Error(json.error?.message ?? "Fehler");
       setSaved(true);
     } catch (e) {
-      setTestResult({ ok: false, message: e.message });
+      setError(e.message);
     } finally {
       setSaving(false);
     }
@@ -172,6 +175,12 @@ export default function DatabaseConfig({ initial }) {
 
   return (
     <div className="flex flex-col gap-6">
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       {/* DB Type Selector */}
       <div className="rounded-lg border border-gray-200 bg-white p-5 flex flex-col gap-4">
         <h2 className="text-sm font-semibold text-gray-900">Datenbanktyp</h2>

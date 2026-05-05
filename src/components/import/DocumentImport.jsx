@@ -10,7 +10,6 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
-  Loader2,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -89,6 +88,7 @@ export default function DocumentImport({ projectId }) {
 
   const [files, setFiles] = useState([]);
   const [dragging, setDragging] = useState(false);
+  const [fileWarning, setFileWarning] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState("");
 
@@ -102,11 +102,25 @@ export default function DocumentImport({ projectId }) {
   // ── File handling ──────────────────────────────────────────────────────────
 
   function addFiles(newFiles) {
-    const valid = [...newFiles].filter((f) => f.size <= 10 * 1024 * 1024);
+    const all = [...newFiles];
+    const oversized = all.filter((f) => f.size > 10 * 1024 * 1024);
+    const valid = all.filter((f) => f.size <= 10 * 1024 * 1024);
+
+    const warnings = [];
+    if (oversized.length === 1) {
+      warnings.push(`„${oversized[0].name}" überschreitet 10 MB und wurde nicht hinzugefügt.`);
+    } else if (oversized.length > 1) {
+      warnings.push(`${oversized.length} Dateien überschreiten 10 MB und wurden nicht hinzugefügt.`);
+    }
+    if (valid.length > 0 && files.length + valid.length > 5) {
+      warnings.push("Maximal 5 Dateien erlaubt — überzählige Dateien wurden ignoriert.");
+    }
+
+    setFileWarning(warnings.join(" "));
     setFiles((prev) => {
       const existing = new Set(prev.map((f) => f.name + f.size));
       const unique = valid.filter((f) => !existing.has(f.name + f.size));
-      return [...prev, ...unique].slice(0, 5); // max 5 files
+      return [...prev, ...unique].slice(0, 5);
     });
     setProposals(null);
     setAnalyzeError("");
@@ -270,6 +284,14 @@ export default function DocumentImport({ projectId }) {
           onChange={(e) => addFiles(e.target.files)}
         />
 
+        {/* File rejection warning */}
+        {fileWarning && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            {fileWarning}
+          </div>
+        )}
+
         {/* File list */}
         {files.length > 0 && (
           <ul className="mt-3 space-y-2">
@@ -302,7 +324,7 @@ export default function DocumentImport({ projectId }) {
           >
             {analyzing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner className="h-4 w-4" />
                 KI analysiert…
               </>
             ) : (

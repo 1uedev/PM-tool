@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import Button from "@/components/ui/Button.jsx";
 import Input from "@/components/ui/Input.jsx";
 
@@ -30,6 +31,7 @@ export default function UserForm({ user, onSuccess }) {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState(null);
+  const [saved, setSaved] = useState(false);
 
   function set(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -61,8 +63,11 @@ export default function UserForm({ user, onSuccess }) {
         return;
       }
 
-      if (onSuccess) onSuccess(json.data);
-      else router.push("/admin/users");
+      setSaved(true);
+      setTimeout(() => {
+        if (onSuccess) onSuccess(json.data);
+        else router.push("/admin/users");
+      }, 800);
     } catch {
       setServerError("Netzwerkfehler. Bitte erneut versuchen.");
     } finally {
@@ -75,6 +80,12 @@ export default function UserForm({ user, onSuccess }) {
       {serverError && (
         <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {serverError}
+        </div>
+      )}
+      {saved && (
+        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+          {isEdit ? "Änderungen gespeichert" : "Benutzer angelegt"}
         </div>
       )}
 
