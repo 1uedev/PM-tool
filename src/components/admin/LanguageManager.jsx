@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Plus, Globe, Star, StarOff, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Check, Plus, Globe, Star, Eye, EyeOff, Trash2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function LanguageManager({ initialLanguages }) {
   const [languages, setLanguages] = useState(initialLanguages);
@@ -9,6 +12,7 @@ export default function LanguageManager({ initialLanguages }) {
   const [form, setForm] = useState({ code: "", name: "", nativeName: "" });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   async function patch(code, data) {
     const res = await fetch(`/api/admin/languages/${code}`, {
@@ -47,8 +51,13 @@ export default function LanguageManager({ initialLanguages }) {
     }
   }
 
-  async function handleDelete(lang) {
-    if (!confirm(`Sprache "${lang.nativeName}" wirklich löschen?`)) return;
+  function handleDelete(lang) {
+    setDeleteTarget(lang);
+  }
+
+  async function handleDeleteConfirm() {
+    const lang = deleteTarget;
+    setDeleteTarget(null);
     try {
       const res = await fetch(`/api/admin/languages/${lang.code}`, { method: "DELETE" });
       const json = await res.json();
@@ -173,56 +182,43 @@ export default function LanguageManager({ initialLanguages }) {
         <form onSubmit={handleAdd} className="rounded-lg border border-gray-200 bg-white p-4 flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-gray-900">Neue Sprache hinzufügen</h3>
           <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700">Sprachcode *</label>
-              <input
-                type="text"
-                value={form.code}
-                onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-                placeholder="z.B. fr, es, it"
-                maxLength={5}
-                required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700">Name (Englisch) *</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="z.B. French"
-                required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700">Name (Nativ) *</label>
-              <input
-                type="text"
-                value={form.nativeName}
-                onChange={(e) => setForm((f) => ({ ...f, nativeName: e.target.value }))}
-                placeholder="z.B. Français"
-                required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
+            <Input
+              label="Sprachcode *"
+              type="text"
+              value={form.code}
+              onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+              placeholder="z.B. fr, es, it"
+              maxLength={5}
+              required
+            />
+            <Input
+              label="Name (Englisch) *"
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="z.B. French"
+              required
+            />
+            <Input
+              label="Name (Nativ) *"
+              type="text"
+              value={form.nativeName}
+              onChange={(e) => setForm((f) => ({ ...f, nativeName: e.target.value }))}
+              placeholder="z.B. Français"
+              required
+            />
           </div>
           <div className="flex items-center justify-end gap-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => { setShowAdd(false); setForm({ code: "", name: "", nativeName: "" }); }}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
             >
               Abbrechen
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" variant="primary" disabled={saving}>
               {saving ? "Wird gespeichert..." : "Hinzufügen"}
-            </button>
+            </Button>
           </div>
         </form>
       ) : (
@@ -234,6 +230,16 @@ export default function LanguageManager({ initialLanguages }) {
           Sprache hinzufügen
         </button>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Sprache löschen"
+        description={deleteTarget ? `Sprache „${deleteTarget.nativeName}" (${deleteTarget.code}) wirklich löschen?` : ""}
+        confirmLabel="Löschen"
+        danger
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

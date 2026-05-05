@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Sparkles, CheckCircle, XCircle, Eye, EyeOff, ChevronDown } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 const PROVIDERS = [
   {
@@ -261,30 +263,24 @@ export default function AiProviderConfig({ initial }) {
             </button>
             {showAdvanced && (
               <div className="mt-3 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-700">Timeout (ms)</label>
-                  <input
-                    type="number"
-                    value={timeoutMs}
-                    min={5000}
-                    max={120000}
-                    step={1000}
-                    onChange={(e) => setTimeoutMs(Number(e.target.value))}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-700">Max. Tokens</label>
-                  <input
-                    type="number"
-                    value={maxTokens}
-                    min={256}
-                    max={8192}
-                    step={256}
-                    onChange={(e) => setMaxTokens(Number(e.target.value))}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
+                <Input
+                  label="Timeout (ms)"
+                  type="number"
+                  value={timeoutMs}
+                  min={5000}
+                  max={120000}
+                  step={1000}
+                  onChange={(e) => setTimeoutMs(Number(e.target.value))}
+                />
+                <Input
+                  label="Max. Tokens"
+                  type="number"
+                  value={maxTokens}
+                  min={256}
+                  max={8192}
+                  step={256}
+                  onChange={(e) => setMaxTokens(Number(e.target.value))}
+                />
               </div>
             )}
           </div>
@@ -309,22 +305,18 @@ export default function AiProviderConfig({ initial }) {
       {/* Actions */}
       <div className="flex items-center gap-3">
         {provider !== "disabled" && (
-          <button
+          <Button
+            variant="secondary"
             onClick={handleTest}
             disabled={testing || (!apiKey && !apiKeySet)}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
           >
             {testing ? "Wird getestet..." : "Verbindung testen"}
-          </button>
+          </Button>
         )}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
+        <Button variant="primary" onClick={handleSave} disabled={saving}>
           <Sparkles className="h-4 w-4" />
           {saving ? "Wird gespeichert..." : "Konfiguration speichern"}
-        </button>
+        </Button>
         {saved && (
           <span className="flex items-center gap-1 text-sm text-green-700">
             <CheckCircle className="h-4 w-4" />

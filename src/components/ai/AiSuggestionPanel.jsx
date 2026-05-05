@@ -50,7 +50,7 @@ export default function AiSuggestionPanel({ artifactType, suggestions, onAccept,
         <div className="flex items-center gap-2">
           <button
             onClick={onAcceptAll}
-            className="rounded-md bg-purple-600 px-3 py-1 text-xs font-medium text-white hover:bg-purple-700 transition-colors"
+            className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
           >
             Alle übernehmen
           </button>

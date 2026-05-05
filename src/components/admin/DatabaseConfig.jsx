@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Database, CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 const DB_TYPES = [
   { value: "sqlite",     label: "SQLite",      description: "Lokale Datei — ideal für Entwicklung" },
@@ -213,59 +215,43 @@ export default function DatabaseConfig({ initial }) {
 
         {type === "sqlite" && (
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-700">Dateipfad</label>
-            <input
+            <Input
+              label="Dateipfad"
               type="text"
               value={fields.filePath}
               onChange={field("filePath")}
               placeholder="./prisma/dev.db"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="font-mono"
             />
             <p className="mt-1 text-xs text-gray-400">Relativ zum Projektstamm oder absoluter Pfad</p>
           </div>
         )}
 
         {type !== "sqlite" && rawMode && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-700">Connection URL</label>
-            <input
-              type="text"
-              value={rawUrl}
-              onChange={(e) => { setRawUrl(e.target.value); setTestResult(null); setSaved(false); }}
-              placeholder={type === "mariadb" ? "mysql://user:pass@host:3306/db" : "postgresql://user:pass@host:5432/db"}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+          <Input
+            label="Connection URL"
+            type="text"
+            value={rawUrl}
+            onChange={(e) => { setRawUrl(e.target.value); setTestResult(null); setSaved(false); }}
+            placeholder={type === "mariadb" ? "mysql://user:pass@host:3306/db" : "postgresql://user:pass@host:5432/db"}
+            className="font-mono"
+          />
         )}
 
         {type !== "sqlite" && !rawMode && (
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 grid grid-cols-3 gap-3">
               <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-gray-700">Host</label>
-                <input type="text" value={fields.host} onChange={field("host")} placeholder="localhost"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <Input label="Host" type="text" value={fields.host} onChange={field("host")} placeholder="localhost" />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-700">Port</label>
-                <input type="text" value={fields.port} onChange={field("port")} placeholder={DEFAULT_PORTS[type]}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <Input label="Port" type="text" value={fields.port} onChange={field("port")} placeholder={DEFAULT_PORTS[type]} />
               </div>
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700">Datenbankname</label>
-              <input type="text" value={fields.database} onChange={field("database")} placeholder="pmcopilot"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700">Benutzername</label>
-              <input type="text" value={fields.username} onChange={field("username")} placeholder="postgres"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-            </div>
+            <Input label="Datenbankname" type="text" value={fields.database} onChange={field("database")} placeholder="pmcopilot" />
+            <Input label="Benutzername" type="text" value={fields.username} onChange={field("username")} placeholder="postgres" />
             <div className="col-span-2">
-              <label className="mb-1 block text-xs font-medium text-gray-700">Passwort</label>
-              <input type="password" value={fields.password} onChange={field("password")} placeholder="••••••••"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <Input label="Passwort" type="password" value={fields.password} onChange={field("password")} placeholder="••••••••" />
             </div>
           </div>
         )}
@@ -294,20 +280,12 @@ export default function DatabaseConfig({ initial }) {
 
         {/* Actions */}
         <div className="flex items-center gap-3 pt-1">
-          <button
-            onClick={handleTest}
-            disabled={testing}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          >
+          <Button variant="secondary" onClick={handleTest} disabled={testing}>
             {testing ? "Verbindung wird getestet..." : "Verbindung testen"}
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
+          </Button>
+          <Button variant="primary" onClick={handleSave} disabled={saving}>
             {saving ? "Wird gespeichert..." : "Konfiguration speichern"}
-          </button>
+          </Button>
           {saved && (
             <span className="flex items-center gap-1 text-sm text-green-700">
               <CheckCircle className="h-4 w-4" />
