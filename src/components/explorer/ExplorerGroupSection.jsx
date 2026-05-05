@@ -21,7 +21,7 @@ export default function ExplorerGroupSection({ group, byType, projectId }) {
         <ChevronRight
           className={`h-3 w-3 flex-shrink-0 transition-transform ${open ? "rotate-90" : ""} ${colors.text ?? "text-gray-300"}`}
         />
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${colors.text ?? "text-gray-400"}`}>
+        <span className={`text-xs font-semibold uppercase tracking-wide ${colors.text ?? "text-gray-400"}`}>
           {group.label}
         </span>
         {total > 0 && (
