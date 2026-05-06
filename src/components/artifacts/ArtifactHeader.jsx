@@ -109,14 +109,17 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
               onClick={handleStatusChange}
               disabled={statusLoading}
               title={STATUS_NEXT_LABEL[artifact.status]}
-              className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
             >
               {statusLoading ? (
                 <Spinner className="h-3 w-3" />
               ) : (
-                <ChevronRight className="h-3 w-3" />
+                <>
+                  <span className="opacity-60">{ARTIFACT_STATUS_LABELS[artifact.status]}</span>
+                  <ChevronRight className="h-3 w-3 opacity-60" />
+                  <span className="font-semibold text-gray-700">{ARTIFACT_STATUS_LABELS[nextStatus]}</span>
+                </>
               )}
-              {ARTIFACT_STATUS_LABELS[nextStatus]}
             </button>
 
             {/* Delete */}
@@ -156,7 +159,7 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
       <ConfirmDialog
         open={showDeleteConfirm}
         title="Artefakt löschen?"
-        description={`"${artifact.title}" wird als gelöscht markiert und aus dem Explorer entfernt.`}
+        description={`"${artifact.title}" wird aus dem Explorer entfernt. Diese Aktion kann über die Benutzeroberfläche nicht rückgängig gemacht werden.`}
         confirmLabel="Löschen"
         danger
         onConfirm={handleDelete}

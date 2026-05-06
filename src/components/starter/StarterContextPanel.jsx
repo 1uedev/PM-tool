@@ -34,9 +34,9 @@ export default function StarterContextPanel({ projectId, artifactType }) {
       <div className="mb-5 rounded-lg border border-dashed border-blue-200 bg-blue-50/50 px-4 py-3">
         <div className="flex items-center gap-2 text-xs text-blue-500">
           <Rocket className="h-3.5 w-3.5" />
-          <span>No PRD Starter answers for this artifact type yet.</span>
+          <span>Noch keine PRD-Starter-Antworten für diesen Artefakttyp.</span>
           <Link href={`/projects/${projectId}/starter`} className="underline hover:text-blue-700">
-            Complete the starter →
+            Starter ausfüllen →
           </Link>
         </div>
       </div>
@@ -44,24 +44,28 @@ export default function StarterContextPanel({ projectId, artifactType }) {
   }
 
   return (
-    <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50">
+    <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-2.5 text-left"
+        aria-expanded={open}
+        className="flex w-full items-center justify-between px-4 py-2.5 text-left hover:bg-blue-100/60 transition-colors"
       >
         <div className="flex items-center gap-2">
           <Rocket className="h-3.5 w-3.5 text-blue-500" />
-          <span className="text-xs font-semibold text-blue-700">PRD Starter context</span>
-          <span className="text-xs text-blue-400">— keep your artifact consistent with these answers</span>
+          <span className="text-xs font-semibold text-blue-700">PRD-Starter-Kontext</span>
+          <span className="text-xs text-blue-400 hidden sm:inline">— Artefakt konsistent mit diesen Antworten halten</span>
         </div>
-        {open
-          ? <ChevronUp className="h-3.5 w-3.5 text-blue-400" />
-          : <ChevronDown className="h-3.5 w-3.5 text-blue-400" />
-        }
+        <div className="flex items-center gap-1 text-blue-400">
+          <span className="text-xs">{open ? "Einklappen" : "Aufklappen"}</span>
+          {open
+            ? <ChevronUp className="h-4 w-4" />
+            : <ChevronDown className="h-4 w-4" />
+          }
+        </div>
       </button>
 
-      {open && (
+      <div className={`transition-all duration-200 ease-in-out ${open ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"}`}>
         <div className="border-t border-blue-200 divide-y divide-blue-100">
           {relevantAnswers.map(({ question, value }) => (
             <div key={question.key} className="px-4 py-3">
@@ -76,11 +80,11 @@ export default function StarterContextPanel({ projectId, artifactType }) {
               href={`/projects/${projectId}/starter`}
               className="text-xs text-blue-500 hover:text-blue-700 underline"
             >
-              Edit PRD Starter →
+              PRD Starter bearbeiten →
             </Link>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

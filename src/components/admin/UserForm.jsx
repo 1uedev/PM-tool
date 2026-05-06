@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import Button from "@/components/ui/Button.jsx";
 import Input from "@/components/ui/Input.jsx";
+import Select from "@/components/ui/Select.jsx";
 
 const ROLE_LABELS = {
   ADMIN: "Administrator",
@@ -141,30 +142,18 @@ export default function UserForm({ user, onSuccess }) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Rolle</label>
-          <select
-            value={form.systemRole}
-            onChange={(e) => set("systemRole", e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {Object.entries(ROLE_LABELS).map(([val, label]) => (
-              <option key={val} value={val}>{label}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select
-            value={form.status}
-            onChange={(e) => set("status", e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {Object.entries(STATUS_LABELS).map(([val, label]) => (
-              <option key={val} value={val}>{label}</option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Rolle"
+          value={form.systemRole}
+          onChange={(e) => set("systemRole", e.target.value)}
+          options={Object.entries(ROLE_LABELS).map(([value, label]) => ({ value, label }))}
+        />
+        <Select
+          label="Status"
+          value={form.status}
+          onChange={(e) => set("status", e.target.value)}
+          options={Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+        />
       </div>
 
       <div className="flex gap-3 pt-2">

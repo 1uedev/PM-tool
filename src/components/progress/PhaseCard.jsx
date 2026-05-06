@@ -89,7 +89,7 @@ export default function PhaseCard({ phase, projectId }) {
             : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
           }`}
       >
-        {missing ? "+ Ersten anlegen" : "+ Hinzufügen"}
+        + Hinzufügen
       </Link>
     </div>
   );
