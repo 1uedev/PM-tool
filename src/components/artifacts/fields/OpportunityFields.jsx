@@ -1,6 +1,7 @@
 import { FieldGroup, FieldLabel, FieldInput, FieldTextarea } from "./FieldHelpers.jsx";
+import ArtifactRefField from "./ArtifactRefField.jsx";
 
-export default function OpportunityFields({ fields, onChange, disabled }) {
+export default function OpportunityFields({ fields, onChange, disabled, projectId, artifactId }) {
   return (
     <div className="flex flex-col gap-5">
       <FieldGroup>
@@ -9,11 +10,15 @@ export default function OpportunityFields({ fields, onChange, disabled }) {
           placeholder="Welche Chance haben wir? Was ermöglicht sich hier?" rows={3} />
       </FieldGroup>
 
-      <FieldGroup>
-        <FieldLabel hint="Nutzer, Segment, Markt">Zielgruppe</FieldLabel>
-        <FieldInput fieldKey="targetAudience" fields={fields} onChange={onChange} disabled={disabled}
-          placeholder="Wer profitiert von der Lösung dieser Opportunity?" />
-      </FieldGroup>
+      <ArtifactRefField
+        projectId={projectId}
+        artifactId={artifactId}
+        targetTypes={["USER_PERSONA", "BUYER_PERSONA"]}
+        relationType="RELATES_TO"
+        label="Zielgruppe"
+        hint="Verknüpfte Personas"
+        disabled={disabled}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <FieldGroup>

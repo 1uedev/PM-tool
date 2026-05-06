@@ -1,6 +1,7 @@
 import { FieldGroup, FieldLabel, FieldInput, FieldTextarea, SectionDivider } from "./FieldHelpers.jsx";
+import ArtifactRefField from "./ArtifactRefField.jsx";
 
-export default function PositioningFields({ fields, onChange, disabled }) {
+export default function PositioningFields({ fields, onChange, disabled, projectId, artifactId }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Positioning statement box */}
@@ -18,17 +19,21 @@ export default function PositioningFields({ fields, onChange, disabled }) {
           rows={3}
           placeholder="Füge hier deine Positionierungsaussage ein…"
           className="w-full bg-transparent text-sm text-violet-900 placeholder-violet-300 outline-none resize-y
-            disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
       <SectionDivider label="Details" />
 
-      <FieldGroup>
-        <FieldLabel hint="Segment, Zielmarkt">Zielsegment</FieldLabel>
-        <FieldInput fieldKey="targetSegment" fields={fields} onChange={onChange} disabled={disabled}
-          placeholder="Welches Marktsegment addressieren wir primär?" />
-      </FieldGroup>
+      <ArtifactRefField
+        projectId={projectId}
+        artifactId={artifactId}
+        targetTypes={["USER_PERSONA", "BUYER_PERSONA"]}
+        relationType="RELATES_TO"
+        label="Zielsegment"
+        hint="Verknüpfte Personas"
+        disabled={disabled}
+      />
 
       <FieldGroup>
         <FieldLabel hint="Nachhaltig, schwer kopierbar">Wettbewerbsvorteil</FieldLabel>

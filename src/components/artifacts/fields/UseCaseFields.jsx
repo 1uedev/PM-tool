@@ -1,31 +1,29 @@
 import { FieldGroup, FieldLabel, FieldInput, FieldTextarea } from "./FieldHelpers.jsx";
+import ArtifactRefField from "./ArtifactRefField.jsx";
 
-export default function UseCaseFields({ fields, onChange, disabled }) {
+export default function UseCaseFields({ fields, onChange, disabled, projectId, artifactId }) {
   return (
     <div className="flex flex-col gap-5">
-      {/* Actor + Goal side by side */}
-      <div className="grid grid-cols-2 gap-4">
-        <FieldGroup>
-          <FieldLabel hint="Wer führt die Aktion aus?">Akteur</FieldLabel>
-          <FieldInput
-            fieldKey="actor"
-            fields={fields}
-            onChange={onChange}
-            placeholder="z. B. Hausbesitzer"
-            disabled={disabled}
-          />
-        </FieldGroup>
-        <FieldGroup>
-          <FieldLabel hint="Was möchte der Akteur erreichen?">Ziel</FieldLabel>
-          <FieldInput
-            fieldKey="goal"
-            fields={fields}
-            onChange={onChange}
-            placeholder="z. B. Gerät per Sprache steuern"
-            disabled={disabled}
-          />
-        </FieldGroup>
-      </div>
+      <ArtifactRefField
+        projectId={projectId}
+        artifactId={artifactId}
+        targetTypes={["USER_PERSONA", "BUYER_PERSONA"]}
+        relationType="RELATES_TO"
+        label="Akteur"
+        hint="Wer führt die Aktion aus?"
+        disabled={disabled}
+      />
+
+      <FieldGroup>
+        <FieldLabel hint="Was möchte der Akteur erreichen?">Ziel</FieldLabel>
+        <FieldInput
+          fieldKey="goal"
+          fields={fields}
+          onChange={onChange}
+          placeholder="z. B. Gerät per Sprache steuern"
+          disabled={disabled}
+        />
+      </FieldGroup>
 
       <FieldGroup>
         <FieldLabel hint="Was muss vorher erfüllt sein?">Vorbedingungen</FieldLabel>

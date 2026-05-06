@@ -1,6 +1,7 @@
-import { FieldGroup, FieldLabel, FieldInput, FieldTextarea, SectionDivider } from "./FieldHelpers.jsx";
+import { FieldGroup, FieldLabel, FieldTextarea, SectionDivider } from "./FieldHelpers.jsx";
+import ArtifactRefField from "./ArtifactRefField.jsx";
 
-export default function ValuePropositionFields({ fields, onChange, disabled }) {
+export default function ValuePropositionFields({ fields, onChange, disabled, projectId, artifactId }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Highlighted statement box */}
@@ -15,17 +16,21 @@ export default function ValuePropositionFields({ fields, onChange, disabled }) {
           rows={3}
           placeholder="Wir helfen [Zielgruppe] dabei, [Problem] zu lösen, indem wir [Lösung] anbieten — anders als [Alternative]."
           className="w-full bg-transparent text-sm text-blue-900 placeholder-blue-300 outline-none resize-y
-            disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
       <SectionDivider label="Details" />
 
-      <FieldGroup>
-        <FieldLabel hint="Hauptkunde, Segment">Zielkunde</FieldLabel>
-        <FieldInput fieldKey="targetCustomer" fields={fields} onChange={onChange} disabled={disabled}
-          placeholder="Wer ist der primäre Zielkunde?" />
-      </FieldGroup>
+      <ArtifactRefField
+        projectId={projectId}
+        artifactId={artifactId}
+        targetTypes={["USER_PERSONA", "BUYER_PERSONA"]}
+        relationType="RELATES_TO"
+        label="Zielkunde"
+        hint="Verknüpfte Personas"
+        disabled={disabled}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <FieldGroup>

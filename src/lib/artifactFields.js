@@ -37,7 +37,6 @@ export const ARTIFACT_FIELD_DEFS = {
 
   OPPORTUNITY: [
     { key: "description", label: "Beschreibung der Opportunity", placeholder: "Welche Chance haben wir?", multiline: true, rows: 3 },
-    { key: "targetAudience", label: "Zielgruppe", placeholder: "Wer profitiert von der Lösung?", multiline: false },
     { key: "potentialValue", label: "Potenzieller Wert", placeholder: "Welchen Business- oder Nutzerwert hat das?", multiline: true, rows: 2 },
     { key: "timeToMarket", label: "Zeitliche Einschätzung", placeholder: "Wann ist die Gelegenheit relevant?", multiline: false },
   ],
@@ -78,20 +77,16 @@ export const ARTIFACT_FIELD_DEFS = {
 
   PRODUCT_VISION: [
     { key: "oneLiner", label: "Einzeiler / Elevator Pitch", placeholder: "Das Produkt in einem Satz", multiline: false },
-    { key: "targetUsers", label: "Zielnutzer", placeholder: "Für wen bauen wir das?", multiline: true, rows: 2 },
-    { key: "valueProposition", label: "Nutzenversprechen", placeholder: "Welchen Wert bietet das Produkt?", multiline: true, rows: 4 },
   ],
 
   VALUE_PROPOSITION: [
     { key: "statement", label: "Value Proposition Statement", placeholder: "Wir helfen [Zielgruppe] dabei, [Problem] zu lösen, indem wir [Lösung] anbieten.", multiline: true, rows: 3 },
-    { key: "targetCustomer", label: "Zielkunde", placeholder: "Wer ist der Hauptkunde?", multiline: false },
     { key: "keyBenefit", label: "Hauptnutzen", placeholder: "Was ist der wichtigste Vorteil?", multiline: true, rows: 2 },
     { key: "differentiator", label: "Differenzierungsmerkmal", placeholder: "Was unterscheidet uns von Alternativen?", multiline: true, rows: 2 },
   ],
 
   POSITIONING: [
     { key: "statement", label: "Positionierungsaussage", placeholder: "Für [Zielgruppe], die [Bedürfnis], ist [Produkt] die [Kategorie], die [Differenzierungsmerkmal].", multiline: true, rows: 3 },
-    { key: "targetSegment", label: "Zielsegment", placeholder: "Welches Marktsegment addressieren wir?", multiline: false },
     { key: "competitiveAdvantage", label: "Wettbewerbsvorteil", placeholder: "Unser nachhaltiger Vorteil gegenüber Wettbewerbern", multiline: true, rows: 3 },
     { key: "keyMessage", label: "Kernbotschaft", placeholder: "Die eine Botschaft, die hängen bleibt", multiline: false },
   ],
@@ -114,14 +109,12 @@ export const ARTIFACT_FIELD_DEFS = {
   // ─── Discovery & Design ───
 
   USE_CASE: [
-    { key: "actor", label: "Akteur", placeholder: "Wer führt die Aktion aus?", multiline: false },
     { key: "goal", label: "Ziel", placeholder: "Was möchte der Akteur erreichen?", multiline: false },
     { key: "flow", label: "Ablauf", placeholder: "1. Schritt\n2. Schritt\n…", multiline: true, rows: 6 },
     { key: "preconditions", label: "Vorbedingungen", placeholder: "Was muss vorher erfüllt sein?", multiline: true, rows: 2 },
   ],
 
   USER_JOURNEY: [
-    { key: "actor", label: "Akteur / Persona", placeholder: "Wer durchläuft die Journey?", multiline: false },
     { key: "scenario", label: "Szenario", placeholder: "In welcher Situation befinden wir uns?", multiline: true, rows: 2 },
     { key: "steps", label: "Journey-Schritte", placeholder: "1. Schritt: Aktion — Gedanken — Gefühl\n2. Schritt: …", multiline: true, rows: 8 },
     { key: "painPoints", label: "Pain Points in der Journey", placeholder: "Wo entstehen Reibung oder Frustration?", multiline: true, rows: 3 },
@@ -146,7 +139,6 @@ export const ARTIFACT_FIELD_DEFS = {
   // ─── Delivery ───
 
   USER_STORY: [
-    { key: "role", label: "Als … (Rolle)", placeholder: "z. B. Hausbesitzer", multiline: false },
     { key: "action", label: "möchte ich … (Aktion)", placeholder: "z. B. meine Geräte per App steuern", multiline: true, rows: 2 },
     { key: "benefit", label: "damit … (Nutzen)", placeholder: "z. B. ich Energie spare", multiline: true, rows: 2 },
   ],

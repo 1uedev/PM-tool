@@ -191,7 +191,13 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
       {/* Type-specific field component */}
       <div className="flex-1">
         {FieldsComponent ? (
-          <FieldsComponent fields={fields} onChange={handleFieldChange} disabled={!canEdit} />
+          <FieldsComponent
+            fields={fields}
+            onChange={handleFieldChange}
+            disabled={!canEdit}
+            projectId={projectId}
+            artifactId={artifact?.id ?? null}
+          />
         ) : (
           <p className="text-sm text-gray-400 italic">
             Keine Felder für Typ "{artifactType}" definiert.
