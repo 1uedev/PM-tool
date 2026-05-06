@@ -46,12 +46,16 @@ export default function ArtifactNode({ data, selected }) {
       <Handle
         type="target"
         position={Position.Left}
-        style={{ width: 10, height: 10, background: "#94a3b8", border: "2px solid #fff" }}
+        title="Ziel: hier ablegen um eine Verknüpfung zu erstellen"
+        aria-label="Verknüpfungs-Ziel"
+        style={{ width: 12, height: 12, background: "#94a3b8", border: "2px solid #fff", cursor: "cell" }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        style={{ width: 10, height: 10, background: "#94a3b8", border: "2px solid #fff" }}
+        title="Quelle: ziehen um eine Verknüpfung zu erstellen"
+        aria-label="Verknüpfungs-Quelle"
+        style={{ width: 12, height: 12, background: "#3b82f6", border: "2px solid #fff", cursor: "crosshair" }}
       />
     </div>
   );

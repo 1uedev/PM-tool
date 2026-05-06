@@ -110,7 +110,14 @@ function CoverageBar({ typesInGroup, presentTypes, colorKey }) {
 
   return (
     <div className="flex items-center gap-1.5">
-      <div className="h-1 w-16 overflow-hidden rounded-full bg-white/40">
+      <div
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Abdeckung: ${pct}%`}
+        className="h-1 w-16 overflow-hidden rounded-full bg-white/40"
+      >
         <div
           className={`h-full rounded-full transition-all ${barColor}`}
           style={{ width: `${pct}%` }}
@@ -365,7 +372,14 @@ export default function TraceabilityView({ artifacts, relations, projectId }) {
               {coveragePct}%
             </span>
           </div>
-          <div className="h-1.5 w-40 overflow-hidden rounded-full bg-gray-100">
+          <div
+            role="progressbar"
+            aria-valuenow={coveragePct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Domänenabdeckung: ${coveragePct}%`}
+            className="h-1.5 w-40 overflow-hidden rounded-full bg-gray-100"
+          >
             <div
               className={`h-full rounded-full transition-all ${coveragePct === 100 ? "bg-green-500" : coveragePct >= 50 ? "bg-blue-400" : "bg-orange-400"}`}
               style={{ width: `${coveragePct}%` }}

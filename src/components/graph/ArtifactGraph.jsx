@@ -184,7 +184,7 @@ export default function ArtifactGraph({ projectId }) {
   // ── Graph ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex-1" style={{ height: "100%" }}>
+    <div className="flex-1" style={{ height: "100%" }} aria-label="Artefakt-Graph — interaktive Ansicht aller Artefakte und Verknüpfungen">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -223,9 +223,15 @@ export default function ArtifactGraph({ projectId }) {
                 </div>
               ))}
             </div>
-            <div className="mt-3 border-t border-gray-100 pt-2.5 space-y-1 text-gray-400 leading-snug">
-              <p><span className="font-medium text-gray-500">Verbinden:</span> rechten Handle ziehen zum linken Handle eines anderen Knotens</p>
-              <p><span className="font-medium text-gray-500">Öffnen:</span> Doppelklick auf einen Knoten</p>
+            <div className="mt-3 border-t border-gray-100 pt-2.5 space-y-1.5 leading-snug">
+              <p className="text-gray-500 text-xs">
+                <span className="font-semibold text-blue-600">Verbinden:</span>
+                {" "}blauen Handle rechts ziehen → linken Handle eines anderen Knotens
+              </p>
+              <p className="text-gray-500 text-xs">
+                <span className="font-semibold text-gray-600">Öffnen:</span>
+                {" "}Doppelklick auf einen Knoten
+              </p>
             </div>
           </div>
         </Panel>

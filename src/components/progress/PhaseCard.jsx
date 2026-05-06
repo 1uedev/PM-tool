@@ -40,7 +40,14 @@ export default function PhaseCard({ phase, projectId }) {
             <span>Fortschritt</span>
             <span className="font-medium">{progress}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${label}: ${progress}% abgeschlossen`}
+            className="h-2 w-full overflow-hidden rounded-full bg-gray-100"
+          >
             <div
               className="h-full rounded-full bg-green-500 transition-all duration-500"
               style={{ width: `${progress}%` }}

@@ -44,6 +44,9 @@ function ProposalCard({ proposal, checked, onToggle, expanded, onExpandToggle })
       <div className="flex items-center gap-3 p-3">
         <button
           type="button"
+          role="checkbox"
+          aria-checked={checked}
+          aria-label={`${proposal.title} auswählen`}
           onClick={() => onToggle(proposal._id)}
           className="flex-shrink-0 text-blue-600 hover:text-blue-700"
         >
@@ -258,6 +261,7 @@ export default function DocumentImport({ projectId }) {
         <div
           role="button"
           tabIndex={0}
+          aria-label="Dateien hochladen — klicken oder per Drag & Drop ablegen"
           className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 text-center transition-colors cursor-pointer
             ${dragging ? "border-blue-400 bg-blue-50" : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100"}`}
           onDragOver={onDragOver}

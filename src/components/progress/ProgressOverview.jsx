@@ -26,7 +26,14 @@ function GroupSection({ group, phases, projectId }) {
             <>
               <span className="text-xs text-gray-500">{total} Artefakt{total !== 1 ? "e" : ""}</span>
               <div className="flex items-center gap-1.5">
-                <div className="h-1.5 w-20 overflow-hidden rounded-full bg-gray-200">
+                <div
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${group.label}: ${progress}%`}
+                  className="h-1.5 w-20 overflow-hidden rounded-full bg-gray-200"
+                >
                   <div
                     className="h-full rounded-full bg-green-500"
                     style={{ width: `${progress}%` }}
@@ -92,7 +99,14 @@ export default function ProgressOverview({ data, projectId }) {
 
         {/* Overall progress bar */}
         <div className="flex-1 min-w-40">
-          <div className="h-3 w-full overflow-hidden rounded-full bg-gray-100">
+          <div
+            role="progressbar"
+            aria-valuenow={overallProgress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Gesamtfortschritt: ${overallProgress}%`}
+            className="h-3 w-full overflow-hidden rounded-full bg-gray-100"
+          >
             <div
               className="h-full rounded-full bg-blue-500 transition-all duration-700"
               style={{ width: `${overallProgress}%` }}
