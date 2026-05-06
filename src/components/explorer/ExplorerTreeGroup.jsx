@@ -45,9 +45,12 @@ export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
   return (
     <>
       <div>
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setOpen((o) => !o)}
-          className="group flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-gray-100"
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setOpen((o) => !o)}
+          className="group flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-gray-100"
         >
           <div className="flex items-center gap-1.5">
             <ChevronRight
@@ -67,7 +70,7 @@ export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
               <Plus className="h-3.5 w-3.5 text-gray-500" />
             </button>
           )}
-        </button>
+        </div>
 
         {open && (
           <div className="ml-2 mt-0.5 flex flex-col gap-0.5">
