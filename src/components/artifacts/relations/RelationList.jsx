@@ -132,7 +132,9 @@ export default function RelationList({ projectId, artifactId, artifactType }) {
           <Spinner className="h-4 w-4" /> Lade Verknüpfungen…
         </div>
       ) : fetchError ? (
-        <p className="px-1 text-sm text-red-600">Verknüpfungen konnten nicht geladen werden.</p>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          Verknüpfungen konnten nicht geladen werden.
+        </div>
       ) : !hasAny ? (
         <p className="text-sm text-gray-400 italic px-1">Keine Verknüpfungen vorhanden</p>
       ) : (
