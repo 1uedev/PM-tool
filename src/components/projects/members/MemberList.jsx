@@ -23,7 +23,7 @@ function Initials({ name, email }) {
     : str.slice(0, 2).toUpperCase();
 }
 
-export default function MemberList({ projectId }) {
+export default function MemberList({ projectId, isOwner = false }) {
   const { data: members = [], mutate, isLoading } = useSWR(
     `/api/projects/${projectId}/members`,
     fetcher
@@ -75,7 +75,7 @@ export default function MemberList({ projectId }) {
   return (
     <>
       {error && (
-        <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
       )}
 
       <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white">
@@ -97,32 +97,38 @@ export default function MemberList({ projectId }) {
               <p className="truncate text-xs text-gray-400">{member.user.email}</p>
             </div>
 
-            {/* Role select */}
+            {/* Role — editable for owners, read-only label otherwise */}
             <div className="flex items-center gap-1.5">
               {ROLE_ICONS[member.role]}
-              {roleLoading === member.id ? (
-                <Spinner className="h-4 w-4" />
+              {isOwner ? (
+                roleLoading === member.id ? (
+                  <Spinner className="h-4 w-4" />
+                ) : (
+                  <select
+                    value={member.role}
+                    onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                    className="rounded-md border border-gray-200 py-1 pl-2 pr-6 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="VIEWER">{ROLE_LABELS.VIEWER}</option>
+                    <option value="EDITOR">{ROLE_LABELS.EDITOR}</option>
+                    <option value="OWNER">{ROLE_LABELS.OWNER}</option>
+                  </select>
+                )
               ) : (
-                <select
-                  value={member.role}
-                  onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                  className="rounded-md border border-gray-200 py-1 pl-2 pr-6 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="VIEWER">{ROLE_LABELS.VIEWER}</option>
-                  <option value="EDITOR">{ROLE_LABELS.EDITOR}</option>
-                  <option value="OWNER">{ROLE_LABELS.OWNER}</option>
-                </select>
+                <span className="text-xs text-gray-500">{ROLE_LABELS[member.role]}</span>
               )}
             </div>
 
-            {/* Remove button */}
-            <button
-              onClick={() => setDeleteConfirm(member)}
-              title="Mitglied entfernen"
-              className="rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            {/* Remove — owner only */}
+            {isOwner && (
+              <button
+                onClick={() => setDeleteConfirm(member)}
+                title="Mitglied entfernen"
+                className="rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
           </div>
         ))}
       </div>

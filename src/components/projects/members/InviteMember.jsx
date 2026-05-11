@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus } from "lucide-react";
-import Spinner from "@/components/ui/Spinner.jsx";
+import { UserPlus, CheckCircle2 } from "lucide-react";
+import Button from "@/components/ui/Button.jsx";
+import Input from "@/components/ui/Input.jsx";
+import Select from "@/components/ui/Select.jsx";
 
-const ROLE_LABELS = { VIEWER: "Viewer", EDITOR: "Editor", OWNER: "Owner" };
+const ROLE_OPTIONS = [
+  { value: "VIEWER", label: "Viewer" },
+  { value: "EDITOR", label: "Editor" },
+  { value: "OWNER", label: "Owner" },
+];
 
 export default function InviteMember({ projectId, onInvited }) {
   const [email, setEmail] = useState("");
@@ -26,10 +32,10 @@ export default function InviteMember({ projectId, onInvited }) {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error?.message ?? "Fehler beim Einladen");
+        setError(json.error?.message ?? "Fehler beim Hinzufügen");
         return;
       }
-      setSuccess(`${json.data.user.name || json.data.user.email} wurde als ${ROLE_LABELS[role]} hinzugefügt.`);
+      setSuccess(`${json.data.user.name || json.data.user.email} wurde hinzugefügt.`);
       setEmail("");
       onInvited?.();
     } finally {
@@ -40,35 +46,37 @@ export default function InviteMember({ projectId, onInvited }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="flex gap-2">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => { setEmail(e.target.value); setError(""); setSuccess(""); }}
-          placeholder="E-Mail-Adresse"
-          required
-          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-        />
-        <select
+        <div className="flex-1">
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); setError(""); setSuccess(""); }}
+            placeholder="E-Mail-Adresse"
+            required
+          />
+        </div>
+        <Select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {Object.entries(ROLE_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          disabled={loading || !email.trim()}
-          className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? <Spinner className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
-          Hinzufügen
-        </button>
+          options={ROLE_OPTIONS}
+          className="w-32"
+        />
+        <Button type="submit" disabled={loading || !email.trim()}>
+          {loading ? "…" : <><UserPlus className="h-4 w-4" /> Hinzufügen</>}
+        </Button>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-green-600">{success}</p>}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+          {success}
+        </div>
+      )}
     </form>
   );
 }

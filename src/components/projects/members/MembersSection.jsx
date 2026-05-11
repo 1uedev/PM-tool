@@ -14,7 +14,7 @@ export default function MembersSection({ projectId, isOwner }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <MemberList projectId={projectId} />
+      <MemberList projectId={projectId} isOwner={isOwner} />
       {isOwner && (
         <InviteMember projectId={projectId} onInvited={handleInvited} />
       )}
