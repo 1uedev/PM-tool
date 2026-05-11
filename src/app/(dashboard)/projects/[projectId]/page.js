@@ -2,14 +2,11 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
-import Link from "next/link";
-import { Settings, BarChart3, Columns3, GitBranch, Rocket, Network, Upload } from "lucide-react";
-import Button from "@/components/ui/Button.jsx";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
 import { DirtyFormProvider } from "@/lib/DirtyFormContext.js";
 import { ProjectRoleProvider } from "@/lib/ProjectRoleContext.js";
-import SearchButton from "@/components/search/SearchButton.jsx";
+import ProjectNavBar from "@/components/layout/ProjectNavBar.jsx";
 
 export async function generateMetadata({ params }) {
   const { projectId } = await params;
@@ -46,51 +43,7 @@ export default async function ProjectPage({ params }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Top bar */}
-      <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
-        <div className="flex items-center gap-2 text-sm">
-          <Link href="/projects" className="text-gray-500 hover:text-gray-900">
-            Projekte
-          </Link>
-          <span className="text-gray-300">/</span>
-          <span className="font-medium text-gray-900">{project.name}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <SearchButton projectId={projectId} />
-          {role !== "VIEWER" && (
-            <Button href={`/projects/${projectId}/import`} variant="ghost">
-              <Upload className="h-4 w-4" />
-              Import
-            </Button>
-          )}
-          <Button href={`/projects/${projectId}/starter`} variant="ghost">
-            <Rocket className="h-4 w-4" />
-            Starter
-          </Button>
-          <Button href={`/projects/${projectId}/board`} variant="ghost">
-            <Columns3 className="h-4 w-4" />
-            Board
-          </Button>
-          <Button href={`/projects/${projectId}/progress`} variant="ghost">
-            <BarChart3 className="h-4 w-4" />
-            Fortschritt
-          </Button>
-          <Button href={`/projects/${projectId}/graph`} variant="ghost">
-            <Network className="h-4 w-4" />
-            Graph
-          </Button>
-          <Button href={`/projects/${projectId}/traceability`} variant="ghost">
-            <GitBranch className="h-4 w-4" />
-            Traceability
-          </Button>
-          {role === "OWNER" && (
-            <Button href={`/projects/${projectId}/settings`} variant="ghost">
-              <Settings className="h-4 w-4" />
-              Einstellungen
-            </Button>
-          )}
-        </div>
-      </header>
+      <ProjectNavBar projectId={projectId} projectName={project.name} role={role} />
 
       {/* Two-column explorer */}
       <ProjectRoleProvider role={role}>

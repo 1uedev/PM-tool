@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
-import Link from "next/link";
 import StarterForm from "@/components/starter/StarterForm.jsx";
+import ProjectNavBar from "@/components/layout/ProjectNavBar.jsx";
 import { STARTER_DEFAULTS } from "@/lib/starterContext.js";
 import { PROJECT_ROLE } from "@/lib/constants.js";
 
@@ -41,20 +41,7 @@ export default async function StarterPage({ params }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
-        <div className="flex items-center gap-2 text-sm">
-          <Link href="/projects" className="text-gray-500 hover:text-gray-900">Projects</Link>
-          <span className="text-gray-300">/</span>
-          <Link href={`/projects/${projectId}`} className="text-gray-500 hover:text-gray-900">
-            {project.name}
-          </Link>
-          <span className="text-gray-300">/</span>
-          <span className="font-medium text-gray-900">PRD Starter</span>
-        </div>
-        <Link href={`/projects/${projectId}`} className="text-sm text-gray-500 hover:text-gray-900">
-          ← Explorer
-        </Link>
-      </header>
+      <ProjectNavBar projectId={projectId} projectName={project.name} role={role} />
 
       <div className="flex-1 overflow-y-auto p-6 max-w-3xl mx-auto w-full">
         <StarterForm

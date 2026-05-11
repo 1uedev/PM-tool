@@ -2,9 +2,8 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
-import Link from "next/link";
-import { ArrowLeft, Network } from "lucide-react";
 import ArtifactGraph from "@/components/graph/ArtifactGraph.jsx";
+import ProjectNavBar from "@/components/layout/ProjectNavBar.jsx";
 
 export async function generateMetadata({ params }) {
   const { projectId } = await params;
@@ -28,21 +27,7 @@ export default async function GraphPage({ params }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Header */}
-      <header className="flex h-14 flex-shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4">
-        <Link
-          href={`/projects/${projectId}`}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {membership.project.name}
-        </Link>
-        <span className="text-gray-300">/</span>
-        <div className="flex items-center gap-1.5">
-          <Network className="h-4 w-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-900">Artifact Graph</span>
-        </div>
-      </header>
+      <ProjectNavBar projectId={projectId} projectName={membership.project.name} role={membership.role} />
 
       {/* Graph canvas — fills remaining height */}
       <div className="flex flex-1 overflow-hidden">

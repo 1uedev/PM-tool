@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
-import Link from "next/link";
 import BoardView from "@/components/board/BoardView.jsx";
+import ProjectNavBar from "@/components/layout/ProjectNavBar.jsx";
 
 export async function generateMetadata({ params }) {
   const { projectId } = await params;
@@ -27,24 +27,7 @@ export default async function BoardPage({ params }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Top bar */}
-      <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
-        <div className="flex items-center gap-2 text-sm">
-          <Link href="/projects" className="text-gray-500 hover:text-gray-900">Projekte</Link>
-          <span className="text-gray-300">/</span>
-          <Link href={`/projects/${projectId}`} className="text-gray-500 hover:text-gray-900">
-            {membership.project.name}
-          </Link>
-          <span className="text-gray-300">/</span>
-          <span className="font-medium text-gray-900">Board</span>
-        </div>
-        <Link
-          href={`/projects/${projectId}`}
-          className="text-sm text-gray-500 hover:text-gray-900"
-        >
-          ← Explorer
-        </Link>
-      </header>
+      <ProjectNavBar projectId={projectId} projectName={membership.project.name} role={membership.role} />
 
       <BoardView projectId={projectId} />
     </div>
