@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderOpen, LayoutDashboard, Users, Globe2, Database, Sparkles } from "lucide-react";
+import { FolderOpen, LayoutDashboard, Users, Globe2, Database, Sparkles, UserCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import LogoutButton from "@/components/auth/LogoutButton.jsx";
@@ -92,6 +92,17 @@ export default function Sidebar({ languages = [], currentLocale = "de" }) {
         {languages.length > 1 && (
           <LanguagePicker languages={languages} currentLocale={currentLocale} />
         )}
+        <Link
+          href="/account"
+          className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors
+            ${pathname === "/account"
+              ? "bg-blue-50 text-blue-700 font-medium"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            }`}
+        >
+          <UserCircle className="h-4 w-4 flex-shrink-0" />
+          <span className="truncate">{session?.user?.name || session?.user?.email || "Konto"}</span>
+        </Link>
         <LogoutButton className="w-full justify-start" />
       </div>
     </aside>

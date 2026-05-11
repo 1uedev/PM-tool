@@ -6,6 +6,7 @@ import Link from "next/link";
 import ProjectForm from "@/components/projects/ProjectForm.jsx";
 import ProjectSettingsActions from "@/components/projects/ProjectSettingsActions.jsx";
 import MembersSection from "@/components/projects/members/MembersSection.jsx";
+import ExportSection from "@/components/projects/ExportSection.jsx";
 
 export const metadata = { title: "Projekteinstellungen — PM Copilot" };
 
@@ -51,6 +52,13 @@ export default async function ProjectSettingsPage({ params }) {
             Mitglieder
           </h2>
           <MembersSection projectId={projectId} isOwner={role === "OWNER"} />
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-sm font-semibold text-gray-700 uppercase tracking-wide">
+            Export
+          </h2>
+          <ExportSection projectId={projectId} projectName={project.name} />
         </section>
 
         {role === "OWNER" && (
