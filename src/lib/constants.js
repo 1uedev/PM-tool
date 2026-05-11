@@ -391,3 +391,17 @@ export const RELATION_SUGGESTIONS = {
     MEASUREMENT_PLAN: "RELATES_TO",
   },
 };
+
+// ─── Marketing / Public Site ───
+
+export const SITE = {
+  name: "PM Copilot",
+  description: "AI-powered product management for structured PRDs, traceability, and contextual AI assistance.",
+};
+
+export const NAV_LINKS = [
+  { label: "Features", href: "/features" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];

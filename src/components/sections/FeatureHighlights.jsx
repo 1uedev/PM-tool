@@ -1,30 +1,30 @@
-import { Zap, BarChart3, Shield, Users, ArrowRight } from "lucide-react";
+import { FolderOpen, GitBranch, Sparkles, History, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import SectionLabel from "@/components/ui/SectionLabel";
-import Button from "@/components/ui/Button";
 
 const features = [
   {
-    icon: Zap,
-    title: "Lightning Deploy",
-    desc: "Push to production in seconds with zero-downtime deployments and automatic rollbacks.",
+    icon: FolderOpen,
+    title: "Structured Explorer",
+    desc: "35 artifact types across 8 domain groups — all in a two-column workspace. Type-specific forms, status tracking, and unsaved-change guards built in.",
     color: "primary",
   },
   {
-    icon: BarChart3,
-    title: "Real-time Analytics",
-    desc: "Understand your users with built-in analytics, heatmaps, and funnel tracking.",
+    icon: GitBranch,
+    title: "Relations & Traceability",
+    desc: "Every link between artifacts is explicit and typed. The traceability view shows coverage per group, gaps to fill, and the full dependency graph.",
     color: "accent",
   },
   {
-    icon: Shield,
-    title: "Enterprise Security",
-    desc: "SOC 2 certified with SSO, RBAC, audit logs, and end-to-end encryption.",
+    icon: Sparkles,
+    title: "AI Assistance",
+    desc: "Per-artifact AI suggestions from Claude or OpenAI — shown in a separate panel, never auto-applied. Upload existing documents and bulk-create artifacts from the content.",
     color: "success",
   },
   {
-    icon: Users,
-    title: "Team Collaboration",
-    desc: "Real-time multiplayer editing, comments, and approval workflows built in.",
+    icon: History,
+    title: "Version History",
+    desc: "Every save creates a new version automatically. Compare, restore, and track exactly what changed and when — for every artifact in the project.",
     color: "amber",
   },
 ];
@@ -42,11 +42,11 @@ export default function FeatureHighlights() {
       <div className="max-w-[1200px] mx-auto text-center">
         <SectionLabel text="Features" />
         <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
-          Everything you need to ship
+          Everything a PM needs in one place
         </h2>
-        <p className="text-slate-400 text-base max-w-[480px] mx-auto mb-14">
-          Powerful tools that work together seamlessly, so your team can focus on
-          what matters.
+        <p className="text-slate-400 text-base max-w-[520px] mx-auto mb-14">
+          From the first problem statement to the launch checklist — structured,
+          connected, and always traceable.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -75,9 +75,12 @@ export default function FeatureHighlights() {
         </div>
 
         <div className="mt-10">
-          <Button variant="outline" href="/features">
+          <Link
+            href="/features"
+            className="inline-flex items-center gap-2 bg-transparent text-white border border-white/20 rounded-lg px-5 py-2.5 text-sm font-semibold no-underline hover:bg-white/5 transition-colors"
+          >
             Explore all features <ArrowRight size={14} />
-          </Button>
+          </Link>
         </div>
       </div>
     </section>

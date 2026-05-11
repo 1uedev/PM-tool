@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, Menu, X } from "lucide-react";
+import { LayoutDashboard, Menu, X } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/constants";
 
 export default function Navbar() {
@@ -16,7 +16,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 no-underline">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <Zap size={18} className="text-white" />
+            <LayoutDashboard size={16} className="text-white" />
           </div>
           <span className="text-xl font-bold text-white tracking-tight">
             {SITE.name}
@@ -26,10 +26,7 @@ export default function Navbar() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => {
-            const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.href);
+            const isActive = pathname.startsWith(link.href);
             return (
               <Link
                 key={link.href}
@@ -45,10 +42,10 @@ export default function Navbar() {
             );
           })}
           <Link
-            href="/contact"
+            href="/login"
             className="bg-primary text-white rounded-lg px-5 py-2 text-sm font-semibold no-underline hover:bg-primary-dark transition-colors"
           >
-            Get Started
+            Sign in
           </Link>
         </div>
 
@@ -74,6 +71,13 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/login"
+            onClick={() => setMenuOpen(false)}
+            className="text-base text-white no-underline py-2 font-semibold"
+          >
+            Sign in →
+          </Link>
         </div>
       )}
     </nav>

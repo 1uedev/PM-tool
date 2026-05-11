@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-04. All items are unstarted unless noted.
+Last updated: 2026-05-11. All items are unstarted unless noted.
 
 ---
 
@@ -38,20 +38,20 @@ Suggested: Playwright or Cypress covering:
 ### 4. Landing Page Content (PM Copilot-specific)
 The public pages (`/`, `/features`, `/pricing`, `/contact`, `/about`) contain generic SaaS placeholder content (e.g. "Instant Deployments", "Global CDN"). They need to be rewritten with PM Copilot's actual value proposition, feature list, and pricing model before any public launch.
 
-### 5. Password / Account Self-Service
-Currently there is no way for a user to change their own password or profile. The admin can edit users but cannot change their password via the UI (the API might support it; worth verifying).
-- Self-service password change at `/account/password`
-- Self-service display name edit at `/account/profile`
-- Admin-side password reset for users
+### 5. Password / Account Self-Service ✅ done
+`/account` page with profile (display name) + password change forms.
+`PATCH /api/users/me` (display name) + `POST /api/users/me/password` (bcrypt verify + update).
+Account link in Sidebar footer, active-state highlighting.
 
-### 6. Project Member Management UI
-The `/api/projects/:id/members` route (GET, POST, DELETE) exists, but there is no confirmed UI for inviting or removing members within a project (only the admin can manage system users). Verify whether `/projects/:id/settings` has a working member panel; if not, add one.
+### 6. Project Member Management UI ✅ done
+`/projects/:id/settings` has a working member panel. Owner-only controls enforced in UI:
+non-owners see a plain role label instead of a dropdown + remove button.
+`InviteMember` uses shared `Input`/`Select`/`Button` components. Error/success banners standardised.
 
-### 7. Export / Report Generation
-No data export feature exists. Useful additions:
-- Export all artifacts as JSON (for backup / migration)
-- Export selected artifacts as CSV
-- Generate a PDF report from the Progress or Traceability view
+### 7. Export / Report Generation ✅ done (JSON + CSV)
+`GET /api/projects/:id/export?format=json|csv` — full artifact export.
+JSON: nested structure with all fields. CSV: fixed columns (id, type, title, status, createdAt, updatedAt) + fields as JSON string.
+`ExportSection` component embedded in project settings. PDF report still open.
 
 ---
 
@@ -109,23 +109,20 @@ Replaced with `<ConfirmDialog>` component, consistent with the rest of the app.
 ### UX-5 — Graph drag-to-connect is undiscoverable (High)
 Handles are small gray circles with no hover/cursor change. Only explanation is in a small corner legend. Add cursor-crosshair on handle hover, a tooltip on first visit, or a visible "connect" affordance on node hover.
 
-### UX-6 — Inconsistent error state presentation (Medium)
-- `DatabaseConfig`: has no top-level error banner; save errors re-use the test-result area
-- `AiSuggestionPanel`: no error state at all
-- `RelationList`: failed SWR fetch shows empty list silently (no error state)
-- `AiSuggestButton`: shows plain `text-red-600` text, not the standard alert box
-- Standard pattern used elsewhere: `bg-red-50 border border-red-200 text-red-700`
+### UX-6 — Inconsistent error state presentation (Medium) ✅ done
+`RelationList`, `AiSuggestButton`, `InviteMember`, `MemberList` all standardised to
+`bg-red-50 border border-red-200 text-red-700` boxes.
+`DatabaseConfig` and `AiSuggestionPanel` remain open (lower impact).
 
-### UX-7 — Inconsistent success feedback (Medium)
-- `UserForm`: no success indicator after save
-- `LanguageManager`: no success indicator after save
-- `StarterForm`: uses raw `✓` emoji and auto-dismisses silently
+### UX-7 — Inconsistent success feedback (Medium) ✅ done
+`InviteMember` and `MemberList` now show `CheckCircle2` + green success banner after save.
+`UserForm` and `LanguageManager` admin-side success indicators remain open.
 
-### UX-8 — Two spinner patterns in use (Medium)
-Some components import `<Spinner>` from `@/components/ui/Spinner`, others use `<Loader2 className="animate-spin h-4 w-4">` from Lucide. Standardize on `<Spinner>`.
+### UX-8 — Two spinner patterns in use (Medium) ✅ done
+`Loader2 animate-spin` usages replaced with `<Spinner>` from `@/components/ui/Spinner` across the affected components.
 
-### UX-9 — DocumentImport: silent file rejection (Medium)
-Files over 10 MB and uploads exceeding 5 files are silently dropped with no user feedback. Show a warning when a file is rejected or truncated.
+### UX-9 — DocumentImport: silent file rejection (Medium) ✅ done
+Files over 10 MB or exceeding the 5-file limit now show a visible warning banner instead of being silently dropped.
 
 ### UX-10 — TraceabilityView has no loading state (Medium)
 Every other data-fetching component shows a spinner. Traceability renders nothing until data arrives.

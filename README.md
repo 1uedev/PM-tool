@@ -39,6 +39,9 @@ Every item in the system is an **Artifact** with a type-specific set of fields, 
 - **Admin panel** — user management (create / edit / deactivate), language management (DE/EN), database configuration, AI provider configuration (provider + model + API key, effective without restart)
 - **Role-based access** — system roles (Admin / User) and project roles (Owner / Editor / Viewer) with full enforcement in API and UI
 - **Multilingual** — next-intl, cookie-based locale, no URL prefix; currently DE + EN
+- **Account self-service** — users can update their display name and change their password at `/account`; account link in sidebar footer
+- **Export** — download all project artifacts as JSON (full nested structure) or CSV (fixed columns + fields as JSON) from project settings
+- **Relation pickers** — key fields (target user, actor, target segment, etc.) are formal relation pickers linking to Persona artifacts, not free-text; links appear automatically in graph and traceability
 
 ### Architecture notes for AI assistants
 
@@ -1113,5 +1116,67 @@ A full codebase review identified and fixed 9 bugs across all severity levels.
 - `src/app/(dashboard)/projects/[projectId]/page.js` — Import button added
 - `next.config.mjs` — `pdf-parse` and `mammoth` added to `serverExternalPackages`
 - `USER_MANUAL.md` — Section 14: Document Import added (v1.1)
+
+---
+
+### Extension Step 16 — Formal Relation Pickers (ArtifactRefField) ✅
+
+Key free-text fields that asked "who is the target user?" were replaced with live relation pickers that create formal `Relation` records in the database — so persona links appear automatically in the artifact graph, traceability view, and relation badges.
+
+**New component:** `src/components/artifacts/fields/ArtifactRefField.jsx`
+- Fetches existing relations + all project artifacts via SWR
+- Renders linked items as colored chips with × remove button
+- Dropdown filtered to the specified `targetTypes`; creates/deletes Relation records via the existing API
+
+**Updated field components:**
+
+| Component | Field replaced | Linked types |
+|---|---|---|
+| `ProductVisionFields` | `targetUsers` textarea | USER_PERSONA, BUYER_PERSONA |
+| `ProductVisionFields` | `valueProposition` textarea | VALUE_PROPOSITION |
+| `UseCaseFields` | `actor` input | USER_PERSONA, BUYER_PERSONA |
+| `ValuePropositionFields` | `targetCustomer` input | USER_PERSONA, BUYER_PERSONA |
+| `UserStoryFields` | `role` row | USER_PERSONA, BUYER_PERSONA |
+| `UserJourneyFields` | `actor` input | USER_PERSONA, BUYER_PERSONA |
+| `OpportunityFields` | `targetAudience` input | USER_PERSONA, BUYER_PERSONA |
+| `PositioningFields` | `targetSegment` input | USER_PERSONA, BUYER_PERSONA |
+
+---
+
+### Extension Step 17 — UX Polish Pass ✅
+
+- **Hydration fix:** `ExplorerTreeGroup` outer toggle changed from `<button>` to `<div role="button" tabIndex={0}>` — the `<button>` inside `<button>` HTML violation caused a React hydration error in the browser
+- **Error states (UX-6):** `RelationList`, `AiSuggestButton`, `InviteMember`, `MemberList` all standardised to `bg-red-50 border border-red-200 text-red-700` boxes
+- **Success feedback (UX-7):** `InviteMember` + `MemberList` show `CheckCircle2` + green banner after successful operations
+- **Spinner standardisation (UX-8):** `Loader2 animate-spin` usages replaced with `<Spinner>` component throughout
+- **DocumentImport rejection feedback (UX-9):** files over 10 MB or exceeding the 5-file limit now show a visible warning banner
+
+---
+
+### Extension Step 18 — Member Management: Owner-Only Controls ✅
+
+Non-owners previously saw the role dropdown and remove button in project settings — clicking either resulted in a 403 error. Fixed by threading `isOwner` from the settings page down through `MembersSection` → `MemberList`: non-owners see a plain role label. `InviteMember` rewritten to use shared `Input`/`Select`/`Button` components.
+
+---
+
+### Extension Step 19 — Account Self-Service ✅
+
+**API:**
+- `GET/PATCH /api/users/me` — read and update display name
+- `POST /api/users/me/password` — verify current password (bcrypt), hash and save new password; returns field-level error on mismatch
+
+**UI:**
+- `/account` — two-section form: Profile (name + disabled email) and Change Password (current / new / confirm with client-side equality check)
+- Sidebar footer — account link showing user name or email, with active-state highlight
+
+---
+
+### Extension Step 20 — Artifact Export (JSON + CSV) ✅
+
+**API:** `GET /api/projects/:id/export?format=json|csv`
+- **JSON:** full nested structure `{ project, artifacts: [...with fields...] }`
+- **CSV:** fixed columns (id, type, type_label, title, status, createdAt, updatedAt, fields) where `fields` is a JSON string
+
+**UI:** `ExportSection` component in project settings — two buttons with per-format loading states; uses fetch → blob → `createObjectURL` → anchor click to trigger the browser download.
 
 ---

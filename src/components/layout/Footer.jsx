@@ -1,26 +1,29 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { SITE } from "@/lib/constants";
 
 const footerSections = [
-  { title: "Product", links: [
-    { label: "Features", href: "/features" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Changelog", href: "#" },
-    { label: "Docs", href: "#" },
-  ]},
-  { title: "Company", links: [
-    { label: "About", href: "/about" },
-    { label: "Blog", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Contact", href: "/contact" },
-  ]},
-  { title: "Legal", links: [
-    { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
-    { label: "Security", href: "#" },
-    { label: "GDPR", href: "#" },
-  ]},
+  {
+    title: "Product",
+    links: [
+      { label: "Features", href: "/features" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Sign in", href: "/login" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "GitHub", href: "https://github.com" },
+    ],
+  },
 ];
 
 export default function Footer() {
@@ -31,7 +34,7 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Zap size={14} className="text-white" />
+              <LayoutDashboard size={14} className="text-white" />
             </div>
             <span className="text-base font-bold text-white">{SITE.name}</span>
           </div>
@@ -63,7 +66,7 @@ export default function Footer() {
       </div>
 
       <div className="max-w-[1200px] mx-auto mt-10 pt-6 border-t border-white/5 text-center text-slate-500 text-xs">
-        &copy; {new Date().getFullYear()} {SITE.name} Inc. All rights reserved.
+        &copy; {new Date().getFullYear()} {SITE.name}. Free and open source.
       </div>
     </footer>
   );

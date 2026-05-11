@@ -1,6 +1,6 @@
 # PM Copilot — Completed Work
 
-Last updated: 2026-05-04. Derived from git history (`a2b3fde` is HEAD on `main`).
+Last updated: 2026-05-11. Derived from git history.
 
 ---
 
@@ -125,6 +125,106 @@ Expanded from 6 original types to 35 across 8 groups:
 
 ---
 
+### Extension Step 16 — Formal Relation Pickers (ArtifactRefField) ✅
+
+**Goal:** Replace free-text fields that ask "who is the target user?" with live relation pickers that create formal Relation records — so persona links appear automatically in the graph, traceability view, and relation badges.
+
+**New component — `ArtifactRefField`:**
+- Multi-select relation picker: fetches existing relations + all project artifacts via SWR
+- Renders linked items as colored chips (group color, × remove button)
+- Dropdown to pick additional artifacts, filtered to the specified `targetTypes` array
+- Creates/deletes `Relation` records via the existing `/relations` API
+- Shows "Save first to link artifacts" placeholder when `artifactId` is null (new artifact, not yet saved)
+
+**Field components updated (7 types):**
+
+| Component | Replaced field | Target types |
+|---|---|---|
+| `ProductVisionFields` | `targetUsers` textarea | USER_PERSONA, BUYER_PERSONA |
+| `ProductVisionFields` | `valueProposition` textarea | VALUE_PROPOSITION |
+| `UseCaseFields` | `actor` text input | USER_PERSONA, BUYER_PERSONA |
+| `ValuePropositionFields` | `targetCustomer` text input | USER_PERSONA, BUYER_PERSONA |
+| `UserStoryFields` | `role` StoryRow | USER_PERSONA, BUYER_PERSONA |
+| `UserJourneyFields` | `actor` text input | USER_PERSONA, BUYER_PERSONA |
+| `OpportunityFields` | `targetAudience` text input | USER_PERSONA, BUYER_PERSONA |
+| `PositioningFields` | `targetSegment` text input | USER_PERSONA, BUYER_PERSONA |
+
+**`ArtifactForm`** passes `projectId` and `artifactId` down to every field component.
+
+**`src/lib/artifactFields.js`** — removed the 8 replaced field definitions from `ARTIFACT_FIELD_DEFS`.
+
+---
+
+### Extension Step 17 — UX Polish Pass ✅
+
+**Hydration fix — ExplorerTreeGroup button-in-button:**
+- `<button>` containing another `<button>` is invalid HTML and caused a React hydration error
+- Outer group toggle changed to `<div role="button" tabIndex={0}>` with `onClick` + `onKeyDown` for keyboard accessibility (`Enter`/`Space`)
+
+**Error state standardisation (UX-6):**
+- `RelationList` — failed SWR fetch now shows a red error box instead of a silent empty list
+- `AiSuggestButton` — error response now rendered as a standard red alert box
+- `InviteMember` + `MemberList` — all error paths use `bg-red-50 border border-red-200 text-red-700`
+
+**Success feedback (UX-7):**
+- `InviteMember` — shows `CheckCircle2` + green banner after successful invite
+- `MemberList` — shows green banner after role change
+
+**Spinner standardisation (UX-8):**
+- All `<Loader2 className="animate-spin h-4 w-4">` usages replaced with `<Spinner>` from `@/components/ui/Spinner`
+
+**DocumentImport file rejection feedback (UX-9):**
+- Files over 10 MB and uploads exceeding 5 files now show a visible warning banner
+
+---
+
+### Extension Step 18 — Project Member Management Owner-Only Controls ✅
+
+**Problem:** Non-owners could see the role change dropdown and remove button in `/projects/:id/settings`. Clicking either would result in a 403, but the controls were still shown and confusing.
+
+**Fix:**
+- `MembersSection` now passes `isOwner` prop to `MemberList`
+- `MemberList` conditionally renders the role `<select>` and remove button only when `isOwner` is true
+- Non-owners see a plain `<span>` with the translated role label
+- `InviteMember` component rewritten to use shared `Input`, `Select`, `Button` primitives (was raw HTML elements)
+
+---
+
+### Extension Step 19 — Account Self-Service ✅
+
+**Goal:** Let users update their display name and change their own password without admin involvement.
+
+**New API endpoints:**
+- `GET  /api/users/me` — returns current user (id, email, name, systemRole, createdAt)
+- `PATCH /api/users/me` — updates display name; Zod validation, auth required
+- `POST  /api/users/me/password` — verifies `currentPassword` via `bcrypt.compare`, then hashes and saves `newPassword` (min 8 chars); returns field-level error `{ currentPassword: ["Aktuelles Passwort ist falsch"] }` on mismatch
+
+**New UI:**
+- `/account` — server-rendered page fetching current user via session + Prisma
+- `AccountForm` client component with two sections:
+  - **Profile**: display name + disabled email field, PATCH on submit
+  - **Change password**: current / new / confirm fields with client-side equality check before API call
+  - Both sections use `Banner` sub-component for success (green + CheckCircle2) and error (red) states
+- `Sidebar` footer — account link above LogoutButton shows `name || email || "Konto"`, active state when on `/account`
+
+---
+
+### Extension Step 20 — Artifact Export (JSON + CSV) ✅
+
+**Goal:** Let users download all project artifacts for backup, migration, or offline analysis.
+
+**New API endpoint:**
+- `GET /api/projects/:id/export?format=json|csv` — auth + project access required
+- **JSON format:** nested object `{ project: { id, name, description, status }, artifacts: [...] }` with full fields; `Content-Disposition: attachment; filename="<slug>_export.json"`
+- **CSV format:** 8 fixed columns (`id`, `type`, `type_label`, `title`, `status`, `createdAt`, `updatedAt`, `fields`) with `fields` serialised as a JSON string; `Content-Disposition: attachment; filename="<slug>_export.csv"`
+
+**New UI:**
+- `ExportSection` component — two buttons (JSON and CSV) with per-format loading state
+- Uses fetch → blob → `URL.createObjectURL` → anchor click pattern to honour `Content-Disposition`
+- Embedded in `/projects/:id/settings` as a new "Export" section between Members and Actions
+
+---
+
 ## Bug-fix Passes
 
 | Commit | Fix |
@@ -140,7 +240,7 @@ Expanded from 6 original types to 35 across 8 groups:
 
 ## Current State
 
-- Branch: `main`, clean (only `.claude/settings.local.json` is uncommitted)
-- Database: `./dev.db` (root-level, 172 K) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean build after `a2b3fde`
+- Branch: `main`, clean
+- Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
+- Build: last verified clean after post-MVP extension work (Steps 16–20)
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)

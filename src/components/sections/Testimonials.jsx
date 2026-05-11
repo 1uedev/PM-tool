@@ -7,22 +7,22 @@ import SectionLabel from "@/components/ui/SectionLabel";
 const testimonials = [
   {
     name: "Sarah Chen",
-    role: "CTO, TechFlow",
-    text: "Launchpad cut our development time in half. The analytics alone paid for the entire platform.",
+    role: "Senior PM, TechFlow",
+    text: "PM Copilot replaced our entire Notion + Confluence setup for PRD work. Every requirement is now traceable back to a persona and a validated hypothesis.",
     stars: 5,
     avatar: "SC",
   },
   {
     name: "Marcus Rivera",
-    role: "Founder, DataSync",
-    text: "We went from idea to production in two weeks. The onboarding was seamless.",
+    role: "Head of Product, DataSync",
+    text: "The document import feature cut our onboarding time in half. We uploaded our existing PRD and had 20 structured artifacts in minutes.",
     stars: 5,
     avatar: "MR",
   },
   {
     name: "Lisa Müller",
-    role: "VP Eng, CloudBase",
-    text: "Best developer experience I've seen. The team collaboration features are game-changing.",
+    role: "VP Product, CloudBase",
+    text: "The AI suggestion panel is exactly right — it never auto-applies anything, you always review and accept each suggestion. That's the correct approach for PM work.",
     stars: 5,
     avatar: "LM",
   },
@@ -34,7 +34,7 @@ export default function Testimonials() {
   useEffect(() => {
     const timer = setInterval(
       () => setActive((i) => (i + 1) % testimonials.length),
-      4000
+      4500
     );
     return () => clearInterval(timer);
   }, []);
@@ -44,30 +44,22 @@ export default function Testimonials() {
   return (
     <section className="bg-dark-muted py-20 px-6">
       <div className="max-w-[640px] mx-auto text-center">
-        <SectionLabel text="Testimonials" />
+        <SectionLabel text="What PMs say" />
         <h2 className="text-3xl font-bold text-white mb-12">
-          Loved by developers
+          Built for the way PMs actually work
         </h2>
 
         <div className="bg-dark rounded-2xl p-10 border border-white/5 min-h-[180px]">
-          {/* Stars */}
           <div className="flex justify-center gap-1 mb-4">
             {Array.from({ length: t.stars }).map((_, i) => (
-              <Star
-                key={i}
-                size={16}
-                fill="#f59e0b"
-                className="text-amber-500"
-              />
+              <Star key={i} size={16} fill="#f59e0b" className="text-amber-500" />
             ))}
           </div>
 
-          {/* Quote */}
           <p className="text-white text-lg leading-relaxed italic mb-6">
             &ldquo;{t.text}&rdquo;
           </p>
 
-          {/* Author */}
           <div className="flex items-center justify-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-sm font-bold">
               {t.avatar}
@@ -79,7 +71,6 @@ export default function Testimonials() {
           </div>
         </div>
 
-        {/* Dots */}
         <div className="flex justify-center gap-2 mt-5">
           {testimonials.map((_, i) => (
             <button
