@@ -117,9 +117,13 @@ AI_MAX_TOKENS=2048
 ### Useful Scripts
 
 ```bash
-npm run db:seed    # Seed demo data
-npm run db:reset   # Reset DB and re-seed
-npx prisma studio  # Open database browser
+npm run db:seed       # Seed demo data
+npm run db:reset      # Reset DB and re-seed
+npx prisma studio     # Open database browser
+
+npm test              # Run unit test suite (99 tests)
+npm run test:watch    # Vitest watch mode
+npm run test:coverage # Coverage report (HTML + text)
 ```
 
 ---
@@ -1178,5 +1182,23 @@ Non-owners previously saw the role dropdown and remove button in project setting
 - **CSV:** fixed columns (id, type, type_label, title, status, createdAt, updatedAt, fields) where `fields` is a JSON string
 
 **UI:** `ExportSection` component in project settings — two buttons with per-format loading states; uses fetch → blob → `createObjectURL` → anchor click to trigger the browser download.
+
+---
+
+### Extension Step 21 — Landing Page Rewrite ✅
+
+All five public pages replaced with PM Copilot-specific content. Root `/` now shows the full landing page for unauthenticated visitors (authenticated users redirect to `/projects`). `SITE` and `NAV_LINKS` constants added — Navbar and Footer were importing them but they didn't exist, so both components were broken. Pages updated: Hero, FeatureHighlights, Testimonials, LogoBar, CtaBanner, `/features`, `/pricing`, `/about`, `/contact`.
+
+---
+
+### Extension Step 22 — Unit Test Suite (Vitest) ✅
+
+**99 tests, 10 files, all passing.** First test coverage in the project.
+
+**Setup:** `vitest` + `@vitest/coverage-v8` + `@testing-library/react` + `jsdom`. Global `next/server` mock in `src/__tests__/setup.js`. Path alias `@/` wired via `vitest.config.js`.
+
+**Coverage:** all Zod validators, `errors.js`, `validateBody`/`validateParams`, `requireAuth` / `requireAdmin` / `requireProjectAccess` / `requireArtifactAccess` middleware (Prisma and next-auth mocked with `vi.mock`), and `parseExtractionResponse` / `buildExtractionPrompt` from the document extractor.
+
+**Commands:** `npm test` · `npm run test:watch` · `npm run test:coverage`
 
 ---

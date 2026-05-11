@@ -238,9 +238,61 @@ Expanded from 6 original types to 35 across 8 groups:
 
 ---
 
+---
+
+### Extension Step 21 — Landing Page Rewrite ✅
+
+All public marketing pages replaced with PM Copilot-specific content (previously showed generic "Launchpad" / deployment platform placeholder copy).
+
+- Root `/` — now shows the full landing page for unauthenticated visitors; authenticated users still redirect to `/projects`
+- `Hero` — "Structure your product from problem to launch", CTAs to `/login` and `/features`
+- `LogoBar` — 8 domain group names instead of fake company logos
+- `FeatureHighlights` — Explorer, Relations & Traceability, AI Assistance, Version History
+- `Testimonials` — PM-relevant quotes
+- `CtaBanner` — "Start structuring your product today" → `/login`
+- `Navbar` — `LayoutDashboard` icon, "Sign in" → `/login`; `SITE` and `NAV_LINKS` exports added to `constants.js` (were missing, so Navbar/Footer were broken)
+- `Footer` — dead `#` hrefs removed, PM Copilot copy
+- `/features` — 6 detailed feature sections (Explorer, Relations & Graph, AI Assistance, Version History, Views, Admin & Export)
+- `/pricing` — single "Free. Forever. Self-hosted." plan with feature checklist and FAQ
+- `/about` — problem framing, 4 design principles, tech stack grid
+- `/contact` — updated email, PM Copilot copy
+
+---
+
+### Extension Step 22 — Unit Test Suite (Vitest) ✅
+
+First test suite in the project — 99 tests across 10 files, all passing.
+
+**Setup:**
+- `vitest` + `@vitest/coverage-v8` + `@testing-library/react` + `jsdom` installed
+- `vitest.config.js` with `@/` path alias and node environment
+- `src/__tests__/setup.js` — global `next/server` mock so `NextResponse.json` returns a plain inspectable object
+
+**Test files and coverage:**
+
+| File | Tests | What's covered |
+|---|---|---|
+| `lib/errors.test.js` | 8 | `errorResponse` / `successResponse` shape, status, details |
+| `lib/validators/artifact.test.js` | 12 | Type enum, status enum, title length, defaults |
+| `lib/validators/project.test.js` | 9 | Name/description limits, partial updates |
+| `lib/validators/comment.test.js` | 5 | Empty, max 2000, boundary |
+| `lib/validators/relation.test.js` | 6 | All 4 relation types, missing fields |
+| `lib/validators/user.test.js` | 14 | Email, password min-8, `formatUserName`, `safeUser` |
+| `lib/validators/index.test.js` | 7 | `validateBody` (bad JSON, schema failure), `validateParams` |
+| `lib/middleware/project-access.test.js` | 10 | Role hierarchy, archived guard, soft-delete filter |
+| `lib/middleware/auth-guard.test.js` | 8 | No session, stale JWT → 401, non-admin → 403 |
+| `lib/ai/document-extractor.test.js` | 20 | Parse, filter, sanitise, title cap, truncation, buildPrompt |
+
+**Scripts:** `npm test` · `npm run test:watch` · `npm run test:coverage`
+
+**Still open:** RTL component tests (`ArtifactForm`), API route integration tests, E2E flows.
+
+---
+
 ## Current State
 
-- Branch: `main`, clean
+- Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean after post-MVP extension work (Steps 16–20)
+- Build: last verified clean (`40dc0df`)
+- Tests: 99 passing, `npm test`
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)

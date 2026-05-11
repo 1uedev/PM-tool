@@ -6,15 +6,12 @@ Last updated: 2026-05-11. All items are unstarted unless noted.
 
 ## High Priority
 
-### 1. Test Suite (Vitest + React Testing Library)
-The spec mandates Vitest + RTL; no test files exist anywhere in the repo.
-Items to cover at minimum:
-- `requireAuth` / `requireProjectAccess` / `requireAdmin` middleware
-- Zod validators (`artifact.js`, `project.js`, `comment.js`, `relation.js`)
-- Artifact field serialization/deserialization helpers
-- `ArtifactForm` save/dirty logic
-- `DocumentImport` proposal parsing (`parseExtractionResponse`)
-- API routes: auth, project CRUD, artifact CRUD (using in-memory SQLite or test DB)
+### 1. Test Suite (Vitest + React Testing Library) — partially done ✅ lib layer
+99 unit tests across 10 files covering middleware, all validators, errors, and document extractor.
+Still open:
+- `ArtifactForm` save/dirty logic (RTL component test)
+- API route integration tests (in-memory SQLite or test DB)
+- E2E flows (see item 3)
 
 ### 2. Responsive Design + Accessibility Pass
 Sprint 4 Step 7 from the original spec was never explicitly committed.
@@ -35,8 +32,8 @@ Suggested: Playwright or Cypress covering:
 
 ## Medium Priority
 
-### 4. Landing Page Content (PM Copilot-specific)
-The public pages (`/`, `/features`, `/pricing`, `/contact`, `/about`) contain generic SaaS placeholder content (e.g. "Instant Deployments", "Global CDN"). They need to be rewritten with PM Copilot's actual value proposition, feature list, and pricing model before any public launch.
+### 4. Landing Page Content (PM Copilot-specific) ✅ done
+All public pages rewritten with PM Copilot content. Root `/` now shows the landing page for unauthenticated visitors. Navbar/Footer wired up (SITE/NAV_LINKS were missing). Features, Pricing, About, Contact all updated.
 
 ### 5. Password / Account Self-Service ✅ done
 `/account` page with profile (display name) + password change forms.
