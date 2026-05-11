@@ -1202,3 +1202,15 @@ All five public pages replaced with PM Copilot-specific content. Root `/` now sh
 **Commands:** `npm test` · `npm run test:watch` · `npm run test:coverage`
 
 ---
+
+### Extension Step 23 — Unified Project Navigation (ProjectNavBar) ✅
+
+Replaced 7 duplicated inline `<header>` blocks across all project sub-pages with a single shared `ProjectNavBar` client component (`src/components/layout/ProjectNavBar.jsx`).
+
+**Two-row layout:**
+- **Row 1** — `Projekte / {projectName}` breadcrumb (left); Search, Importieren (non-VIEWER), Einstellungen (OWNER) utility actions (right)
+- **Row 2** — Tab strip: Explorer · Starter · Board · Fortschritt · Graph · Traceability with `border-b-2 border-blue-600` active-state highlight driven by `usePathname()`
+
+**Pages updated:** Explorer, Board, Fortschritt, Graph, Traceability, Starter, Import. Also fixed Starter breadcrumb "Projects" → "Projekte".
+
+---

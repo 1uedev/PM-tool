@@ -1,6 +1,6 @@
 # PM Copilot — Completed Work
 
-Last updated: 2026-05-11. Derived from git history.
+Last updated: 2026-05-12. Derived from git history.
 
 ---
 
@@ -289,10 +289,26 @@ First test suite in the project — 99 tests across 10 files, all passing.
 
 ---
 
+### Extension Step 23 — Unified Project Navigation (ProjectNavBar) ✅
+
+**Problem:** Every project sub-page had its own inline `<header>` with inconsistent content. The Explorer page crammed 8 buttons into one row with no active-state indication. Other pages (Board, Graph, Traceability, etc.) showed only a `← Explorer` back-link with no way to jump between views directly.
+
+**New component — `ProjectNavBar`** (`src/components/layout/ProjectNavBar.jsx`):
+- Client component using `usePathname()` for active-tab detection
+- **Row 1** — breadcrumb (`Projekte / {projectName}`) on left; Search, Importieren (non-VIEWER), Einstellungen (OWNER) on right
+- **Row 2** — tab strip: Explorer · Starter · Board · Fortschritt · Graph · Traceability; active tab has `border-b-2 border-blue-600 text-blue-700`
+- Project name truncates at 240px to prevent overflow on long names
+
+**Pages updated (7 total):** Explorer, Board, Fortschritt, Graph, Traceability, Starter, Import
+
+**Also fixed:** Starter page breadcrumb showed "Projects" (English) — corrected to "Projekte".
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (`40dc0df`)
+- Build: last verified clean (`cb53d7b`)
 - Tests: 99 passing, `npm test`
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)

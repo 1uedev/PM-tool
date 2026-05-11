@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-11. All items are unstarted unless noted.
+Last updated: 2026-05-12. All items are unstarted unless noted.
 
 ---
 
@@ -84,6 +84,13 @@ The Database Config UI exists, but the actual Prisma migration flow for switchin
 ---
 
 ## UX/UI Fixes (from audit 2026-05-04)
+
+### UX-0 — Project header overflow + no active-state on navigation (High) ✅ done
+Explorer page crammed 8 ghost buttons into one row with no indication of current view. Other pages showed only `← Explorer`.
+Replaced all 7 inline `<header>` blocks with shared `ProjectNavBar` client component:
+- Row 1: breadcrumb + utility actions (Search, Importieren, Einstellungen)
+- Row 2: tab strip with `border-b-2 border-blue-600` active highlight
+Also fixed: "+" button for Importieren renamed to Importieren (German), Starter page "Projects" → "Projekte".
 
 ### UX-1 — Language fragmentation (Critical)
 `TraceabilityView` and `ArtifactGraph`/`GraphRelationDialog` are entirely in English while the rest of the app is German. `constants.js` type/status/relation labels are English and appear directly in the UI.
