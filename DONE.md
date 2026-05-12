@@ -365,12 +365,36 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+### Extension Step 25 — Expanded Test Suite (RTL + API Integration) ✅
+
+**Goal:** Extend the Vitest suite beyond the lib layer to cover the main form component and the three core API route files.
+
+**New test files (4):**
+
+| File | Tests | What's covered |
+|---|---|---|
+| `__tests__/components/ArtifactForm.test.jsx` | 20 | Create mode (title required, POST + navigate, network error), Edit mode (PATCH + field merge, dirty flag, save feedback, field-level + global API errors, reset on artifact swap), VIEWER role (disabled inputs + hidden save) |
+| `__tests__/api/projects.test.js` | 10 | GET /api/projects (401, list with role+artifactCount, _count stripped, 500), POST (401, 400 missing/empty name, 201 with OWNER member, 500) |
+| `__tests__/api/artifacts.test.js` | 10 | GET list (401, 403, list, type-filter, 500), POST (403, 400 no-type/empty-title, 201 with initial version, 500) |
+| `__tests__/api/artifact.test.js` | 11 | GET (401, 404, fields parsed, fields already object), PATCH (403, 400 invalid status, update+version increment, field merge, 500), DELETE (403, 404, soft-delete, 500) |
+
+**Total suite: 150 tests, 14 files, all passing.**
+
+**Key engineering decisions:**
+- `// @vitest-environment jsdom` docblock on `ArtifactForm.test.jsx` — overrides global node environment per file
+- `vi.hoisted()` for `mockPush`/`mockBack`/`mockMutate` — mock values hoisted before `vi.mock()` factories run
+- Async `vi.mock()` factories with `await import("react")` + `React.createElement` for `DirtyFormContext.js` and `ProjectRoleContext.js` — avoids Vite 8 Oxc refusing to parse JSX in `.js` extension files
+- `PARAMS = { params: Promise.resolve({...}) }` in all API tests — Next.js 15 App Router `params` is a Promise
+- `vitest.config.js` updated: `plugins: [react()]`, `environmentMatchGlobs: [["src/__tests__/components/**", "jsdom"]]`
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 24)
-- Tests: 99 passing, `npm test`
+- Build: last verified clean (Step 25)
+- Tests: 150 passing, `npm test`
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 1–5, 7–11
+- Remaining open work: TODO.md items 1 (E2E only), 2–5, 7–11

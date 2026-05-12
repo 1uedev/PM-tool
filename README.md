@@ -121,7 +121,7 @@ npm run db:seed       # Seed demo data
 npm run db:reset      # Reset DB and re-seed
 npx prisma studio     # Open database browser
 
-npm test              # Run unit test suite (99 tests)
+npm test              # Run unit test suite (150 tests)
 npm run test:watch    # Vitest watch mode
 npm run test:coverage # Coverage report (HTML + text)
 ```
@@ -1240,5 +1240,36 @@ Remaining audit items resolved:
 - **UX-16** — `rounded-md` → `rounded-lg` on RelationList and VersionList action buttons. `rounded-xl` for cards and dialogs is intentional.
 
 All 17 items (UX-0 through UX-16) are now closed.
+
+---
+
+### Extension Step 24 — Rich Text Editor for Long-Form Fields ✅
+
+Prose/narrative fields replaced from plain `<textarea>` to a Tiptap-powered rich text editor — without any schema migration.
+
+**New component — `RichTextarea`** (`src/components/ui/RichTextarea.jsx`): minimal toolbar (Bold · Italic · BulletList · OrderedList), toolbar hidden in read-only mode, loaded via `next/dynamic` with `ssr: false`. External value changes sync via `editor.commands.setContent(value, false)` — the `false` flag prevents re-triggering `onUpdate`.
+
+**`FieldTextarea`** in `FieldHelpers.jsx` gains a `rich` boolean prop. When `true` it renders `RichTextarea`; both calling conventions (key-based and value-based) work unchanged.
+
+**34 field targets across 24 components** updated to `rich={true}`. Kept as plain text: `flow` (Use Case, numbered steps), `acceptanceCriteria` (FunctionalRequirement, `-` bullet format), `keyResults` (KPI/OKR, `KR1/KR2/KR3`), `steps` (UserJourney, `N. Schritt:` format).
+
+**Storage:** HTML. Existing plain-text data loads transparently — Tiptap renders it as an unformatted paragraph.
+
+---
+
+### Extension Step 25 — Expanded Test Suite (RTL + API Integration) ✅
+
+Extended the Vitest suite from 99 to **150 tests across 14 files**.
+
+**New test files:**
+
+| File | Tests | Coverage |
+|---|---|---|
+| `__tests__/components/ArtifactForm.test.jsx` | 20 | Create/edit/dirty-flag/VIEWER-role using React Testing Library |
+| `__tests__/api/projects.test.js` | 10 | GET list + POST create with role propagation |
+| `__tests__/api/artifacts.test.js` | 10 | GET list + POST create with initial version |
+| `__tests__/api/artifact.test.js` | 11 | GET/PATCH/DELETE for single artifact, field merge, soft-delete, version increment |
+
+**Notable:** API tests use `{ params: Promise.resolve({...}) }` (Next.js 15 App Router `params` is async). Component tests use `vi.hoisted()` for router mocks and async `vi.mock()` factories with `React.createElement` to avoid Vite 8 Oxc refusing JSX in `.js` context files.
 
 ---

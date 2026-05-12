@@ -1,16 +1,16 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-13. All items are unstarted unless noted.
+Last updated: 2026-05-14. All items are unstarted unless noted.
 
 ---
 
 ## High Priority
 
-### 1. Test Suite (Vitest + React Testing Library) — partially done ✅ lib layer
-99 unit tests across 10 files covering middleware, all validators, errors, and document extractor.
+### 1. Test Suite (Vitest + React Testing Library) — partially done ✅ lib + RTL + API
+150 tests across 14 files. New coverage since Step 22:
+- `ArtifactForm` RTL component tests (20 tests — create/edit/dirty/VIEWER role)
+- API route integration tests: `artifacts` (10), `artifact` (11), `projects` (10)
 Still open:
-- `ArtifactForm` save/dirty logic (RTL component test)
-- API route integration tests (in-memory SQLite or test DB)
 - E2E flows (see item 3)
 
 ### 2. Responsive Design + Accessibility Pass
