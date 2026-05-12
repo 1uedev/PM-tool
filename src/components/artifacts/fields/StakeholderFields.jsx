@@ -64,6 +64,7 @@ export default function StakeholderFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What does this person own or decide? What are they accountable for?"
           rows={3}
+          rich
         />
       </FieldGroup>
 

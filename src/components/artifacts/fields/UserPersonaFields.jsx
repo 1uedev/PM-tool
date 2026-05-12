@@ -22,6 +22,7 @@ export default function UserPersonaFields({ fields, onChange, disabled }) {
           onChange={onChange}
           placeholder="Describe the key goals and motivations of this persona…"
           rows={4}
+          rich
           disabled={disabled}
         />
       </FieldGroup>
@@ -34,6 +35,7 @@ export default function UserPersonaFields({ fields, onChange, disabled }) {
           onChange={onChange}
           placeholder="What problems, obstacles, or frustrations does this persona face?…"
           rows={4}
+          rich
           disabled={disabled}
         />
       </FieldGroup>
@@ -46,6 +48,7 @@ export default function UserPersonaFields({ fields, onChange, disabled }) {
           onChange={onChange}
           placeholder="Describe the life and work context of this persona…"
           rows={3}
+          rich
           disabled={disabled}
         />
       </FieldGroup>

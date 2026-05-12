@@ -12,6 +12,7 @@ export default function AssumptionFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="State the assumption clearly and specifically. What are we treating as true without full evidence?"
           rows={3}
+          rich
         />
       </div>
 
@@ -23,6 +24,7 @@ export default function AssumptionFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="Why are we making this assumption? What evidence or reasoning supports it?"
           rows={3}
+          rich
         />
       </FieldGroup>
 
@@ -36,6 +38,7 @@ export default function AssumptionFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What happens to the plan if this assumption turns out to be false?"
           rows={3}
+          rich
         />
       </FieldGroup>
 
@@ -48,6 +51,7 @@ export default function AssumptionFields({ fields, onChange, disabled }) {
             disabled={disabled}
             placeholder="What test, research, or data would confirm or disprove this?"
             rows={3}
+            rich
           />
         </FieldGroup>
         <FieldGroup>

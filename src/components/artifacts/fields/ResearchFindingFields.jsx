@@ -5,7 +5,7 @@ export default function ResearchFindingFields({ fields, onChange, disabled }) {
     <div className="flex flex-col gap-5">
       <FieldGroup>
         <FieldLabel hint="Die wichtigste Erkenntnis in 1–2 Sätzen">Kernaussage / Insight</FieldLabel>
-        <FieldTextarea fieldKey="insight" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="insight" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Was haben wir herausgefunden? Was ist die zentrale Erkenntnis?" rows={3} />
       </FieldGroup>
 
@@ -26,7 +26,7 @@ export default function ResearchFindingFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Was ändert sich im Produkt oder in der Strategie?">Implikationen fürs Produkt</FieldLabel>
-        <FieldTextarea fieldKey="implications" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="implications" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Was bedeutet dieses Finding für uns? Was sollten wir tun oder nicht tun?" rows={3} />
       </FieldGroup>
     </div>

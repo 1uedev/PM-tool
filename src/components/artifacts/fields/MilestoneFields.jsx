@@ -13,6 +13,7 @@ export default function MilestoneFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What does reaching this milestone mean? What state will the project be in?"
           rows={3}
+          rich
         />
       </FieldGroup>
 
@@ -47,6 +48,7 @@ export default function MilestoneFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What must be true for this milestone to be considered complete? List measurable conditions."
           rows={3}
+          rich
         />
       </FieldGroup>
 

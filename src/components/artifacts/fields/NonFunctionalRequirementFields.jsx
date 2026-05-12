@@ -5,7 +5,7 @@ export default function NonFunctionalRequirementFields({ fields, onChange, disab
     <div className="flex flex-col gap-5">
       <FieldGroup>
         <FieldLabel hint="Welche nicht-funktionale Eigenschaft ist gefordert?">Beschreibung</FieldLabel>
-        <FieldTextarea fieldKey="description" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="description" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Welche nicht-funktionale Eigenschaft ist gefordert?" rows={3} />
       </FieldGroup>
 

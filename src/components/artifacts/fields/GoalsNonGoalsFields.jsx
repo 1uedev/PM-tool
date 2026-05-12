@@ -12,6 +12,7 @@ export default function GoalsNonGoalsFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What outcomes, capabilities, or results are we committing to deliver?"
           rows={4}
+          rich
         />
       </div>
 
@@ -26,6 +27,7 @@ export default function GoalsNonGoalsFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What are we explicitly not doing? List things that might seem related but are out of scope."
           rows={4}
+          rich
         />
       </div>
 
@@ -37,6 +39,7 @@ export default function GoalsNonGoalsFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="Why were these boundaries set? What constraints or decisions drove them?"
           rows={3}
+          rich
         />
       </FieldGroup>
     </div>

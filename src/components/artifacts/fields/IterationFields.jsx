@@ -11,7 +11,7 @@ export default function IterationFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Was haben wir gelernt?">Learnings</FieldLabel>
-        <FieldTextarea fieldKey="learnings" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="learnings" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Was haben wir gelernt?" rows={4} />
       </FieldGroup>
 
@@ -19,13 +19,13 @@ export default function IterationFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Was ändern wir konkret?">Verbesserungsmaßnahmen</FieldLabel>
-        <FieldTextarea fieldKey="improvements" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="improvements" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Was ändern wir konkret?" rows={3} />
       </FieldGroup>
 
       <FieldGroup>
         <FieldLabel hint="Was machen wir als nächstes?">Nächste Schritte</FieldLabel>
-        <FieldTextarea fieldKey="nextSteps" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="nextSteps" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Was machen wir als nächstes?" rows={3} />
       </FieldGroup>
     </div>

@@ -9,6 +9,12 @@
 // B) Value-based (new types, inline label):
 //    <FieldTextarea label="Problem" value={fields.problem} onChange={(v) => onChange("problem", v)} />
 //    onChange: (value: string) => void
+//
+// Pass rich={true} on prose/narrative fields to render a Tiptap rich-text editor instead.
+
+import dynamic from "next/dynamic";
+
+const RichTextarea = dynamic(() => import("@/components/ui/RichTextarea"), { ssr: false });
 
 export function FieldLabel({ children, hint }) {
   return (
@@ -25,28 +31,43 @@ export function FieldTextarea({
   // Convention B
   label, value,
   // Shared
-  onChange, placeholder, rows = 3, className = "", disabled = false,
+  onChange, placeholder, rows = 3, className = "", disabled = false, rich = false,
 }) {
   const isKeyBased = fieldKey !== undefined;
   const resolvedValue = isKeyBased ? (fields?.[fieldKey] ?? "") : (value ?? "");
-  const handleChange = (e) => {
-    if (isKeyBased) onChange(fieldKey, e.target.value);
-    else onChange(e.target.value);
-  };
+  const handleChange = rich
+    ? (html) => {
+        if (isKeyBased) onChange(fieldKey, html);
+        else onChange(html);
+      }
+    : (e) => {
+        if (isKeyBased) onChange(fieldKey, e.target.value);
+        else onChange(e.target.value);
+      };
 
   return (
     <div className="flex flex-col gap-1">
       {label && <FieldLabel>{label}</FieldLabel>}
-      <textarea
-        value={resolvedValue}
-        onChange={handleChange}
-        placeholder={placeholder}
-        rows={rows}
-        disabled={disabled}
-        className={`w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors
-          focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y
-          disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 ${className}`}
-      />
+      {rich ? (
+        <RichTextarea
+          value={resolvedValue}
+          onChange={handleChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={className}
+        />
+      ) : (
+        <textarea
+          value={resolvedValue}
+          onChange={handleChange}
+          placeholder={placeholder}
+          rows={rows}
+          disabled={disabled}
+          className={`w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors
+            focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y
+            disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 ${className}`}
+        />
+      )}
     </div>
   );
 }

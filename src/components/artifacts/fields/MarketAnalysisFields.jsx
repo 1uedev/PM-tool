@@ -5,7 +5,7 @@ export default function MarketAnalysisFields({ fields, onChange, disabled }) {
     <div className="flex flex-col gap-5">
       <FieldGroup>
         <FieldLabel hint="Überblick in 2–3 Sätzen">Zusammenfassung</FieldLabel>
-        <FieldTextarea fieldKey="summary" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="summary" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Überblick über den Markt und die wichtigsten Erkenntnisse…" rows={3} />
       </FieldGroup>
 
@@ -19,7 +19,7 @@ export default function MarketAnalysisFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Technologie, Regulierung, Nachfrage…">Wichtige Trends</FieldLabel>
-        <FieldTextarea fieldKey="trends" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="trends" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Welche Trends prägen den Markt? Was verändert sich?" rows={4} />
       </FieldGroup>
 

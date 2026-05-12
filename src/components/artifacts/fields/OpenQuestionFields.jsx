@@ -12,6 +12,7 @@ export default function OpenQuestionFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="What is the unresolved question? Be specific about what needs to be decided or clarified."
           rows={3}
+          rich
         />
       </div>
 
@@ -23,6 +24,7 @@ export default function OpenQuestionFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="Why is this question important? What depends on its answer? What do we know so far?"
           rows={3}
+          rich
         />
       </FieldGroup>
 
@@ -57,6 +59,7 @@ export default function OpenQuestionFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="How was this question answered? (fill in once resolved)"
           rows={3}
+          rich
         />
       </FieldGroup>
     </div>

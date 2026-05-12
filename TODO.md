@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-12. All items are unstarted unless noted.
+Last updated: 2026-05-13. All items are unstarted unless noted.
 
 ---
 
@@ -44,8 +44,7 @@ Currently 13 out of 35 artifact types are extractable from uploaded documents. C
 - Bulk delete (with confirmation)
 - Bulk tag assignment
 
-### 6. Rich Text for Long-Form Fields
-Several fields (e.g. `flow`, `description`, `acceptanceCriteria`) are plain textareas. A lightweight rich-text editor (e.g. Tiptap) would improve usability for longer content without breaking the JSON storage approach.
+### ~~6. Rich Text for Long-Form Fields~~ ✅ DONE
 
 ### 7. In-App Notifications
 Currently there is no way for a user to know that another user commented on their artifact. A simple in-app notification panel (unread count in header, list of events) would be the minimum viable awareness layer — without requiring email or real-time infrastructure.

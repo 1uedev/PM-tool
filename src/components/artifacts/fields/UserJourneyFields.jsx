@@ -16,7 +16,7 @@ export default function UserJourneyFields({ fields, onChange, disabled, projectI
 
       <FieldGroup>
         <FieldLabel hint="In welcher Situation?">Szenario</FieldLabel>
-        <FieldTextarea fieldKey="scenario" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="scenario" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="In welcher Situation befinden wir uns?" rows={2} />
       </FieldGroup>
 
@@ -31,12 +31,12 @@ export default function UserJourneyFields({ fields, onChange, disabled, projectI
       <div className="grid grid-cols-2 gap-4">
         <FieldGroup>
           <FieldLabel hint="Wo entstehen Reibung oder Frustration?">Pain Points</FieldLabel>
-          <FieldTextarea fieldKey="painPoints" fields={fields} onChange={onChange} disabled={disabled}
+          <FieldTextarea fieldKey="painPoints" fields={fields} onChange={onChange} rich disabled={disabled}
             placeholder="Wo hakt es in der Journey?" rows={3} />
         </FieldGroup>
         <FieldGroup>
           <FieldLabel hint="Wo können wir besser werden?">Verbesserungspotenziale</FieldLabel>
-          <FieldTextarea fieldKey="opportunities" fields={fields} onChange={onChange} disabled={disabled}
+          <FieldTextarea fieldKey="opportunities" fields={fields} onChange={onChange} rich disabled={disabled}
             placeholder="Wo können wir die Erfahrung verbessern?" rows={3} />
         </FieldGroup>
       </div>

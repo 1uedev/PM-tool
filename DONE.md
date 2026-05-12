@@ -1,6 +1,6 @@
 # PM Copilot — Completed Work
 
-Last updated: 2026-05-12. Derived from git history.
+Last updated: 2026-05-13. Derived from git history.
 
 ---
 
@@ -338,12 +338,39 @@ All nine items from the 2026-05-04 audit that were actionable without out-of-sco
 
 ---
 
+---
+
+### Extension Step 24 — Rich Text Editor for Long-Form Fields ✅
+
+**Goal:** Replace plain `<textarea>` elements on prose/narrative fields with a Tiptap rich-text editor — supports bold, italic, bullet lists, and ordered lists — without requiring any schema migration.
+
+**Storage:** HTML (Tiptap's native output). Existing plain-text data loads transparently — Tiptap treats it as an unformatted paragraph. No schema migration needed.
+
+**New component — `RichTextarea`** (`src/components/ui/RichTextarea.jsx`):
+- `@tiptap/react` + `@tiptap/starter-kit` + `@tiptap/extension-placeholder`
+- Minimal toolbar: Bold · Italic · (divider) · BulletList · OrderedList
+- Toolbar hidden when `disabled={true}` (read-only mode)
+- `useEffect` sync: when the artifact is swapped in the explorer, `editor.commands.setContent(value, false)` re-hydrates without triggering `onUpdate`
+- Loaded via `next/dynamic` with `ssr: false` to avoid SSR serialisation issues
+
+**`FieldTextarea` updated** (`FieldHelpers.jsx`):
+- New `rich` prop (boolean, default false); when truthy renders `<RichTextarea>` instead of `<textarea>`
+- Both calling conventions (A: `fieldKey`/`fields`, B: `label`/`value`) work unchanged
+
+**Fields updated — 34 field targets across 24 components:**
+
+Prose fields that got `rich={true}`: goals, painPoints, context, description, rationale, alternatives, consequences, assumption, validation, problem, impact, currentSolution, whyInsufficient, insight, implications, inScope, outOfScope, successCriteria, scope, goals (Epic), potentialValue, summary (MarketAnalysis), trends, mitigation, constraint, rationale (Constraint), impact (Constraint), assumption (Assumption), validatedBy, question, context (OpenQuestion), resolution, goals (GoalsNonGoals), nonGoals, rationale (GoalsNonGoals), description (Milestone), criteria, responsibility, keyBenefit, differentiator, description (NonFunctionalRequirement), description (RoadmapItem), rationale (Roadmap), learnings, improvements, nextSteps, scenario, painPoints (UserJourney), opportunities
+
+**Kept as plain text** (structured / mono): `flow` (Use Case, numbered steps), `acceptanceCriteria` (FunctionalRequirement, `-` bullet format), `keyResults` (KPI/OKR, `KR1/KR2/KR3` format), `steps` (UserJourney, `N. Schritt: …` format)
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (`9cdf26e`)
+- Build: last verified clean (Step 24)
 - Tests: 99 passing, `npm test`
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 1–11
+- Remaining open work: TODO.md items 1–5, 7–11

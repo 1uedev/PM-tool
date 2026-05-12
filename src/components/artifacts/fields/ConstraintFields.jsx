@@ -14,6 +14,7 @@ export default function ConstraintFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="State the constraint clearly. What limit, boundary, or non-negotiable condition applies?"
           rows={3}
+          rich
         />
       </div>
 
@@ -52,6 +53,7 @@ export default function ConstraintFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="Why does this constraint exist? Where does it come from?"
           rows={3}
+          rich
         />
       </FieldGroup>
 
@@ -65,6 +67,7 @@ export default function ConstraintFields({ fields, onChange, disabled }) {
           disabled={disabled}
           placeholder="How does this constraint affect scope, timeline, design decisions, or team capacity?"
           rows={3}
+          rich
         />
       </FieldGroup>
     </div>

@@ -35,12 +35,12 @@ export default function ValuePropositionFields({ fields, onChange, disabled, pro
       <div className="grid grid-cols-2 gap-4">
         <FieldGroup>
           <FieldLabel hint="Was ist der wichtigste Vorteil?">Hauptnutzen</FieldLabel>
-          <FieldTextarea fieldKey="keyBenefit" fields={fields} onChange={onChange} disabled={disabled}
+          <FieldTextarea fieldKey="keyBenefit" fields={fields} onChange={onChange} rich disabled={disabled}
             placeholder="Was ist der eine Kernnutzen, der alles andere überwiegt?" rows={3} />
         </FieldGroup>
         <FieldGroup>
           <FieldLabel hint="Gegenüber Wettbewerbern oder Status quo">Differenzierungsmerkmal</FieldLabel>
-          <FieldTextarea fieldKey="differentiator" fields={fields} onChange={onChange} disabled={disabled}
+          <FieldTextarea fieldKey="differentiator" fields={fields} onChange={onChange} rich disabled={disabled}
             placeholder="Was unterscheidet uns klar von Alternativen?" rows={3} />
         </FieldGroup>
       </div>

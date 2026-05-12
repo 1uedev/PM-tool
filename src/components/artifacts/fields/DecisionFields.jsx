@@ -5,7 +5,7 @@ export default function DecisionFields({ fields, onChange, disabled }) {
     <div className="flex flex-col gap-5">
       <FieldGroup>
         <FieldLabel hint="Warum musste eine Entscheidung getroffen werden?">Kontext / Hintergrund</FieldLabel>
-        <FieldTextarea fieldKey="context" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="context" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Warum musste eine Entscheidung getroffen werden?" rows={3} />
       </FieldGroup>
 
@@ -27,7 +27,7 @@ export default function DecisionFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Warum wurde so entschieden?">Begründung</FieldLabel>
-        <FieldTextarea fieldKey="rationale" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="rationale" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Warum wurde so entschieden?" rows={3} />
       </FieldGroup>
 
@@ -35,13 +35,13 @@ export default function DecisionFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Welche Optionen wurden verworfen?">Verworfene Alternativen</FieldLabel>
-        <FieldTextarea fieldKey="alternatives" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="alternatives" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Welche Optionen wurden nicht gewählt und warum?" rows={3} />
       </FieldGroup>
 
       <FieldGroup>
         <FieldLabel hint="Was ändert sich durch diese Entscheidung?">Konsequenzen</FieldLabel>
-        <FieldTextarea fieldKey="consequences" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="consequences" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Welche Auswirkungen hat die Entscheidung?" rows={2} />
       </FieldGroup>
     </div>

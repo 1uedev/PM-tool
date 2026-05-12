@@ -11,6 +11,7 @@ export default function FunctionalRequirementFields({ fields, onChange, disabled
           onChange={onChange}
           placeholder="Das System muss… / Die Anwendung soll…"
           rows={4}
+          rich
           disabled={disabled}
         />
       </FieldGroup>

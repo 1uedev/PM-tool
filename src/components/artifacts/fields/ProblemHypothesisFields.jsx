@@ -11,6 +11,7 @@ export default function ProblemHypothesisFields({ fields, onChange, disabled }) 
           onChange={onChange}
           placeholder="Beschreibe das Problem so konkret wie möglich…"
           rows={4}
+          rich
           disabled={disabled}
         />
       </FieldGroup>
@@ -36,6 +37,7 @@ export default function ProblemHypothesisFields({ fields, onChange, disabled }) 
           onChange={onChange}
           placeholder="Wir glauben, dass… / Eine einheitliche Lösung würde…"
           rows={3}
+          rich
           disabled={disabled}
         />
       </FieldGroup>
@@ -48,6 +50,7 @@ export default function ProblemHypothesisFields({ fields, onChange, disabled }) 
           onChange={onChange}
           placeholder="Nutzerinterviews, A/B-Tests, Prototyp-Tests…"
           rows={3}
+          rich
           disabled={disabled}
         />
       </FieldGroup>

@@ -20,19 +20,19 @@ export default function BuyerPersonaFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Was will er/sie im Unternehmen erreichen?">Geschäftliche Ziele</FieldLabel>
-        <FieldTextarea fieldKey="goals" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="goals" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Welche Ergebnisse und Ziele treibt diese Person an?" rows={3} />
       </FieldGroup>
 
       <FieldGroup>
         <FieldLabel hint="Was hindert oder frustriert sie im Berufsalltag?">Pain Points</FieldLabel>
-        <FieldTextarea fieldKey="painPoints" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="painPoints" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Welche Herausforderungen, Risiken oder Frustrationen hat diese Persona?" rows={3} />
       </FieldGroup>
 
       <FieldGroup>
         <FieldLabel hint="Preis, ROI, Support, Compliance…">Kaufkriterien</FieldLabel>
-        <FieldTextarea fieldKey="buyingCriteria" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="buyingCriteria" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Worauf legt er/sie beim Kauf Wert? Was sind Dealbreaker?" rows={3} />
       </FieldGroup>
     </div>

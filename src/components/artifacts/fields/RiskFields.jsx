@@ -5,7 +5,7 @@ export default function RiskFields({ fields, onChange, disabled }) {
     <div className="flex flex-col gap-5">
       <FieldGroup>
         <FieldLabel hint="Was könnte schiefgehen?">Risikobeschreibung</FieldLabel>
-        <FieldTextarea fieldKey="description" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="description" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Was könnte schiefgehen?" rows={3} />
       </FieldGroup>
 
@@ -26,7 +26,7 @@ export default function RiskFields({ fields, onChange, disabled }) {
 
       <FieldGroup>
         <FieldLabel hint="Wie reduzieren oder verhindern wir das Risiko?">Mitigationsstrategie</FieldLabel>
-        <FieldTextarea fieldKey="mitigation" fields={fields} onChange={onChange} disabled={disabled}
+        <FieldTextarea fieldKey="mitigation" fields={fields} onChange={onChange} rich disabled={disabled}
           placeholder="Wie reduzieren oder verhindern wir das Risiko?" rows={3} />
       </FieldGroup>
 
