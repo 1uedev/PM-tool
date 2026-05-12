@@ -1225,6 +1225,20 @@ All nine actionable items from the 2026-05-04 UX audit resolved. Key changes per
 - **UX-5** — `ArtifactNode` source handle is blue with `cursor: "crosshair"`; target handle has `cursor: "cell"`; both have German `title` tooltips; legend panel explains the drag-to-connect gesture
 - **UX-2/3/6/7/8/9** — Previously completed (admin components, ConfirmDialog, error boxes, success banners, Spinner, file rejection warnings)
 
-Still open: UX-10 through UX-16 (lower priority).
+---
+
+### UX Audit Pass — Items UX-10 through UX-16 ✅
+
+Remaining audit items resolved:
+
+- **UX-10** — Shared `ProjectPageSkeleton` component (`src/components/layout/ProjectPageSkeleton.jsx`): animated two-row skeleton (breadcrumb row + tab-strip row) matching the ProjectNavBar layout, plus a centered spinner. All four sub-page `loading.js` files (board, progress, graph, traceability) now use it.
+- **UX-11** — StarterContextPanel already had `transition-all duration-200`, text labels, and `aria-expanded`; no changes needed.
+- **UX-12** — Delete dialog description now tells users to check version history before deleting instead of the misleading "nicht rückgängig über die Benutzeroberfläche" phrasing.
+- **UX-13** — `StatusPipeline` component in `ArtifactHeader`: three states shown inline with colored dots — current step blue + bold, completed steps green, upcoming steps gray. Cycle direction is now always visible at a glance.
+- **UX-14** — TraceabilityView empty-group CTA unified: "+ Erstes anlegen" → "+ Hinzufügen" (matches PhaseCard).
+- **UX-15** — Already standardised (`disabled:opacity-50` across Button, Input, Select).
+- **UX-16** — `rounded-md` → `rounded-lg` on RelationList and VersionList action buttons. `rounded-xl` for cards and dialogs is intentional.
+
+All 17 items (UX-0 through UX-16) are now closed.
 
 ---

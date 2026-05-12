@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2, ChevronRight } from "lucide-react";
+import { useState, Fragment } from "react";
+import { Trash2 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { mutate } from "swr";
 import { ARTIFACT_TYPE_LABELS, ARTIFACT_STATUS, ARTIFACT_STATUS_LABELS } from "@/lib/constants.js";
@@ -18,11 +18,38 @@ const STATUS_FLOW = [
   ARTIFACT_STATUS.DONE,
 ];
 
-const STATUS_NEXT_LABEL = {
-  DRAFT: 'Als "In Prüfung" markieren',
-  IN_REVIEW: 'Als "Fertig" markieren',
-  DONE: 'Zurück zu "Entwurf"',
-};
+function StatusPipeline({ current }) {
+  const currentIndex = STATUS_FLOW.indexOf(current);
+  return (
+    <>
+      {STATUS_FLOW.map((s, i) => (
+        <Fragment key={s}>
+          {i > 0 && <span className="h-px w-3 flex-shrink-0 bg-gray-300" />}
+          <span
+            className={`flex items-center gap-1 ${
+              s === current
+                ? "font-semibold text-blue-700"
+                : i < currentIndex
+                ? "text-green-600"
+                : "text-gray-400"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
+                s === current
+                  ? "bg-blue-600"
+                  : i < currentIndex
+                  ? "bg-green-500"
+                  : "bg-gray-300"
+              }`}
+            />
+            {ARTIFACT_STATUS_LABELS[s]}
+          </span>
+        </Fragment>
+      ))}
+    </>
+  );
+}
 
 export default function ArtifactHeader({ artifact, projectId, onStatusChange }) {
   const router = useRouter();
@@ -104,21 +131,17 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
         {/* Right: actions — only for EDITOR+ */}
         {canEdit && (
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Quick status toggle */}
+            {/* Quick status toggle — shows full Entwurf · In Prüfung · Fertig pipeline */}
             <button
               onClick={handleStatusChange}
               disabled={statusLoading}
-              title={STATUS_NEXT_LABEL[artifact.status]}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+              title={`Weiter zu: ${ARTIFACT_STATUS_LABELS[nextStatus]}`}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs transition-colors hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50"
             >
               {statusLoading ? (
                 <Spinner className="h-3 w-3" />
               ) : (
-                <>
-                  <span className="opacity-60">{ARTIFACT_STATUS_LABELS[artifact.status]}</span>
-                  <ChevronRight className="h-3 w-3 opacity-60" />
-                  <span className="font-semibold text-gray-700">{ARTIFACT_STATUS_LABELS[nextStatus]}</span>
-                </>
+                <StatusPipeline current={artifact.status} />
               )}
             </button>
 
@@ -159,7 +182,7 @@ export default function ArtifactHeader({ artifact, projectId, onStatusChange }) 
       <ConfirmDialog
         open={showDeleteConfirm}
         title="Artefakt löschen?"
-        description={`"${artifact.title}" wird aus dem Explorer entfernt. Diese Aktion kann über die Benutzeroberfläche nicht rückgängig gemacht werden.`}
+        description={`„${artifact.title}" wird dauerhaft gelöscht. Diese Aktion lässt sich nicht rückgängig machen — prüfe vorher die Versionshistorie, wenn du Inhalte aufbewahren möchtest.`}
         confirmLabel="Löschen"
         danger
         onConfirm={handleDelete}

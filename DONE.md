@@ -326,6 +326,20 @@ All nine items from the 2026-05-04 audit that were actionable without out-of-sco
 
 ---
 
+### UX Audit Pass — Items UX-10 through UX-16 ✅
+
+| Item | Change |
+|---|---|
+| UX-10 | `ProjectPageSkeleton` component — two-row animated skeleton (breadcrumb + tab strip) + spinner; replaces stale single-row loading skeletons in board/progress/graph/traceability `loading.js` |
+| UX-11 | Already had animation, text labels, h-4 chevrons, and `aria-expanded` — no changes needed |
+| UX-12 | Delete dialog: removed misleading "über die Benutzeroberfläche nicht rückgängig" clause; now tells user to check version history before deleting |
+| UX-13 | `StatusPipeline` component in `ArtifactHeader`: shows all three states inline — current blue, completed green, upcoming gray — so cycle direction is always visible |
+| UX-14 | TraceabilityView empty-group "+ Erstes anlegen" unified to "+ Hinzufügen" (matches PhaseCard) |
+| UX-15 | Already standardised to `disabled:opacity-50` across Button, Input, Select — no changes needed |
+| UX-16 | `rounded-md` → `rounded-lg` in RelationList and VersionList action buttons; `rounded-xl` for cards/dialogs/field containers kept as intentional larger radius |
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)

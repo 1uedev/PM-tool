@@ -124,26 +124,26 @@ Source handle is blue (`#3b82f6`) with `cursor: "crosshair"`. Target handle is g
 ### UX-9 — DocumentImport: silent file rejection (Medium) ✅ done
 Files over 10 MB or exceeding the 5-file limit now show a visible warning banner instead of being silently dropped.
 
-### UX-10 — TraceabilityView has no loading state (Medium)
-Every other data-fetching component shows a spinner. Traceability renders nothing until data arrives.
+### UX-10 — TraceabilityView has no loading state (Medium) ✅ done
+All 4 sub-page loading files (board, progress, graph, traceability) now use shared `ProjectPageSkeleton` component with a two-row animated skeleton matching the ProjectNavBar layout + centered spinner.
 
-### UX-11 — StarterContextPanel collapse not discoverable (Low)
-Defaults open, collapse chevron is 14×14 px, no animation, no tooltip. Add a transition and a more visible toggle affordance.
+### UX-11 — StarterContextPanel collapse not discoverable (Low) ✅ done
+Already had `transition-all duration-200 ease-in-out`, "Einklappen"/"Aufklappen" text labels, `h-4 w-4` chevron icons, and `aria-expanded`. No changes needed.
 
-### UX-12 — Delete confirmation doesn't surface restore path (Low)
-The delete dialog mentions soft-delete language but provides no link to version history or a restore option. Either add a note ("Kann in der Versionshistorie wiederhergestellt werden") or link to it.
+### UX-12 — Delete confirmation doesn't surface restore path (Low) ✅ done
+Description updated: "„{title}" wird dauerhaft gelöscht. Diese Aktion lässt sich nicht rückgängig machen — prüfe vorher die Versionshistorie, wenn du Inhalte aufbewahren möchtest."
 
-### UX-13 — Status cycle button gives no sense of direction (Low)
-The cycle button (DRAFT → IN_REVIEW → DONE → DRAFT) only shows the next state. Add a small pipeline indicator (e.g. `Draft → In Review → Done`) so the cycle direction is visible.
+### UX-13 — Status cycle button gives no sense of direction (Low) ✅ done
+Replaced `{current} → {next}` with a `StatusPipeline` component showing all three states inline: current = blue dot + bold, completed = green dot, upcoming = gray dot. Separator `h-px w-3 bg-gray-300` between steps. Title tooltip still shows next state name.
 
-### UX-14 — PhaseCard uses two verbs for the same action (Low / Trivial)
-"+ Ersten anlegen" vs "+ Hinzufügen" for identical Explorer create actions. Unify to one label.
+### UX-14 — PhaseCard uses two verbs for the same action (Low / Trivial) ✅ done
+TraceabilityView GroupSection empty-state changed "+ Erstes anlegen" → "+ Hinzufügen". Both TraceabilityView and PhaseCard now use "+ Hinzufügen".
 
-### UX-15 — Disabled opacity inconsistency (Low / Trivial)
-`Button` uses `disabled:opacity-50`; `Input`/`Select` use `disabled:opacity-60`. Standardize to one value across all interactive components.
+### UX-15 — Disabled opacity inconsistency (Low / Trivial) ✅ done
+Button, Input, and Select all already used `disabled:opacity-50`. No changes needed.
 
-### UX-16 — Border radius and shadow not centrally defined (Low)
-`rounded-lg` (Button, Input, nav), `rounded-xl` (ConfirmDialog), `rounded-md` (some admin selects) are all hardcoded independently. No single token or CSS variable.
+### UX-16 — Border radius and shadow not centrally defined (Low) ✅ done
+Actionable inconsistencies resolved: `rounded-md` in RelationList and VersionList action buttons changed to `rounded-lg`. `rounded-xl` for cards/dialogs/field containers is intentional (larger radius for containing elements vs. interactive controls).
 
 ---
 

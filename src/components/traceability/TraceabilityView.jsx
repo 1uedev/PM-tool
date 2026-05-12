@@ -184,7 +184,7 @@ function GroupSection({ group, artifacts, connectionMap, projectId, forceOpen, r
               href={`/projects/${projectId}?newType=${group.types[0]}`}
               className="rounded-full bg-white/30 px-2 py-0.5 text-xs hover:bg-white/60 transition-colors"
             >
-              + Erstes anlegen
+              + Hinzufügen
             </Link>
           </div>
         </div>

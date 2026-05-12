@@ -95,7 +95,7 @@ function VersionRow({ version, index, isLatest, projectId, artifactId, onRestore
               onClick={() => setConfirmOpen(true)}
               disabled={restoring}
               title={`Version ${version.version} wiederherstellen`}
-              className="flex-shrink-0 flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors disabled:opacity-50"
+              className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors disabled:opacity-50"
             >
               {restoring ? <Spinner className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />}
             </button>
