@@ -92,12 +92,8 @@ Replaced all 7 inline `<header>` blocks with shared `ProjectNavBar` client compo
 - Row 2: tab strip with `border-b-2 border-blue-600` active highlight
 Also fixed: "+" button for Importieren renamed to Importieren (German), Starter page "Projects" → "Projekte".
 
-### UX-1 — Language fragmentation (Critical)
-`TraceabilityView` and `ArtifactGraph`/`GraphRelationDialog` are entirely in English while the rest of the app is German. `constants.js` type/status/relation labels are English and appear directly in the UI.
-- Translate `TraceabilityView` to German (empty state, coverage labels, filter labels)
-- Translate `ArtifactGraph` and `GraphRelationDialog` to German
-- Add a German label map for `ARTIFACT_TYPE_LABELS`, `ARTIFACT_STATUS_LABELS`, `RELATION_TYPE_LABELS` (or wire them through `next-intl`)
-- Fix `ExplorerDetail` line 81: `"New ${...}"` → German prefix
+### UX-1 — Language fragmentation (Critical) ✅ done
+`TraceabilityView`, `ArtifactGraph`, `GraphRelationDialog` are all in German. All label maps in `constants.js` (`ARTIFACT_TYPE_LABELS`, `ARTIFACT_STATUS_LABELS`, `RELATION_TYPE_LABELS`) are German. `ExplorerDetail` already used `Neues {label}`. No remaining English in the authenticated app — landing page copy is intentionally English.
 
 ### UX-2 — Admin pages bypass Button/Input/Select components ✅ done
 `AiProviderConfig`, `DatabaseConfig`, `LanguageManager` used raw `<button>`/`<input>` tags instead of the shared UI components. `AiSuggestionPanel`'s primary button used `bg-purple-600` instead of the app's blue. Fixed.
@@ -105,13 +101,13 @@ Also fixed: "+" button for Importieren renamed to Importieren (German), Starter 
 ### UX-3 — `LanguageManager` used native `window.confirm()` ✅ done
 Replaced with `<ConfirmDialog>` component, consistent with the rest of the app.
 
-### UX-4 — Accessibility gaps in newer features (High)
-- `DocumentImport`: Drop zone has `role="button"` but no `aria-label`; custom proposal checkboxes have no `<input type="checkbox">` or ARIA labels
-- `ArtifactGraph`: Connection handles have no `title`/`aria-label`; drag-to-connect is not keyboard-accessible
-- Progress bars in `ProgressOverview`/`PhaseCard`: missing `role="progressbar"`, `aria-valuenow`, `aria-valuemax`
+### UX-4 — Accessibility gaps in newer features (High) ✅ done
+- `DocumentImport`: Drop zone has `aria-label`; proposal checkboxes now use native `<input type="checkbox" className="sr-only">` inside a `<label>` with the visual `CheckSquare`/`Square` icon; file remove buttons have `aria-label`
+- `ArtifactGraph`: Handles have `title` and `aria-label`; keyboard drag is a ReactFlow limitation (keyboard users can create relations via Explorer's relation dialog instead)
+- Progress bars in `ProgressOverview`, `PhaseCard`, and `TraceabilityView` all have `role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`
 
-### UX-5 — Graph drag-to-connect is undiscoverable (High)
-Handles are small gray circles with no hover/cursor change. Only explanation is in a small corner legend. Add cursor-crosshair on handle hover, a tooltip on first visit, or a visible "connect" affordance on node hover.
+### UX-5 — Graph drag-to-connect is undiscoverable (High) ✅ done
+Source handle is blue (`#3b82f6`) with `cursor: "crosshair"`. Target handle is gray with `cursor: "cell"`. Both have German `title` tooltips. Legend panel (top-right) explains the connect gesture in German.
 
 ### UX-6 — Inconsistent error state presentation (Medium) ✅ done
 `RelationList`, `AiSuggestButton`, `InviteMember`, `MemberList` all standardised to

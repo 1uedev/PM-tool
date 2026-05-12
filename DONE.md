@@ -305,10 +305,31 @@ First test suite in the project — 99 tests across 10 files, all passing.
 
 ---
 
+### UX Audit Pass — Items UX-0 through UX-9 ✅
+
+All nine items from the 2026-05-04 audit that were actionable without out-of-scope work are resolved:
+
+| Item | Status | Notes |
+|---|---|---|
+| UX-0 | ✅ | ProjectNavBar with tab strip + active state (Step 23) |
+| UX-1 | ✅ | All labels already German; no English strings remain in authenticated app |
+| UX-2 | ✅ | Admin components use shared Button/Input/Select primitives |
+| UX-3 | ✅ | LanguageManager uses ConfirmDialog instead of window.confirm() |
+| UX-4 | ✅ | DocumentImport: native checkbox + aria-label on drop zone and file remove buttons; ArtifactGraph handles have title/aria-label; all progress bars have full progressbar ARIA |
+| UX-5 | ✅ | Graph source handle blue + cursor:crosshair; target handle cursor:cell; both have German title tooltips; legend panel explains gesture |
+| UX-6 | ✅ | Error boxes standardised to bg-red-50 border-red-200 text-red-700 |
+| UX-7 | ✅ | Success banners with CheckCircle2 added to InviteMember and MemberList |
+| UX-8 | ✅ | All Loader2 usages replaced with shared Spinner component |
+| UX-9 | ✅ | File rejection warnings shown for >10 MB files and >5 file limit |
+
+**Remaining open (UX-10 through UX-16):** lower priority / nice-to-have items listed in TODO.md.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (`cb53d7b`)
+- Build: last verified clean (current)
 - Tests: 99 passing, `npm test`
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)

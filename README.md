@@ -1214,3 +1214,17 @@ Replaced 7 duplicated inline `<header>` blocks across all project sub-pages with
 **Pages updated:** Explorer, Board, Fortschritt, Graph, Traceability, Starter, Import. Also fixed Starter breadcrumb "Projects" → "Projekte".
 
 ---
+
+### UX Audit Pass — Items UX-0 through UX-9 ✅
+
+All nine actionable items from the 2026-05-04 UX audit resolved. Key changes per item:
+
+- **UX-0** — Shared `ProjectNavBar` with tab strip and active-state (see Step 23)
+- **UX-1** — Verified: all label maps (`ARTIFACT_TYPE_LABELS`, `ARTIFACT_STATUS_LABELS`, `RELATION_TYPE_LABELS`), `TraceabilityView`, `ArtifactGraph`, `GraphRelationDialog` are fully German. No English visible in the authenticated app.
+- **UX-4** — `DocumentImport` proposal checkboxes converted to native `<input type="checkbox" className="sr-only">` inside `<label>` with visual icon; drop zone and file remove buttons have `aria-label`; all progress bars have full ARIA (`role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`)
+- **UX-5** — `ArtifactNode` source handle is blue with `cursor: "crosshair"`; target handle has `cursor: "cell"`; both have German `title` tooltips; legend panel explains the drag-to-connect gesture
+- **UX-2/3/6/7/8/9** — Previously completed (admin components, ConfirmDialog, error boxes, success banners, Spinner, file rejection warnings)
+
+Still open: UX-10 through UX-16 (lower priority).
+
+---

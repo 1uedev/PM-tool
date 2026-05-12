@@ -34,6 +34,7 @@ function formatBytes(bytes) {
 function ProposalCard({ proposal, checked, onToggle, expanded, onExpandToggle }) {
   const label = ARTIFACT_TYPE_LABELS[proposal.type] ?? proposal.type;
   const fieldEntries = Object.entries(proposal.fields).filter(([, v]) => v);
+  const checkId = `proposal-${proposal._id}`;
 
   return (
     <div
@@ -42,25 +43,26 @@ function ProposalCard({ proposal, checked, onToggle, expanded, onExpandToggle })
       }`}
     >
       <div className="flex items-center gap-3 p-3">
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={checked}
-          aria-label={`${proposal.title} auswählen`}
-          onClick={() => onToggle(proposal._id)}
-          className="flex-shrink-0 text-blue-600 hover:text-blue-700"
-        >
+        <label htmlFor={checkId} className="flex-shrink-0 cursor-pointer text-blue-600 hover:text-blue-700">
+          <input
+            id={checkId}
+            type="checkbox"
+            checked={checked}
+            onChange={() => onToggle(proposal._id)}
+            className="sr-only"
+          />
           {checked ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5 text-gray-400" />}
-        </button>
+        </label>
 
-        <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+        <label htmlFor={checkId} className="flex flex-1 flex-col gap-0.5 min-w-0 cursor-pointer">
           <p className="truncate text-sm font-medium text-gray-900">{proposal.title}</p>
           <span className="text-xs text-gray-500">{label}</span>
-        </div>
+        </label>
 
         {fieldEntries.length > 0 && (
           <button
             type="button"
+            aria-label={expanded ? "Details zuklappen" : "Details aufklappen"}
             onClick={() => onExpandToggle(proposal._id)}
             className="flex-shrink-0 text-gray-400 hover:text-gray-600"
           >
@@ -306,6 +308,7 @@ export default function DocumentImport({ projectId }) {
                 <span className="text-xs text-gray-400">{MIME_LABELS[file.type] ?? "Datei"} · {formatBytes(file.size)}</span>
                 <button
                   type="button"
+                  aria-label={`${file.name} entfernen`}
                   onClick={() => removeFile(i)}
                   className="flex-shrink-0 text-gray-400 hover:text-gray-700"
                 >
