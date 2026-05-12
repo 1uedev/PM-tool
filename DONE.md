@@ -238,8 +238,6 @@ Expanded from 6 original types to 35 across 8 groups:
 
 ---
 
----
-
 ### Extension Step 21 — Landing Page Rewrite ✅
 
 All public marketing pages replaced with PM Copilot-specific content (previously showed generic "Launchpad" / deployment platform placeholder copy).
@@ -322,7 +320,7 @@ All nine items from the 2026-05-04 audit that were actionable without out-of-sco
 | UX-8 | ✅ | All Loader2 usages replaced with shared Spinner component |
 | UX-9 | ✅ | File rejection warnings shown for >10 MB files and >5 file limit |
 
-**Remaining open (UX-10 through UX-16):** lower priority / nice-to-have items listed in TODO.md.
+**UX-10 through UX-16** subsequently completed — see table below.
 
 ---
 
@@ -344,6 +342,8 @@ All nine items from the 2026-05-04 audit that were actionable without out-of-sco
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (current)
+- Build: last verified clean (`9cdf26e`)
 - Tests: 99 passing, `npm test`
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
+- All 17 UX audit items (UX-0 through UX-16) resolved
+- Remaining open work: TODO.md items 1–11
