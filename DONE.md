@@ -389,12 +389,38 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+### Extension Step 26 — Playwright E2E Test Suite + ArtifactRefField Bug Fix ✅
+
+**Goal:** Complete the test suite with Playwright E2E tests covering the 3 core flows from the spec, and fix a bug discovered in the process.
+
+**17 E2E tests, 4 files, all passing:**
+
+| File | Tests | Coverage |
+|---|---|---|
+| `e2e/auth.spec.js` | 5 | Redirect to /login, validation errors, wrong credentials, login, logout |
+| `e2e/project.spec.js` | 5 | Create project → starter, create artifact via new-artifact form, edit + save + version history, tree appearance, soft-delete disappears |
+| `e2e/relations.spec.js` | 2 | Add relation via dialog → appears in list, relation visible in traceability view |
+| `e2e/admin.spec.js` | 5 | Admin navigates to /admin/users, non-admin redirect, create user, new user logs in, new user sees empty projects |
+
+**Infrastructure:**
+- `playwright.config.js` — Chromium headless, serial workers, `e2e/` testDir, screenshots + video on failure
+- `e2e/global-setup.js` — server readiness check (verifies localhost:3000 before suite starts)
+- `e2e/helpers/auth.js` — shared `login()` helper
+- `@playwright/test` added to devDependencies; `npm run test:e2e`, `test:e2e:ui`, `test:e2e:headed` scripts added
+
+**Bug fixed (discovered by E2E):**
+- `ArtifactRefField.jsx` — `getGroupColor()` used `group.id` but `ARTIFACT_GROUPS` uses `group.key`. Result: `ARTIFACT_GROUP_COLORS[undefined]` was `undefined`, causing `colors.badge` to throw a runtime error that triggered the error boundary on any page with a ProductVision, UseCase, ValueProposition, UserStory, UserJourney, or Opportunity artifact. Fixed: `group.id` → `group.key`.
+
+**Also fixed:** `RichTextarea.jsx` — added `immediatelyRender: false` to `useEditor` options to prevent Tiptap from throwing an SSR hydration error in headless/server-side rendering contexts (Playwright triggered this on the new-artifact form).
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 25)
-- Tests: 150 passing, `npm test`
+- Build: last verified clean (Step 26)
+- Tests: 150 Vitest + 17 Playwright E2E — all passing
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 1 (E2E only), 2–5, 7–11
+- Remaining open work: TODO.md items 2, 4, 5, 7–11

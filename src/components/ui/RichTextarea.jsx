@@ -33,6 +33,7 @@ export default function RichTextarea({
   className = "",
 }) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({ heading: false, codeBlock: false, code: false }),
       Placeholder.configure({ placeholder: placeholder || "" }),

@@ -9,7 +9,7 @@ const fetcher = (url) => fetch(url).then((r) => r.json()).then((j) => j.data);
 
 function getGroupColor(type) {
   for (const group of ARTIFACT_GROUPS) {
-    if (group.types.includes(type)) return ARTIFACT_GROUP_COLORS[group.id];
+    if (group.types.includes(type)) return ARTIFACT_GROUP_COLORS[group.key];
   }
   return ARTIFACT_GROUP_COLORS.foundations;
 }

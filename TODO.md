@@ -1,17 +1,14 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-14. All items are unstarted unless noted.
+Last updated: 2026-05-13. All items are unstarted unless noted.
 
 ---
 
 ## High Priority
 
-### 1. Test Suite (Vitest + React Testing Library) — partially done ✅ lib + RTL + API
-150 tests across 14 files. New coverage since Step 22:
-- `ArtifactForm` RTL component tests (20 tests — create/edit/dirty/VIEWER role)
-- API route integration tests: `artifacts` (10), `artifact` (11), `projects` (10)
-Still open:
-- E2E flows (see item 3)
+### ~~1. Test Suite~~ ✅ DONE
+150 Vitest tests (lib + RTL + API) + 17 Playwright E2E tests — all passing.
+See item 3 (E2E) — now folded into the completed test suite work.
 
 ### 2. Responsive Design + Accessibility Pass
 Sprint 4 Step 7 from the original spec was never explicitly committed.
@@ -21,12 +18,7 @@ Sprint 4 Step 7 from the original spec was never explicitly committed.
 - Keyboard navigation through Explorer tree
 - Color-contrast check for all group color classes (especially lighter tints)
 
-### 3. E2E Tests for Core Flows
-Sprint 4 Step 8 from the original spec.
-Suggested: Playwright or Cypress covering:
-- Register → log in → create project → fill starter → create artifact → save → view version
-- Add relation → check traceability view shows it
-- Admin: create user → log in as that user → verify project access
+### ~~3. E2E Tests for Core Flows~~ ✅ DONE (folded into item 1)
 
 ---
 

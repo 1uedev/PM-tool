@@ -38,3 +38,5 @@ yarn-error.log*
 # database
 *.db
 *.db-journal
+test-results/
+playwright-report/

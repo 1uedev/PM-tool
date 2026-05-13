@@ -121,7 +121,8 @@ npm run db:seed       # Seed demo data
 npm run db:reset      # Reset DB and re-seed
 npx prisma studio     # Open database browser
 
-npm test              # Run unit test suite (150 tests)
+npm test              # Run unit test suite (150 Vitest tests)
+npm run test:e2e      # Run E2E suite (17 Playwright tests, requires dev server)
 npm run test:watch    # Vitest watch mode
 npm run test:coverage # Coverage report (HTML + text)
 ```
@@ -1271,5 +1272,24 @@ Extended the Vitest suite from 99 to **150 tests across 14 files**.
 | `__tests__/api/artifact.test.js` | 11 | GET/PATCH/DELETE for single artifact, field merge, soft-delete, version increment |
 
 **Notable:** API tests use `{ params: Promise.resolve({...}) }` (Next.js 15 App Router `params` is async). Component tests use `vi.hoisted()` for router mocks and async `vi.mock()` factories with `React.createElement` to avoid Vite 8 Oxc refusing JSX in `.js` context files.
+
+---
+
+### Extension Step 26 — Playwright E2E Test Suite ✅
+
+**17 E2E tests, 4 spec files, all passing.** Runs headless Chromium against the live dev server.
+
+**Commands:** `npm run test:e2e` · `npm run test:e2e:headed` · `npm run test:e2e:ui`
+
+| File | Tests | Coverage |
+|---|---|---|
+| `e2e/auth.spec.js` | 5 | Redirect guard, validation, wrong credentials, login, logout |
+| `e2e/project.spec.js` | 5 | Create project, create/edit artifact, version history, tree display, soft-delete |
+| `e2e/relations.spec.js` | 2 | Add relation via dialog, traceability view shows it |
+| `e2e/admin.spec.js` | 5 | Admin user management, non-admin redirect, create user → login → empty state |
+
+**Infrastructure:** `playwright.config.js` (Chromium, serial, screenshots + video on failure), `e2e/global-setup.js` (server readiness check), `e2e/helpers/auth.js` (shared login helper).
+
+**Bug fixed during E2E:** `ArtifactRefField.getGroupColor()` used `group.id` instead of `group.key`, causing `ARTIFACT_GROUP_COLORS[undefined]` and a runtime crash on any page with a ProductVision, UseCase, or ValueProposition artifact. Also fixed: `RichTextarea` needed `immediatelyRender: false` in `useEditor` to avoid a Tiptap SSR hydration error in headless environments.
 
 ---
