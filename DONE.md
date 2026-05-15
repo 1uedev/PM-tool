@@ -415,12 +415,55 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+### Extension Step 27 — Intelligent Full-Document Import (30 artifact types) ✅
+
+**Goal:** Expand the document import from 13 hardcoded extractable types to all 30 canonical types with field schemas, add chunking for large documents, extract and propose artifact relations, and upgrade the review UI with confidence/evidence display and auto-create mode.
+
+**`src/lib/ai/document-extractor.js` (rewritten):**
+- `getCanonicalExtractableTypes()` — dynamically derives extractable types from `ARTIFACT_FIELD_DEFS`; no hardcoded list
+- `getMissingSchemaTypes()` — surfaces the 9 types without field schemas as warnings
+- `buildTypeSchemas()` — builds per-type `{ fieldKeys, fields, label }` schema from `ARTIFACT_FIELD_DEFS`
+- `buildExtractionPrompt(typeSchemas, chunkText)` — single prompt covering all 30 types; fields come from live schema
+- `parseExtractionResponse(text, typeSchemas)` — robust JSON parser; validates type + field keys; enriches with `_id`, confidence, evidence, rationale
+- `mergeExtractionResults(results)` — deduplicates artifacts and relations across chunks
+- Chunking: `DEFAULT_CHUNK_CHARS = 12000`, `DEFAULT_CHUNK_OVERLAP = 800`
+- Field length caps: title 200, field values 4000, evidence quotes 400, rationale 600
+
+**`src/app/api/projects/[projectId]/import/route.js` (extended):**
+- Chunking strategy for large documents (hard cap 250k chars total text)
+- Parallel chunk processing via `Promise.all`
+- Stats: `{ canonicalTypeCount, proposedArtifactCount, coveredTypeCount, missingTypes, warnings }`
+- Relation proposals pass through to client
+
+**`src/app/api/projects/[projectId]/artifacts/bulk/route.js` (extended):**
+- Accepts `{ artifacts: [...], relations: [...] }` with `clientId` fields
+- `clientId` → DB ID mapping after artifact creation
+- Relations created in same Prisma transaction
+- Limit raised from 50 to 100
+
+**`src/components/import/DocumentImport.jsx` (upgraded):**
+- Coverage panel: 8 groups showing covered/missing types per group
+- `ProposalCard`: per-artifact confidence badge (color-coded ≥75% green, ≥50% amber, <50% red), evidence quotes (truncated, with `Quote` icon), field preview, expand/collapse
+- `RelationsPanel`: per-relation checkboxes, type badge, source→target labels
+- Auto-create mode: requires explicit checkbox before analysis; creates immediately without review step
+- Warnings panel for types lacking field schemas
+
+**New tests:**
+- `src/__tests__/api/artifacts-bulk.test.js` (new, 12 tests) — bulk with and without relations
+- `src/__tests__/lib/ai/document-extractor.test.js` (updated) — `buildTypeSchemas`, `parseExtractionResponse`, chunking, merge, sanitisation
+
+**`vitest.config.js` — fixed `include` filter** to stop Vitest picking up Playwright e2e specs.
+
+**Total test suite: 176 Vitest tests (15 files), 17 Playwright E2E tests — all passing.**
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 26)
-- Tests: 150 Vitest + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 27)
+- Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 2, 4, 5, 7–11
+- Remaining open work: TODO.md items 2, 5, 7–11

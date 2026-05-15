@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-13. All items are unstarted unless noted.
+Last updated: 2026-05-14. All items are unstarted unless noted.
 
 ---
 
@@ -24,11 +24,8 @@ Sprint 4 Step 7 from the original spec was never explicitly committed.
 
 ## Lower Priority / Nice-to-Have
 
-### 4. Document Import — Expand Extractable Types
-Currently 13 out of 35 artifact types are extractable from uploaded documents. Consider adding:
-- Risk, Constraint, Assumption, Open Question (straightforward field schemas)
-- Functional Requirement, Non-Functional Requirement
-- Roadmap Item, Milestone
+### ~~4. Document Import — Expand Extractable Types~~ ✅ DONE
+All 30 canonical extractable types (of 35 total) are now importable. The 5 types without field schemas are surfaced as warnings in the stats panel.
 
 ### 5. Artifact Bulk Actions in Explorer
 - Multi-select artifacts in the tree

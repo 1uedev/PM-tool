@@ -1293,3 +1293,23 @@ Extended the Vitest suite from 99 to **150 tests across 14 files**.
 **Bug fixed during E2E:** `ArtifactRefField.getGroupColor()` used `group.id` instead of `group.key`, causing `ARTIFACT_GROUP_COLORS[undefined]` and a runtime crash on any page with a ProductVision, UseCase, or ValueProposition artifact. Also fixed: `RichTextarea` needed `immediatelyRender: false` in `useEditor` to avoid a Tiptap SSR hydration error in headless environments.
 
 ---
+
+### Extension Step 27 — Intelligent Full-Document Import (30 artifact types) ✅
+
+**Goal:** Expand document import from 13 hardcoded types to all 30 canonical artifact types that have field schemas, add chunking for large documents, extract and propose artifact relations, and upgrade the review UI with confidence/evidence display.
+
+**What changed:**
+
+- **`document-extractor.js` rewritten** — `getCanonicalExtractableTypes()` derives the extractable list directly from `ARTIFACT_FIELD_DEFS`; adding a new artifact type to the constants automatically makes it importable. Document chunking (12 000 chars / 800 char overlap) with `mergeExtractionResults()` for deduplication across chunks. Each proposed artifact now carries `confidence` (0–1), `evidence` (up to 3 source quotes), and `rationale`.
+
+- **`import/route.js`** — parallel chunk processing, 250k char hard cap, rich stats response (`canonicalTypeCount`, `coveredTypeCount`, `missingTypes`, `warnings`).
+
+- **`artifacts/bulk/route.js`** — extended to accept `{ artifacts, relations }` with `clientId` mapping; relations created in the same Prisma transaction; limit raised to 100.
+
+- **`DocumentImport.jsx`** — upgraded review UI: per-group coverage panel, color-coded confidence badges, evidence quotes with expand/collapse, per-relation checkboxes in a dedicated Relations panel, auto-create mode (creates without manual review).
+
+- **`vitest.config.js`** — added `include: ["src/__tests__/**"]` so Vitest no longer picks up the Playwright `e2e/` specs.
+
+**Tests:** 2 new/updated test files; total suite now 176 Vitest tests (15 files) — all passing.
+
+---

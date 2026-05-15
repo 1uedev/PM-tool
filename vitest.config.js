@@ -10,6 +10,7 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    include: ["src/__tests__/**/*.{test,spec}.{js,jsx}"],
     setupFiles: ["./src/__tests__/setup.js"],
     environmentMatchGlobs: [
       ["src/__tests__/components/**", "jsdom"],
