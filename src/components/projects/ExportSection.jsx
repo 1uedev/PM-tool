@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, FileJson, FileText } from "lucide-react";
+import { Download, FileJson, FileText, FileDown } from "lucide-react";
 import Spinner from "@/components/ui/Spinner.jsx";
 
 async function triggerDownload(url, filename) {
@@ -17,7 +17,7 @@ async function triggerDownload(url, filename) {
 }
 
 export default function ExportSection({ projectId, projectName }) {
-  const [loading, setLoading] = useState(null); // "json" | "csv" | null
+  const [loading, setLoading] = useState(null); // "json" | "csv" | "pdf" | null
   const [error, setError] = useState("");
 
   const slug = projectName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
@@ -42,7 +42,7 @@ export default function ExportSection({ projectId, projectName }) {
       <p className="text-sm text-gray-500">
         Alle Artefakte des Projekts als Datei herunterladen.
       </p>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <button
           onClick={() => handleExport("json")}
           disabled={!!loading}
@@ -58,6 +58,14 @@ export default function ExportSection({ projectId, projectName }) {
         >
           {loading === "csv" ? <Spinner className="h-4 w-4" /> : <FileText className="h-4 w-4 text-green-500" />}
           CSV exportieren
+        </button>
+        <button
+          onClick={() => handleExport("pdf")}
+          disabled={!!loading}
+          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+        >
+          {loading === "pdf" ? <Spinner className="h-4 w-4" /> : <FileDown className="h-4 w-4 text-rose-500" />}
+          PDF-Bericht
         </button>
       </div>
       {error && (

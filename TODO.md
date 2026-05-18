@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-18. All items are unstarted unless noted.
+Last updated: 2026-05-18 (updated). All items are unstarted unless noted.
 
 ---
 
@@ -42,8 +42,8 @@ Allow saving a project (its artifact structure, starter answers, and skeleton ar
 ### 10. PostgreSQL / MariaDB Migration Validation
 The Database Config UI exists, but the actual Prisma migration flow for switching from SQLite to Postgres in production has not been exercised end-to-end. A migration runbook and at minimum a CI smoke test against a Postgres container would reduce risk.
 
-### 11. PDF Export / Report Generation
-JSON and CSV artifact export are done. A formatted PDF report (project summary + all artifacts, styled) is still open.
+### ~~11. PDF Export / Report Generation~~ ✅ DONE
+`GET /api/projects/:id/export?format=pdf` — styled A4 report with cover, summary grid, and artifacts grouped by domain. `pdfkit`-based, server-side.
 
 ---
 

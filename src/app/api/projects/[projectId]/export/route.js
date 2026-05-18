@@ -4,8 +4,9 @@ import { requireProjectAccess } from "@/lib/middleware/project-access.js";
 import prisma from "@/lib/prisma.js";
 import { errorResponse } from "@/lib/errors.js";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
+import { generateProjectReport } from "@/lib/pdf/generateProjectReport.js";
 
-// GET /api/projects/:id/export?format=json|csv
+// GET /api/projects/:id/export?format=json|csv|pdf
 export async function GET(request, { params }) {
   const session = await getServerSession(authOptions);
   if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
@@ -53,6 +54,16 @@ export async function GET(request, { params }) {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="${filename}.csv"`,
+      },
+    });
+  }
+
+  if (format === "pdf") {
+    const buffer = await generateProjectReport(project, artifacts);
+    return new Response(buffer, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}.pdf"`,
       },
     });
   }

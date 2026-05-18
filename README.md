@@ -1294,6 +1294,21 @@ Extended the Vitest suite from 99 to **150 tests across 14 files**.
 
 ---
 
+### Extension Step 29 — PDF Export / Report Generation ✅
+
+Adds a formatted PDF report download alongside the existing JSON and CSV exports.
+
+**`GET /api/projects/:id/export?format=pdf`** generates an A4 report using `pdfkit`:
+- **Cover:** project name, description, status, export date
+- **Summary:** 2-column grid showing artifact count per domain group
+- **Artifacts:** one section per group, artifacts sorted by type then title; each card shows title, type, status (color-coded dot), and all field values with German labels
+
+Field values are stored as Tiptap HTML; the generator strips tags and converts block elements to newlines so rich text renders cleanly as plain text in the PDF.
+
+**`ExportSection`** now has three buttons: JSON · CSV · PDF-Bericht.
+
+---
+
 ### Extension Step 28 — Responsive Design + Accessibility Pass ✅
 
 **Mobile Explorer:** New `ExplorerPanelLayout` client component implements master-detail panel switching. On mobile (< 768 px), only the tree or only the detail panel is visible at a time; a back button clears the selection and returns to the tree. On `md+` the original side-by-side layout is preserved.

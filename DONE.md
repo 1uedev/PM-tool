@@ -488,12 +488,34 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 29 — PDF Export / Report Generation ✅
+
+**New dependency:** `pdfkit` v0.18 (pure Node.js, added to `serverExternalPackages`).
+
+**`src/lib/pdf/generateProjectReport.js` (new):**
+- Cover: project name (blue, large), description, status + export date
+- Summary: 2-column grid with per-group artifact counts
+- Artifacts: one page-group per domain, artifacts sorted by type order then title
+- Each artifact: title + status dot/label (right-aligned), type label, then all field values with human-readable labels from `ARTIFACT_FIELD_DEFS`
+- HTML stripped from rich-text fields (`<p>`, `<li>`, `<br>` → newlines; tags removed)
+- Automatic page breaks before any block that would overflow
+
+**`src/app/api/projects/[projectId]/export/route.js`:**
+- Added `format=pdf` branch calling `generateProjectReport()` and returning `application/pdf` with `Content-Disposition: attachment`
+
+**`src/components/projects/ExportSection.jsx`:**
+- Added "PDF-Bericht" button (rose `FileDown` icon) alongside existing JSON / CSV buttons
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 28)
+- Build: last verified clean (Step 29)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 5, 7–11
+- Remaining open work: TODO.md items 5, 7–9
