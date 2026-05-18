@@ -25,6 +25,8 @@ export default function BoardColumn({ status, label, color, artifacts, onDrop, o
 
   return (
     <div
+      role="region"
+      aria-label={`${label}: ${artifacts.length} Artefakt${artifacts.length !== 1 ? "e" : ""}`}
       className={`flex flex-col gap-3 rounded-xl border-2 p-4 transition-colors min-h-64
         ${dragOver ? "border-blue-400 bg-blue-50" : "border-transparent bg-gray-100"}`}
       onDragOver={handleDragOver}

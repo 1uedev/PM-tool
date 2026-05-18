@@ -1294,6 +1294,24 @@ Extended the Vitest suite from 99 to **150 tests across 14 files**.
 
 ---
 
+### Extension Step 28 — Responsive Design + Accessibility Pass ✅
+
+**Mobile Explorer:** New `ExplorerPanelLayout` client component implements master-detail panel switching. On mobile (< 768 px), only the tree or only the detail panel is visible at a time; a back button clears the selection and returns to the tree. On `md+` the original side-by-side layout is preserved.
+
+**Responsive fixes:** `ProjectNavBar` hides "Importieren"/"Einstellungen" text on mobile (icon only); project name truncates to 120 px on mobile vs 240 px on desktop. `BoardView` uses narrower columns (`w-60 sm:w-72`) and tighter padding. `ExplorerDetail` uses `p-4 sm:p-6`.
+
+**ARIA pass:**
+- Explorer tree `<nav>` has `aria-label`
+- `ExplorerTreeGroup` toggle has `aria-expanded` + `aria-controls`; plus button has `aria-label`
+- `ExplorerTreeItem` buttons have `aria-current="page"` when selected + descriptive `aria-label`
+- `ProjectNavBar` breadcrumb and tab strip each wrapped in a `<nav>` with `aria-label`; active tab has `aria-current="page"`
+- `BoardView` filter buttons use `aria-pressed`; filter group has `role="group"`
+- `BoardColumn` has `role="region"` with count in `aria-label`
+
+**Color contrast:** All group badge colors verified to pass WCAG AA — no changes needed.
+
+---
+
 ### Extension Step 27 — Intelligent Full-Document Import (30 artifact types) ✅
 
 **Goal:** Expand document import from 13 hardcoded types to all 30 canonical artifact types that have field schemas, add chunking for large documents, extract and propose artifact relations, and upgrade the review UI with confidence/evidence display.

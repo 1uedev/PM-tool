@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-14. All items are unstarted unless noted.
+Last updated: 2026-05-18. All items are unstarted unless noted.
 
 ---
 
@@ -10,13 +10,8 @@ Last updated: 2026-05-14. All items are unstarted unless noted.
 150 Vitest tests (lib + RTL + API) + 17 Playwright E2E tests — all passing.
 See item 3 (E2E) — now folded into the completed test suite work.
 
-### 2. Responsive Design + Accessibility Pass
-Sprint 4 Step 7 from the original spec was never explicitly committed.
-- Explorer two-column layout collapses properly on mobile
-- Board view and graph view usable on smaller screens
-- ARIA labels on all interactive elements (artifact tree items, drag handles, relation dialog)
-- Keyboard navigation through Explorer tree
-- Color-contrast check for all group color classes (especially lighter tints)
+### ~~2. Responsive Design + Accessibility Pass~~ ✅ DONE
+Explorer mobile panel-switching, responsive nav/board, full ARIA pass (aria-expanded, aria-current, aria-label, aria-pressed, role=region). Group badge colors pass WCAG AA.
 
 ### ~~3. E2E Tests for Core Flows~~ ✅ DONE (folded into item 1)
 

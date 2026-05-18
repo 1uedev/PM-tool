@@ -52,7 +52,7 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto p-6">
+    <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
       <ArtifactHeader
         artifact={artifact}
         projectId={projectId}
@@ -75,7 +75,7 @@ function ArtifactDetailPanel({ artifactId, projectId }) {
 
 function NewArtifactPanel({ type, projectId }) {
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto p-6">
+    <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
       <div className="mb-4">
         <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
           Neues {ARTIFACT_TYPE_LABELS[type] ?? type}

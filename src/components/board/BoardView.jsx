@@ -83,10 +83,13 @@ export default function BoardView({ projectId }) {
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Typ:</span>
-        <div className="flex gap-1 flex-wrap">
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400" aria-hidden="true">
+          Typ:
+        </span>
+        <div className="flex gap-1 flex-wrap" role="group" aria-label="Nach Artefakttyp filtern">
           <button
             onClick={() => setTypeFilter("")}
+            aria-pressed={!typeFilter}
             className={`rounded-full px-2 py-0.5 text-xs transition-colors
               ${!typeFilter ? "bg-blue-100 font-medium text-blue-700" : "text-gray-500 hover:bg-gray-100"}`}
           >
@@ -96,6 +99,7 @@ export default function BoardView({ projectId }) {
             <button
               key={type}
               onClick={() => setTypeFilter(type === typeFilter ? "" : type)}
+              aria-pressed={typeFilter === type}
               className={`rounded-full px-2 py-0.5 text-xs transition-colors
                 ${typeFilter === type ? "bg-blue-100 font-medium text-blue-700" : "text-gray-500 hover:bg-gray-100"}`}
             >
@@ -106,10 +110,10 @@ export default function BoardView({ projectId }) {
         {updating && <Spinner className="h-4 w-4 ml-auto" />}
       </div>
 
-      {/* Board columns */}
-      <div className="flex flex-1 gap-4 overflow-x-auto p-4">
+      {/* Board columns — scrollable horizontally; columns narrower on small screens */}
+      <div className="flex flex-1 gap-2 sm:gap-4 overflow-x-auto p-2 sm:p-4">
         {COLUMNS.map((col) => (
-          <div key={col.status} className="w-72 flex-shrink-0">
+          <div key={col.status} className="w-60 sm:w-72 flex-shrink-0">
             <BoardColumn
               status={col.status}
               label={col.label}

@@ -12,6 +12,7 @@ import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
   // Start collapsed when no artifacts exist — keeps the tree clean with 26+ types
   const [open, setOpen] = useState(artifacts.length > 0);
+  const listId = `tree-group-${type}`;
   const [pendingNewNav, setPendingNewNav] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -48,6 +49,8 @@ export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
         <div
           role="button"
           tabIndex={0}
+          aria-expanded={open}
+          aria-controls={listId}
           onClick={() => setOpen((o) => !o)}
           onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setOpen((o) => !o)}
           className="group flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-gray-100"
@@ -64,16 +67,17 @@ export default function ExplorerTreeGroup({ type, artifacts, projectId }) {
           {canEdit && (
             <button
               onClick={handleNew}
-              title={`Neue ${ARTIFACT_TYPE_LABELS[type]} anlegen`}
+              title={`Neue ${ARTIFACT_TYPE_LABELS[type] ?? type} anlegen`}
+              aria-label={`Neue ${ARTIFACT_TYPE_LABELS[type] ?? type} anlegen`}
               className="rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-200"
             >
-              <Plus className="h-3.5 w-3.5 text-gray-500" />
+              <Plus className="h-3.5 w-3.5 text-gray-500" aria-hidden="true" />
             </button>
           )}
         </div>
 
         {open && (
-          <div className="ml-2 mt-0.5 flex flex-col gap-0.5">
+          <div id={listId} className="ml-2 mt-0.5 flex flex-col gap-0.5">
             {artifacts.length === 0 ? (
               <p className="px-3 py-1.5 text-xs text-gray-400 italic">Keine Einträge</p>
             ) : (

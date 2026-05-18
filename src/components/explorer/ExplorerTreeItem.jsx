@@ -50,6 +50,8 @@ export default function ExplorerTreeItem({ artifact }) {
       <button
         onClick={handleClick}
         title={ARTIFACT_STATUS_LABELS[artifact.status]}
+        aria-current={isSelected ? "page" : undefined}
+        aria-label={`${artifact.title} — ${ARTIFACT_STATUS_LABELS[artifact.status] ?? artifact.status}`}
         className={`group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors
           ${isSelected
             ? "bg-blue-50 text-blue-800 font-medium"

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth.js";
 import prisma from "@/lib/prisma.js";
 import ExplorerTreeClient from "@/components/explorer/ExplorerTreeClient.jsx";
 import ExplorerDetail from "@/components/explorer/ExplorerDetail.jsx";
+import ExplorerPanelLayout from "@/components/explorer/ExplorerPanelLayout.jsx";
 import { DirtyFormProvider } from "@/lib/DirtyFormContext.js";
 import { ProjectRoleProvider } from "@/lib/ProjectRoleContext.js";
 import ProjectNavBar from "@/components/layout/ProjectNavBar.jsx";
@@ -45,30 +46,13 @@ export default async function ProjectPage({ params }) {
     <div className="flex flex-1 flex-col overflow-hidden">
       <ProjectNavBar projectId={projectId} projectName={project.name} role={role} />
 
-      {/* Two-column explorer */}
+      {/* Two-column explorer (collapses to single-panel on mobile) */}
       <ProjectRoleProvider role={role}>
       <DirtyFormProvider>
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: Tree */}
-        <aside className="flex w-64 flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white">
-          <div className="flex h-10 flex-shrink-0 items-center border-b border-gray-100 px-4">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Artefakte
-            </span>
-          </div>
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <ExplorerTreeClient
-              projectId={projectId}
-              initialArtifacts={artifacts}
-            />
-          </div>
-        </aside>
-
-        {/* Right: Detail */}
-        <main className="flex flex-1 flex-col overflow-hidden bg-gray-50">
-          <ExplorerDetail projectId={projectId} />
-        </main>
-      </div>
+        <ExplorerPanelLayout
+          tree={<ExplorerTreeClient projectId={projectId} initialArtifacts={artifacts} />}
+          detail={<ExplorerDetail projectId={projectId} />}
+        />
       </DirtyFormProvider>
       </ProjectRoleProvider>
     </div>

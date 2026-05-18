@@ -458,12 +458,42 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 28 — Responsive Design + Accessibility Pass ✅
+
+**Goal:** Sprint 4 Step 7 from the original spec — mobile-friendly layouts and a full ARIA pass.
+
+**Mobile Explorer (master-detail panel switching):**
+- New `ExplorerPanelLayout.jsx` client component reads `useSearchParams()` and toggles visibility:
+  - No artifact/new selected → full-width tree panel; detail hidden
+  - Artifact/new selected → tree hidden; full-width detail panel
+- Mobile back button (`← Zurück`) in detail panel clears `?artifact` / `?new` params and returns to tree
+- On `md+` (768 px+): original side-by-side layout with fixed 256 px tree column
+
+**Responsive layout fixes:**
+- `ProjectNavBar` — `px-2 sm:px-4` padding; project name `max-w-[120px] sm:max-w-[240px]`; "Importieren" and "Einstellungen" label text hidden on mobile (icon only); tab strip `px-2 sm:px-3` per tab
+- `BoardView` — columns `w-60 sm:w-72`; board area `gap-2 sm:gap-4`, `p-2 sm:p-4`
+- `ExplorerDetail` — padding `p-4 sm:p-6` in both `ArtifactDetailPanel` and `NewArtifactPanel`
+
+**ARIA improvements:**
+- `ExplorerTree` nav — `aria-label="Artefaktnavigation"`
+- `ExplorerTreeGroup` toggle — `aria-expanded={open}`, `aria-controls={listId}`, plus button `aria-label`; `<Plus>` icon `aria-hidden`
+- `ExplorerTreeItem` button — `aria-current="page"` when selected; `aria-label` with title + status
+- `ProjectNavBar` — breadcrumb wrapped in `<nav aria-label="Brotkrumennavigation">`; tab strip in `<nav aria-label="Projektnavigation">`; active tab `aria-current="page"`; icon `aria-hidden`
+- `BoardView` — filter group has `role="group" aria-label="Nach Artefakttyp filtern"`, each filter button has `aria-pressed`
+- `BoardColumn` — `role="region"` with `aria-label` showing status label and count
+
+**Color contrast:** All group badge colors (`bg-{color}-50 text-{color}-700`) verified — pass WCAG AA (≥ 4.5:1) at Tailwind's standard palette values. No changes needed.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 27)
+- Build: last verified clean (Step 28)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
 - Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 2, 5, 7–11
+- Remaining open work: TODO.md items 5, 7–11

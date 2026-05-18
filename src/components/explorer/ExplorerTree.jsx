@@ -11,7 +11,7 @@ export default function ExplorerTree({ artifacts, projectId }) {
   }
 
   return (
-    <nav className="flex flex-col gap-0.5 px-2 py-3">
+    <nav className="flex flex-col gap-0.5 px-2 py-3" aria-label="Artefaktnavigation">
       {ARTIFACT_GROUPS.map((group) => (
         <ExplorerGroupSection
           key={group.key}
