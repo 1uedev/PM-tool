@@ -4,6 +4,7 @@ import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/pr
 import { validateBody } from "@/lib/validators/index.js";
 import { updateArtifactSchema } from "@/lib/validators/artifact.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { logAction } from "@/lib/audit.js";
 
 function parseArtifact(artifact) {
   return {
@@ -99,13 +100,18 @@ export async function DELETE(request, { params }) {
   const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
   if (accessErr) return accessErr;
 
-  const { response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
+  const { artifact, response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
   if (artifactErr) return artifactErr;
 
   try {
     await prisma.artifact.update({
       where: { id: artifactId },
       data: { deleted: true },
+    });
+
+    await logAction("ARTIFACT_DELETE", session.user.id, projectId, artifactId, {
+      artifactTitle: artifact.title,
+      artifactType: artifact.type,
     });
 
     return successResponse({ deleted: true });

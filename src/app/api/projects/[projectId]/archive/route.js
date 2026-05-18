@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma.js";
 import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess } from "@/lib/middleware/project-access.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { logAction } from "@/lib/audit.js";
 
 // PATCH /api/projects/:id/archive — toggle archive status (OWNER only)
 export async function PATCH(request, { params }) {
@@ -17,7 +18,7 @@ export async function PATCH(request, { params }) {
   try {
     const current = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { status: true },
+      select: { status: true, name: true },
     });
 
     if (!current) return errorResponse("NOT_FOUND", "Projekt nicht gefunden", 404);
@@ -27,6 +28,11 @@ export async function PATCH(request, { params }) {
     const project = await prisma.project.update({
       where: { id: projectId },
       data: { status: newStatus },
+    });
+
+    const action = newStatus === "ARCHIVED" ? "PROJECT_ARCHIVE" : "PROJECT_UNARCHIVE";
+    await logAction(action, session.user.id, projectId, projectId, {
+      projectName: current.name,
     });
 
     return successResponse(project);

@@ -33,8 +33,8 @@ All 30 canonical extractable types (of 35 total) are now importable. The 5 types
 ### 7. In-App Notifications
 Currently there is no way for a user to know that another user commented on their artifact. A simple in-app notification panel (unread count in header, list of events) would be the minimum viable awareness layer — without requiring email or real-time infrastructure.
 
-### 8. Audit Log UI
-`AiSession` is logged. Destructive actions (delete, restore, archive) are not. An admin-visible audit log page would aid compliance (aligns with the "audit logs" item listed in the landing page's security features).
+### ~~8. Audit Log UI~~ ✅ DONE
+Destructive actions (artifact delete, version restore, project archive/unarchive) are now logged to the `AuditLog` table. Admin-visible page at `/admin/audit` with action filter and pagination.
 
 ### 9. Project Templates
 Allow saving a project (its artifact structure, starter answers, and skeleton artifacts) as a template, and creating new projects from a template. Useful for teams that run a standard PM process repeatedly.

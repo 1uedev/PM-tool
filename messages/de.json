@@ -5,7 +5,8 @@
     "users": "Benutzerverwaltung",
     "languages": "Sprachverwaltung",
     "database": "Datenbank",
-    "ai": "KI-Konfiguration"
+    "ai": "KI-Konfiguration",
+    "audit": "Audit-Log"
   },
   "auth": {
     "logout": "Abmelden",

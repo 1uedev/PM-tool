@@ -510,12 +510,38 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 30 — Audit Log UI ✅
+
+**New `AuditLog` table** (migration `20260518175423_add_audit_log`): `id`, `action`, `userId`, `projectId?`, `targetId?`, `meta` (JSON string), `createdAt`. Indexes on `createdAt`, `userId`, `projectId`.
+
+**Actions logged:**
+- `ARTIFACT_DELETE` — on `DELETE /api/projects/:id/artifacts/:aid`; meta: `{ artifactTitle, artifactType }`
+- `ARTIFACT_RESTORE` — on `POST /api/projects/:id/artifacts/:aid/versions/:vid/restore`; meta: `{ artifactTitle, artifactType, restoredFromVersion }`
+- `PROJECT_ARCHIVE` / `PROJECT_UNARCHIVE` — on `PATCH /api/projects/:id/archive`; meta: `{ projectName }`
+
+**`src/lib/audit.js`** — `logAction(action, userId, projectId, targetId, meta)` helper; fire-and-forget with internal try-catch so it never disrupts the response path.
+
+**`GET /api/admin/audit`** — admin-only; pagination (`page`, `limit`); optional `action` filter; returns `{ entries, total, page, limit }` with user name/email joined.
+
+**`/admin/audit` page** — `AuditLogTable` client component with:
+- Action filter chips (aria-pressed)
+- Table: timestamp, color-coded action badge, user name/email, affected artifact/project
+- Pagination with Seite N/M display
+
+**Sidebar** — "Audit-Log" (`ClipboardList` icon) added to admin nav section. i18n keys added to `de.json` and `en.json`.
+
+**Bug fixed:** `DELETE /artifacts/:id` was not destructuring `artifact` from `requireArtifactAccess` — the artifact object was out of scope. Fixed while adding the log call.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 29)
+- Build: last verified clean (Step 30)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
-- Migrations: 5 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`)
+- Migrations: 6 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 5, 7–9
+- Remaining open work: TODO.md items 5, 7, 9

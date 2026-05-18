@@ -5,7 +5,8 @@
     "users": "User Management",
     "languages": "Language Management",
     "database": "Database",
-    "ai": "AI Configuration"
+    "ai": "AI Configuration",
+    "audit": "Audit Log"
   },
   "auth": {
     "logout": "Log out",

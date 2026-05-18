@@ -25,6 +25,7 @@ model User {
   comments      Comment[]
   versions      ArtifactVersion[]
   aiSessions    AiSession[]
+  auditLogs     AuditLog[]
 }
 
 // ─── Languages ───
@@ -178,6 +179,24 @@ model AiConfig {
   timeoutMs Int      @default(30000)
   maxTokens Int      @default(2048)
   updatedAt DateTime @updatedAt
+}
+
+// ─── Audit Log ───
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // "ARTIFACT_DELETE" | "ARTIFACT_RESTORE" | "PROJECT_ARCHIVE" | "PROJECT_UNARCHIVE"
+  userId    String
+  projectId String?
+  targetId  String?  // artifactId or projectId
+  meta      String   @default("{}") // JSON: { artifactTitle, artifactType, projectName, ... }
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([projectId])
 }
 
 // ─── AI Sessions ───

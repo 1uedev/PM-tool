@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma.js";
 import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { logAction } from "@/lib/audit.js";
 
 // POST /api/projects/:id/artifacts/:aid/versions/:vid/restore — restore to this version
 export async function POST(request, { params }) {
@@ -49,6 +50,12 @@ export async function POST(request, { params }) {
           },
         },
       },
+    });
+
+    await logAction("ARTIFACT_RESTORE", session.user.id, projectId, artifactId, {
+      artifactTitle: version.title,
+      artifactType: updated.type,
+      restoredFromVersion: version.version,
     });
 
     return successResponse({

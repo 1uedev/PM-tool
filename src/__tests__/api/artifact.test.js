@@ -13,6 +13,10 @@ vi.mock("@/lib/prisma.js", () => ({
   },
 }));
 
+vi.mock("@/lib/audit.js", () => ({
+  logAction: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("@/lib/middleware/auth-guard.js", () => ({
   requireAuth: vi.fn(),
 }));

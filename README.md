@@ -1294,6 +1294,22 @@ Extended the Vitest suite from 99 to **150 tests across 14 files**.
 
 ---
 
+### Extension Step 30 — Audit Log UI ✅
+
+Destructive actions are now logged and visible to admins.
+
+**What's logged:** artifact soft-delete, version restore, project archive/unarchive — each with the affected resource's title/name, type, and (for restores) the source version number.
+
+**`src/lib/audit.js`** — `logAction()` fire-and-forget helper with internal error suppression so a failed log write never breaks the user-facing operation.
+
+**`GET /api/admin/audit`** — paginated, filterable by action type (admin-only).
+
+**`/admin/audit`** — table with timestamp · action badge · user · affected resource; action filter chips; page navigation. Linked from the admin sidebar.
+
+**Also fixed:** `DELETE /artifacts/:id` was not capturing the `artifact` variable from `requireArtifactAccess` (was only taking `response`), causing a `ReferenceError` that would have silently swallowed the log call. Fixed while adding the log call.
+
+---
+
 ### Extension Step 29 — PDF Export / Report Generation ✅
 
 Adds a formatted PDF report download alongside the existing JSON and CSV exports.
