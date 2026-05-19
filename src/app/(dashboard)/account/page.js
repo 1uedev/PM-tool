@@ -15,6 +15,8 @@ export default async function AccountPage() {
     select: { id: true, email: true, name: true },
   });
 
+  if (!user) redirect("/login");
+
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
       <header className="flex h-14 flex-shrink-0 items-center border-b border-gray-200 bg-white px-6">
