@@ -4,6 +4,7 @@ import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/pr
 import { validateBody } from "@/lib/validators/index.js";
 import { createCommentSchema } from "@/lib/validators/comment.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { createCommentNotifications } from "@/lib/notifications.js";
 
 // GET /api/projects/:id/artifacts/:aid/comments — list comments
 export async function GET(request, { params }) {
@@ -42,7 +43,7 @@ export async function POST(request, { params }) {
   const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
   if (accessErr) return accessErr;
 
-  const { response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
+  const { artifact, response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
   if (artifactErr) return artifactErr;
 
   const { data, response: validErr } = await validateBody(request, createCommentSchema);
@@ -58,6 +59,14 @@ export async function POST(request, { params }) {
       include: {
         author: { select: { id: true, name: true, email: true } },
       },
+    });
+
+    createCommentNotifications({
+      actorId: session.user.id,
+      projectId,
+      artifactId,
+      artifactTitle: artifact.title,
+      contentPreview: data.content,
     });
 
     return successResponse(comment, 201);

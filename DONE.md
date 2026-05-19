@@ -570,12 +570,39 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 32 — In-App Notifications ✅
+
+**New `Notification` table** (migration `20260519123620_add_notifications`): `id`, `userId` (recipient), `type`, `actorId`, `artifactId?`, `projectId?`, `meta` (JSON string), `read`, `createdAt`. Indexed on `(userId, read)` and `(userId, createdAt)`.
+
+**`src/lib/notifications.js`** — `createCommentNotifications({ actorId, projectId, artifactId, artifactTitle, contentPreview })`: fire-and-forget helper; fetches all project members, excludes the actor, calls `prisma.notification.createMany`. Internal try-catch ensures it never blocks the response.
+
+**Comments API** (`POST /artifacts/:aid/comments`): now destructures `artifact` from `requireArtifactAccess` and calls `createCommentNotifications` after the comment is created.
+
+**`GET /api/notifications`**: returns `{ notifications, unreadCount }` for the current user. Last 30 notifications ordered by `createdAt desc`. `meta` JSON parsed on the server before returning.
+
+**`PATCH /api/notifications/read`**: marks specific IDs (body: `{ ids: string[] }`) or all unread notifications as read.
+
+**`NotificationBell.jsx`** (client component):
+- Bell icon button with red badge showing unread count (capped at 9+)
+- SWR polling every 30 s, revalidates on focus
+- Dropdown panel with last 30 notifications, unread items highlighted in blue
+- Each notification shows actor name, artifact title, content preview (2 lines), relative time, project name
+- Click → marks as read + navigates to `/projects/:id?artifact=:aid`
+- "Alle als gelesen" button → `PATCH /api/notifications/read` (all)
+- Click-outside closes the panel
+
+**`Header.jsx`**: `<NotificationBell />` added to the right side of the header bar.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 31)
+- Build: last verified clean (Step 32)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
-- Migrations: 6 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`)
+- Migrations: 7 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 7, 9
+- Remaining open work: TODO.md items 9, 10

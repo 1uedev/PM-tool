@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-19 (updated). All items are unstarted unless noted.
+Last updated: 2026-05-19 (updated again). All items are unstarted unless noted.
 
 ---
 
@@ -27,8 +27,8 @@ All 30 canonical extractable types (of 35 total) are now importable. The 5 types
 
 ### ~~6. Rich Text for Long-Form Fields~~ ✅ DONE
 
-### 7. In-App Notifications
-Currently there is no way for a user to know that another user commented on their artifact. A simple in-app notification panel (unread count in header, list of events) would be the minimum viable awareness layer — without requiring email or real-time infrastructure.
+### ~~7. In-App Notifications~~ ✅ DONE
+Bell icon in header with red unread badge; dropdown panel (last 30 notifications, 30 s polling). Clicking a notification navigates to the artifact and marks it read. "Alle als gelesen" marks all. Triggered on comment POST for all project members except the author. `Notification` table + migration.
 
 ### ~~8. Audit Log UI~~ ✅ DONE
 Destructive actions (artifact delete, version restore, project archive/unarchive) are now logged to the `AuditLog` table. Admin-visible page at `/admin/audit` with action filter and pagination.
