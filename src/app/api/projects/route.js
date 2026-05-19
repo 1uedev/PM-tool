@@ -37,6 +37,7 @@ export async function GET() {
 }
 
 // POST /api/projects — create a new project; creator becomes OWNER
+// Optional body field: templateId — pre-populates artifacts + starter from a template
 export async function POST(request) {
   const { session, response: authErr } = await requireAuth();
   if (authErr) return authErr;
@@ -45,13 +46,48 @@ export async function POST(request) {
   if (validErr) return validErr;
 
   try {
+    // Optionally load a template to pre-populate the project
+    let templateArtifacts = [];
+    let templateStarter = null;
+
+    if (data.templateId) {
+      const tmpl = await prisma.projectTemplate.findUnique({
+        where: { id: data.templateId },
+        include: { artifacts: { orderBy: { sortOrder: "asc" } } },
+      });
+      if (tmpl) {
+        templateArtifacts = tmpl.artifacts;
+        templateStarter = tmpl.starter ?? null;
+      }
+    }
+
     const project = await prisma.project.create({
       data: {
         name: data.name,
         description: data.description ?? null,
+        prdStarter: templateStarter,
         members: {
           create: { userId: session.user.id, role: "OWNER" },
         },
+        artifacts: templateArtifacts.length > 0
+          ? {
+              create: templateArtifacts.map((a) => ({
+                type: a.type,
+                title: a.title,
+                status: "DRAFT",
+                fields: a.fields,
+                versions: {
+                  create: {
+                    version: 1,
+                    title: a.title,
+                    fields: a.fields,
+                    status: "DRAFT",
+                    authorId: session.user.id,
+                  },
+                },
+              })),
+            }
+          : undefined,
       },
     });
 

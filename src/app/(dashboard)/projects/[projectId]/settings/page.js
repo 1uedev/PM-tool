@@ -7,6 +7,7 @@ import ProjectForm from "@/components/projects/ProjectForm.jsx";
 import ProjectSettingsActions from "@/components/projects/ProjectSettingsActions.jsx";
 import MembersSection from "@/components/projects/members/MembersSection.jsx";
 import ExportSection from "@/components/projects/ExportSection.jsx";
+import SaveAsTemplateDialog from "@/components/projects/SaveAsTemplateDialog.jsx";
 
 export const metadata = { title: "Projekteinstellungen — PM Copilot" };
 
@@ -26,6 +27,14 @@ export default async function ProjectSettingsPage({ params }) {
   if (!membership) notFound();
 
   const { project, role } = membership;
+
+  const artifacts = role === "OWNER"
+    ? await prisma.artifact.findMany({
+        where: { projectId, deleted: false },
+        select: { id: true, type: true, title: true },
+        orderBy: [{ type: "asc" }, { createdAt: "asc" }],
+      })
+    : [];
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
@@ -60,6 +69,18 @@ export default async function ProjectSettingsPage({ params }) {
           </h2>
           <ExportSection projectId={projectId} projectName={project.name} />
         </section>
+
+        {role === "OWNER" && (
+          <section>
+            <h2 className="mb-4 text-sm font-semibold text-gray-700 uppercase tracking-wide">
+              Vorlage
+            </h2>
+            <p className="mb-3 text-sm text-gray-500">
+              Speichere dieses Projekt als Vorlage, um neue Projekte mit der gleichen Struktur schnell zu starten.
+            </p>
+            <SaveAsTemplateDialog project={project} artifacts={artifacts} />
+          </section>
+        )}
 
         {role === "OWNER" && (
           <section>

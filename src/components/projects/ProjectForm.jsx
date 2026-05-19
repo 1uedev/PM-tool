@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input.jsx";
 import Button from "@/components/ui/Button.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
+import TemplatePicker from "./TemplatePicker.jsx";
 
-export default function ProjectForm({ project }) {
+export default function ProjectForm({ project, templates }) {
   const router = useRouter();
   const isEdit = !!project;
 
@@ -14,6 +15,7 @@ export default function ProjectForm({ project }) {
     name: project?.name ?? "",
     description: project?.description ?? "",
   });
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState("");
@@ -39,10 +41,13 @@ export default function ProjectForm({ project }) {
         : "/api/projects";
       const method = isEdit ? "PATCH" : "POST";
 
+      const body = { ...values };
+      if (!isEdit && selectedTemplateId) body.templateId = selectedTemplateId;
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(body),
       });
 
       const json = await res.json();
@@ -79,6 +84,15 @@ export default function ProjectForm({ project }) {
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {globalError}
         </div>
+      )}
+
+      {/* Template picker — only shown when creating a new project and templates exist */}
+      {!isEdit && templates && templates.length > 0 && (
+        <TemplatePicker
+          templates={templates}
+          selectedId={selectedTemplateId}
+          onSelect={setSelectedTemplateId}
+        />
       )}
 
       <Input

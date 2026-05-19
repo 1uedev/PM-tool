@@ -28,6 +28,7 @@ model User {
   auditLogs          AuditLog[]
   notifications      Notification[] @relation("NotificationRecipient")
   actorNotifications Notification[] @relation("NotificationActor")
+  templates          ProjectTemplate[]
 }
 
 // ─── Languages ───
@@ -238,4 +239,34 @@ model Notification {
 
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+// ─── Project Templates ───
+
+model ProjectTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  starter     String?  // JSON: prdStarter answers to pre-populate new projects
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User                     @relation(fields: [createdById], references: [id])
+  artifacts  ProjectTemplateArtifact[]
+
+  @@index([createdById])
+}
+
+model ProjectTemplateArtifact {
+  id         String   @id @default(cuid())
+  templateId String
+  type       String
+  title      String
+  fields     String   @default("{}") // JSON: pre-filled field values
+  sortOrder  Int      @default(0)
+
+  template ProjectTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
 }

@@ -597,12 +597,47 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 33 — Project Templates ✅
+
+**New tables** (migration `20260519125352_add_project_templates`):
+- `ProjectTemplate` — id, name, description, starter (JSON string), createdById, createdAt, updatedAt
+- `ProjectTemplateArtifact` — id, templateId, type, title, fields (JSON), sortOrder
+
+**API:**
+- `GET /api/templates` — list all templates with artifact count and creator info
+- `POST /api/templates` — create template from an existing project; body: `{ name, description?, projectId, artifactIds?, includeStarter? }`; requires EDITOR+ on the source project
+- `GET /api/templates/:id` — full template with artifacts (fields parsed)
+- `DELETE /api/templates/:id` — creator or ADMIN only
+- `POST /api/projects` — extended with optional `templateId`; when supplied, pre-creates all template artifacts as DRAFT with v1 version each, and copies `prdStarter` answers into the new project
+
+**`SaveAsTemplateDialog.jsx`** (new client component):
+- Triggered by "Als Vorlage speichern" button on project settings (Owner only)
+- Name input (pre-filled), description input
+- "Starter-Antworten einschließen" checkbox (shown only if project has prdStarter)
+- Scrollable artifact checklist with select/deselect all
+- POST to `/api/templates` on save; success screen with close
+
+**`TemplatePicker.jsx`** (new client component):
+- Grid of template cards shown above the create form on `/projects/new`
+- "Ohne Vorlage" default option; selecting a template card sets `selectedTemplateId`
+- Displays artifact count per template
+
+**`ProjectForm.jsx`** — accepts new `templates` prop; renders `TemplatePicker` in create mode; includes `templateId` in POST body when a template is selected.
+
+**`projects/new/page.js`** — now fetches all templates server-side and passes them to `ProjectForm`.
+
+**`projects/[projectId]/settings/page.js`** — fetches project artifacts server-side for Owner; renders new "Vorlage" section with `SaveAsTemplateDialog`.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 32)
+- Build: last verified clean (Step 33)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
-- Migrations: 7 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`)
+- Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 9, 10
+- Remaining open work: TODO.md item 10 (PostgreSQL validation — ops/infra only)

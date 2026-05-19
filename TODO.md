@@ -33,8 +33,8 @@ Bell icon in header with red unread badge; dropdown panel (last 30 notifications
 ### ~~8. Audit Log UI~~ ✅ DONE
 Destructive actions (artifact delete, version restore, project archive/unarchive) are now logged to the `AuditLog` table. Admin-visible page at `/admin/audit` with action filter and pagination.
 
-### 9. Project Templates
-Allow saving a project (its artifact structure, starter answers, and skeleton artifacts) as a template, and creating new projects from a template. Useful for teams that run a standard PM process repeatedly.
+### ~~9. Project Templates~~ ✅ DONE
+"Als Vorlage speichern" on project settings (Owner only) with artifact picker + optional starter answers. Template picker on new-project page. `POST /api/projects` accepts `templateId` and pre-creates artifacts + prdStarter. `GET/POST /api/templates`, `GET/DELETE /api/templates/:id`.
 
 ### 10. PostgreSQL / MariaDB Migration Validation
 The Database Config UI exists, but the actual Prisma migration flow for switching from SQLite to Postgres in production has not been exercised end-to-end. A migration runbook and at minimum a CI smoke test against a Postgres container would reduce risk.
