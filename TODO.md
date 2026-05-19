@@ -36,8 +36,8 @@ Destructive actions (artifact delete, version restore, project archive/unarchive
 ### ~~9. Project Templates~~ ✅ DONE
 "Als Vorlage speichern" on project settings (Owner only) with artifact picker + optional starter answers. Template picker on new-project page. `POST /api/projects` accepts `templateId` and pre-creates artifacts + prdStarter. `GET/POST /api/templates`, `GET/DELETE /api/templates/:id`.
 
-### 10. PostgreSQL / MariaDB Migration Validation
-The Database Config UI exists, but the actual Prisma migration flow for switching from SQLite to Postgres in production has not been exercised end-to-end. A migration runbook and at minimum a CI smoke test against a Postgres container would reduce risk.
+### ~~10. PostgreSQL Migration Validation~~ ✅ DONE
+`docker-compose.postgres.yml` + `.env.postgres.example` + `scripts/smoke-postgres.mjs` (10-step CRUD smoke test) + `.github/workflows/postgres-smoke.yml` (CI on schema/migration changes). `npm run test:postgres` for local validation.
 
 ### ~~11. PDF Export / Report Generation~~ ✅ DONE
 `GET /api/projects/:id/export?format=pdf` — styled A4 report with cover, summary grid, and artifacts grouped by domain. `pdfkit`-based, server-side.

@@ -632,12 +632,54 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 34 — PostgreSQL Migration Validation ✅
+
+**Goal:** Validate that the schema and all migrations apply cleanly against PostgreSQL 15, and that all core CRUD operations work correctly after migration.
+
+**`docker-compose.postgres.yml`:**
+- Postgres 15-alpine service on port 5433 (avoids conflict with a local Postgres on 5432)
+- Health check: `pg_isready -U pmcopilot -d pmcopilot_test`
+- Credentials: `pmcopilot / pmcopilot / pmcopilot_test`
+
+**`.env.postgres.example`:**
+- Template with `DATABASE_URL` pointing to the Docker container
+- `AI_PROVIDER="disabled"` — smoke test does not require an AI API key
+
+**`scripts/smoke-postgres.mjs`** — 10-step Node.js smoke test:
+1. Validates `DATABASE_URL` is a PostgreSQL string
+2. Runs `npx prisma migrate deploy` via `execSync`
+3. Checks raw DB connectivity (`SELECT 1`)
+4. Creates User, Project (with OWNER membership), Artifact (with v1), Comment, Notification, ProjectTemplate, AuditLog
+5. Queries artifact back with versions + comments to verify relational integrity
+6. Cleans up test rows; exits 0 on success, 1 on any failure
+
+**`.github/workflows/postgres-smoke.yml`** — CI workflow:
+- Trigger: `workflow_dispatch` + push to `main` when schema/migration/smoke files change
+- Postgres 15-alpine as a service container with health check
+- Steps: checkout → Node 22 → `npm ci` → patch schema provider to `"postgresql"` → `prisma generate` → `prisma migrate deploy` → `node scripts/smoke-postgres.mjs` → restore schema to `"sqlite"`
+
+**`package.json`:** added `"test:postgres": "node scripts/smoke-postgres.mjs"` script for local validation.
+
+**Local validation workflow:**
+```bash
+docker compose -f docker-compose.postgres.yml up -d
+# wait for healthy
+DATABASE_URL="postgresql://pmcopilot:pmcopilot@localhost:5433/pmcopilot_test" \
+  npx prisma migrate deploy
+npm run test:postgres
+docker compose -f docker-compose.postgres.yml down
+```
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 33)
+- Build: last verified clean (Step 34)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
 - Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md item 10 (PostgreSQL validation — ops/infra only)
+- **All TODO items complete.** No remaining open work.

@@ -1310,6 +1310,91 @@ Destructive actions are now logged and visible to admins.
 
 ---
 
+### Extension Step 31 — Artifact Bulk Actions in Explorer ✅
+
+Multi-select mode in the Explorer tree lets EDITOR+ users act on multiple artifacts at once.
+
+**"Auswählen" toggle** in the filter bar (EDITOR/OWNER only) enters bulk select mode. In select mode each tree item shows a checkbox instead of a status dot; clicking toggles selection instead of navigating.
+
+**`BulkActionBar`** appears at the bottom of the tree panel while select mode is active:
+- **Status** — dropdown (DRAFT / In Review / Done) → `PATCH /artifacts/bulk`
+- **Tag** — dropdown of project tags → `POST /artifacts/bulk/tags`
+- **Löschen** — with `ConfirmDialog` → `DELETE /artifacts/bulk` (soft-delete, logged to AuditLog)
+- **×** — exits select mode
+
+**New API endpoints:**
+- `PATCH /api/projects/:id/artifacts/bulk` — body `{ ids, status }`; `updateMany` on the matched artifacts
+- `DELETE /api/projects/:id/artifacts/bulk` — body `{ ids }`; soft-delete + `ARTIFACT_BULK_DELETE` audit log entry
+- `POST /api/projects/:id/artifacts/bulk/tags` — body `{ ids, tagIds }`; upserts `ArtifactTag` rows in a Prisma transaction
+
+**`BulkSelectContext`** — React context (`selectMode`, `selectedIds` Set, `enter`, `clear`, `toggle`) wraps the tree client so selection state is shared between the filter bar, tree items, and action bar without prop drilling.
+
+---
+
+### Extension Step 32 — In-App Notifications ✅
+
+Bell icon in the header keeps users aware of activity on their projects — no email or real-time infrastructure required.
+
+**`Notification` table** (migration `add_notifications`): recipient `userId`, `type`, `actorId`, `artifactId?`, `projectId?`, JSON `meta`, `read` flag, `createdAt`. Indexed on `(userId, read)` and `(userId, createdAt)`.
+
+**Trigger:** `POST /artifacts/:aid/comments` now calls `createCommentNotifications()` after the comment is saved. The helper fetches all project members, excludes the author, and calls `prisma.notification.createMany`. Fire-and-forget with internal try-catch.
+
+**API:**
+- `GET /api/notifications` — returns `{ notifications, unreadCount }` for the session user (last 30, desc)
+- `PATCH /api/notifications/read` — marks specific IDs or all unread as read
+
+**`NotificationBell`** (client component in Header):
+- Bell icon with a red badge (capped at 9+)
+- SWR polling every 30 s, revalidates on window focus
+- Dropdown panel: actor name, artifact title, 2-line comment preview, relative time, project name; unread items in blue
+- Click → navigate to artifact + mark as read
+- "Alle als gelesen" button
+
+---
+
+### Extension Step 33 — Project Templates ✅
+
+Owners can capture a project's structure as a reusable template and apply it when creating new projects.
+
+**New tables** (migration `add_project_templates`):
+- `ProjectTemplate` — name, description, optional `starter` (JSON prdStarter answers), createdById
+- `ProjectTemplateArtifact` — type, title, fields (JSON), sortOrder; cascades on template delete
+
+**Saving a template** — "Als Vorlage speichern" button in the project settings "Vorlage" section (Owner only). `SaveAsTemplateDialog` lets the owner set name/description, optionally include PRD starter answers, and pick which artifacts to include via a scrollable checklist with select/deselect all.
+
+**Using a template** — `/projects/new` fetches all templates server-side and passes them to `ProjectForm`. `TemplatePicker` renders a card grid above the form ("Ohne Vorlage" + one card per template). When a template is selected, the `POST /api/projects` body includes `templateId`; the API pre-creates all template artifacts as DRAFT with initial version history and copies the `prdStarter` answers into the new project.
+
+**API:** `GET/POST /api/templates`, `GET/DELETE /api/templates/:id`.
+
+---
+
+### Extension Step 34 — PostgreSQL Migration Validation ✅
+
+Validates that the schema and all 8 migrations apply cleanly against PostgreSQL 15 and that all core tables work correctly.
+
+**`docker-compose.postgres.yml`** — Postgres 15-alpine on port 5433 with a `pg_isready` health check.
+
+**`scripts/smoke-postgres.mjs`** — 10-step Node.js smoke test:
+1. Validates `DATABASE_URL` is a PostgreSQL string
+2. Runs `npx prisma migrate deploy`
+3. Checks raw connectivity (`SELECT 1`)
+4. Creates User → Project → Artifact (with v1) → Comment → Notification → ProjectTemplate → AuditLog
+5. Queries artifact back with versions + comments to verify relational integrity
+6. Cleans up; exits non-zero on any failure
+
+**`.github/workflows/postgres-smoke.yml`** — CI workflow triggered on pushes that change the schema, migrations, or smoke script. Steps: patch `provider = "postgresql"` → `prisma generate` → `migrate deploy` → smoke test → restore `provider = "sqlite"`.
+
+**Local usage:**
+```bash
+docker compose -f docker-compose.postgres.yml up -d
+DATABASE_URL="postgresql://pmcopilot:pmcopilot@localhost:5433/pmcopilot_test" \
+  npx prisma migrate deploy
+npm run test:postgres
+docker compose -f docker-compose.postgres.yml down
+```
+
+---
+
 ### Extension Step 29 — PDF Export / Report Generation ✅
 
 Adds a formatted PDF report download alongside the existing JSON and CSV exports.
