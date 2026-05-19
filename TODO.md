@@ -1,6 +1,6 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-05-18 (updated). All items are unstarted unless noted.
+Last updated: 2026-05-19 (updated). All items are unstarted unless noted.
 
 ---
 
@@ -22,11 +22,8 @@ Explorer mobile panel-switching, responsive nav/board, full ARIA pass (aria-expa
 ### ~~4. Document Import — Expand Extractable Types~~ ✅ DONE
 All 30 canonical extractable types (of 35 total) are now importable. The 5 types without field schemas are surfaced as warnings in the stats panel.
 
-### 5. Artifact Bulk Actions in Explorer
-- Multi-select artifacts in the tree
-- Bulk status change
-- Bulk delete (with confirmation)
-- Bulk tag assignment
+### ~~5. Artifact Bulk Actions in Explorer~~ ✅ DONE
+"Auswählen" mode in explorer tree (EDITOR+), checkbox per artifact, bulk status change, bulk tag assignment, bulk soft-delete with confirmation. `BulkSelectContext` + `BulkActionBar`. API: `PATCH/DELETE /artifacts/bulk`, `POST /artifacts/bulk/tags`.
 
 ### ~~6. Rich Text for Long-Form Fields~~ ✅ DONE
 

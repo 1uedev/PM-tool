@@ -536,12 +536,46 @@ Prose fields that got `rich={true}`: goals, painPoints, context, description, ra
 
 ---
 
+---
+
+### Extension Step 31 — Artifact Bulk Actions in Explorer ✅
+
+**Goal:** Let EDITOR+ users multi-select artifacts in the Explorer tree and apply batch operations.
+
+**`BulkSelectContext.js`** — React context with `selectMode`, `selectedIds` (Set), `enter()`, `clear()`, `toggle(id)`.
+
+**`ExplorerTreeClient.jsx`:**
+- Wraps inner tree in `<BulkSelectProvider>`
+- "Auswählen" toggle button in the filter bar (EDITOR/OWNER only); shows `CheckSquare` icon when active
+- Renders `<BulkActionBar>` at the bottom of the panel when `selectMode` is true
+- Fetches project tags (SWR) for use in the bulk tag picker
+
+**`ExplorerTreeItem.jsx`:**
+- In select mode: renders a checkbox (custom SVG tick) instead of the status dot; click calls `toggle(id)` instead of navigating
+- `aria-pressed` attribute set in select mode; `aria-current` only set outside select mode
+
+**`BulkActionBar.jsx`** — shown when `selectMode` is true:
+- Selected count display
+- **Status dropdown** (opens upward) — DRAFT / In Review / Done → calls `PATCH /artifacts/bulk`
+- **Tag dropdown** — project tags list → calls `POST /artifacts/bulk/tags`
+- **Delete button** with `ConfirmDialog` → calls `DELETE /artifacts/bulk`
+- **Cancel (×)** button calls `clear()`
+- All actions call SWR `mutate` to refresh the artifact list and then call `clear()`
+
+**API — `PATCH /api/projects/:id/artifacts/bulk`:** Updates `status` on all `ids` that belong to the project and are not deleted. `updateMany`, no version bump needed.
+
+**API — `DELETE /api/projects/:id/artifacts/bulk`:** Soft-deletes all `ids`; logs `ARTIFACT_BULK_DELETE` via `logAction`.
+
+**API — `POST /api/projects/:id/artifacts/bulk/tags`:** Upserts `ArtifactTag` rows for all valid `(artifactId, tagId)` pairs in one Prisma transaction.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 30)
+- Build: last verified clean (Step 31)
 - Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
 - Migrations: 6 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Remaining open work: TODO.md items 5, 7, 9
+- Remaining open work: TODO.md items 7, 9

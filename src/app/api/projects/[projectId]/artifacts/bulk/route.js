@@ -1,10 +1,15 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
+import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess } from "@/lib/middleware/project-access.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import prisma from "@/lib/prisma.js";
 import { ARTIFACT_FIELD_DEFS } from "@/lib/artifactFields.js";
-import { RELATION_TYPE } from "@/lib/constants.js";
+import { RELATION_TYPE, ARTIFACT_STATUS } from "@/lib/constants.js";
+import { logAction } from "@/lib/audit.js";
+
+const VALID_STATUSES = new Set(Object.values(ARTIFACT_STATUS));
+const MAX_BULK_IDS = 200;
 
 // Bulk import limit. Large PRDs can produce 50+ artifacts spanning all
 // sections plus multiple features/stories/risks, so we raise the ceiling.
@@ -177,4 +182,75 @@ export async function POST(request, { params }) {
     },
     201
   );
+}
+
+// PATCH /api/projects/:id/artifacts/bulk — bulk status update
+export async function PATCH(request, { params }) {
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
+  const { projectId } = await params;
+  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
+  if (accessErr) return accessErr;
+
+  let body;
+  try { body = await request.json(); } catch {
+    return errorResponse("VALIDATION_ERROR", "Ungültiger JSON-Body", 400);
+  }
+
+  const { ids, status } = body;
+  if (!Array.isArray(ids) || ids.length === 0 || ids.length > MAX_BULK_IDS) {
+    return errorResponse("VALIDATION_ERROR", `ids muss ein Array mit 1–${MAX_BULK_IDS} Einträgen sein`, 400);
+  }
+  if (!status || !VALID_STATUSES.has(status)) {
+    return errorResponse("VALIDATION_ERROR", "Ungültiger Status", 400);
+  }
+
+  try {
+    const { count } = await prisma.artifact.updateMany({
+      where: { id: { in: ids }, projectId, deleted: false },
+      data: { status },
+    });
+    return successResponse({ updated: count });
+  } catch (error) {
+    console.error("[PATCH bulk]", error);
+    return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+  }
+}
+
+// DELETE /api/projects/:id/artifacts/bulk — bulk soft-delete
+export async function DELETE(request, { params }) {
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
+  const { projectId } = await params;
+  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
+  if (accessErr) return accessErr;
+
+  let body;
+  try { body = await request.json(); } catch {
+    return errorResponse("VALIDATION_ERROR", "Ungültiger JSON-Body", 400);
+  }
+
+  const { ids } = body;
+  if (!Array.isArray(ids) || ids.length === 0 || ids.length > MAX_BULK_IDS) {
+    return errorResponse("VALIDATION_ERROR", `ids muss ein Array mit 1–${MAX_BULK_IDS} Einträgen sein`, 400);
+  }
+
+  try {
+    const { count } = await prisma.artifact.updateMany({
+      where: { id: { in: ids }, projectId, deleted: false },
+      data: { deleted: true },
+    });
+
+    await logAction("ARTIFACT_BULK_DELETE", session.user.id, projectId, null, {
+      ids,
+      count,
+    });
+
+    return successResponse({ deleted: count });
+  } catch (error) {
+    console.error("[DELETE bulk]", error);
+    return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+  }
 }
