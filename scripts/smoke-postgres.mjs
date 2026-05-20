@@ -17,6 +17,8 @@
  * Exit code 1 = a check failed or an unexpected error occurred.
  */
 
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -28,7 +30,9 @@ if (!DATABASE_URL || !DATABASE_URL.startsWith("postgresql")) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 let passed = 0;
 let failed = 0;
@@ -197,6 +201,7 @@ async function run() {
   }
 
   await prisma.$disconnect();
+  await pool.end();
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log(`\n── Result: ${passed} passed, ${failed} failed ─────────────────────`);
