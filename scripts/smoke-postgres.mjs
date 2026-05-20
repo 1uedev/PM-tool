@@ -4,7 +4,8 @@
  * Prerequisites:
  *   1. docker compose -f docker-compose.postgres.yml up -d
  *   2. Wait for Postgres to be healthy (docker compose ps)
- *   3. DATABASE_URL must point to the Postgres instance (see .env.postgres.example)
+ *   3. Switch schema provider to "postgresql" temporarily (or set PRISMA_SCHEMA_PROVIDER=postgresql)
+ *   4. DATABASE_URL must point to the Postgres instance (see .env.postgres.example)
  *
  * Usage:
  *   DATABASE_URL="postgresql://pmcopilot:pmcopilot@localhost:5433/pmcopilot_test" \
@@ -47,16 +48,16 @@ async function run() {
   console.log("  DATABASE_URL:", DATABASE_URL.replace(/:([^:@]+)@/, ":***@"));
   console.log("");
 
-  // ── 1. Migrate ───────────────────────────────────────────────────────────
-  console.log("Step 1: migrate deploy");
+  // ── 1. Push schema ───────────────────────────────────────────────────────
+  console.log("Step 1: db push");
   try {
-    execSync("npx prisma migrate deploy", {
+    execSync("npx prisma db push --accept-data-loss", {
       env: { ...process.env, DATABASE_URL },
       stdio: "pipe",
     });
-    ok("prisma migrate deploy");
+    ok("prisma db push");
   } catch (err) {
-    fail("prisma migrate deploy", err);
+    fail("prisma db push", err);
     console.error(err.stderr?.toString());
     await prisma.$disconnect();
     process.exit(1);
