@@ -1,0 +1,39 @@
+# Dependencies (rebuilt inside Docker)
+node_modules
+.npm
+
+# Next.js build output (rebuilt inside Docker)
+.next
+
+# Source control
+.git
+.gitignore
+
+# Database files (never bake data into the image)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+prisma/dev.db
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Dev / CI tooling
+.github
+.claude
+playwright-report
+test-results
+coverage
+__tests__
+*.test.js
+*.spec.js
+
+# Docs
+*.md
+!README.md
+
+# Docker files themselves (not needed in the build context)
+docker-compose*.yml

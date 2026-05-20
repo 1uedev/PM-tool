@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbUrl = `file:${path.join(__dirname, "..", "dev.db")}`;
+const dbUrl = process.env.DATABASE_URL ?? `file:${path.join(__dirname, "..", "dev.db")}`;
 
 const adapter = new PrismaBetterSqlite3({ url: dbUrl });
 const prisma = new PrismaClient({ adapter });

@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - pm-data:/data
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+      # REQUIRED — generate with: openssl rand -base64 32
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:-change-me-generate-with-openssl-rand-base64-32}"
+      # Set to your public URL in production (e.g. https://pm.example.com)
+      NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3000}"
+      # AI provider: "claude" | "openai" | "disabled"
+      AI_PROVIDER: "${AI_PROVIDER:-disabled}"
+      AI_CLAUDE_API_KEY: "${AI_CLAUDE_API_KEY:-}"
+      AI_OPENAI_API_KEY: "${AI_OPENAI_API_KEY:-}"
+      # Set to "false" to start with an empty database (no demo data)
+      SEED_ON_INIT: "${SEED_ON_INIT:-true}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  pm-data:
+    driver: local
