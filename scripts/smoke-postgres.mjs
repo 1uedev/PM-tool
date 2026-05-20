@@ -1,11 +1,13 @@
 /**
  * PostgreSQL smoke test.
  *
- * Prerequisites:
+ * Prerequisites (local run):
  *   1. docker compose -f docker-compose.postgres.yml up -d
- *   2. Wait for Postgres to be healthy (docker compose ps)
- *   3. Switch schema provider to "postgresql" temporarily (or set PRISMA_SCHEMA_PROVIDER=postgresql)
+ *   2. Switch schema provider to "postgresql": sed -i '' 's/provider = "sqlite"/provider = "postgresql"/' prisma/schema.prisma
+ *   3. npx prisma db push --accept-data-loss
  *   4. DATABASE_URL must point to the Postgres instance (see .env.postgres.example)
+ *
+ * In CI: the workflow handles the schema switch and db push before calling this script.
  *
  * Usage:
  *   DATABASE_URL="postgresql://pmcopilot:pmcopilot@localhost:5433/pmcopilot_test" \
@@ -15,7 +17,6 @@
  * Exit code 1 = a check failed or an unexpected error occurred.
  */
 
-import { execSync } from "node:child_process";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -27,7 +28,7 @@ if (!DATABASE_URL || !DATABASE_URL.startsWith("postgresql")) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
+const prisma = new PrismaClient({ datasourceUrl: DATABASE_URL });
 
 let passed = 0;
 let failed = 0;
@@ -48,23 +49,8 @@ async function run() {
   console.log("  DATABASE_URL:", DATABASE_URL.replace(/:([^:@]+)@/, ":***@"));
   console.log("");
 
-  // ── 1. Push schema ───────────────────────────────────────────────────────
-  console.log("Step 1: db push");
-  try {
-    execSync("npx prisma db push --accept-data-loss", {
-      env: { ...process.env, DATABASE_URL },
-      stdio: "pipe",
-    });
-    ok("prisma db push");
-  } catch (err) {
-    fail("prisma db push", err);
-    console.error(err.stderr?.toString());
-    await prisma.$disconnect();
-    process.exit(1);
-  }
-
-  // ── 2. Basic connectivity ─────────────────────────────────────────────────
-  console.log("\nStep 2: basic queries");
+  // ── 1. Basic connectivity ─────────────────────────────────────────────────
+  console.log("Step 1: basic queries");
   try {
     await prisma.$queryRaw`SELECT 1`;
     ok("database connection");
@@ -72,7 +58,7 @@ async function run() {
     fail("database connection", err);
   }
 
-  // ── 3. Create a user ─────────────────────────────────────────────────────
+  // ── 2. Create a user ─────────────────────────────────────────────────────
   let userId;
   try {
     const hash = await bcrypt.hash("smoke-test-pw", 10);
@@ -90,7 +76,7 @@ async function run() {
     fail("user create", err);
   }
 
-  // ── 4. Create a project ───────────────────────────────────────────────────
+  // ── 3. Create a project ───────────────────────────────────────────────────
   let projectId;
   try {
     const project = await prisma.project.create({
@@ -106,7 +92,7 @@ async function run() {
     fail("project create", err);
   }
 
-  // ── 5. Create an artifact ─────────────────────────────────────────────────
+  // ── 4. Create an artifact ─────────────────────────────────────────────────
   let artifactId;
   try {
     const artifact = await prisma.artifact.create({
@@ -134,7 +120,7 @@ async function run() {
     fail("artifact create with version", err);
   }
 
-  // ── 6. Comment ────────────────────────────────────────────────────────────
+  // ── 5. Comment ────────────────────────────────────────────────────────────
   try {
     await prisma.comment.create({
       data: { content: "Smoke comment", authorId: userId, artifactId },
@@ -144,7 +130,7 @@ async function run() {
     fail("comment create", err);
   }
 
-  // ── 7. Notification ───────────────────────────────────────────────────────
+  // ── 6. Notification ───────────────────────────────────────────────────────
   try {
     await prisma.notification.create({
       data: {
@@ -161,7 +147,7 @@ async function run() {
     fail("notification create", err);
   }
 
-  // ── 8. Project template ───────────────────────────────────────────────────
+  // ── 7. Project template ───────────────────────────────────────────────────
   try {
     await prisma.projectTemplate.create({
       data: {
@@ -177,7 +163,7 @@ async function run() {
     fail("project template create", err);
   }
 
-  // ── 9. Audit log ──────────────────────────────────────────────────────────
+  // ── 8. Audit log ──────────────────────────────────────────────────────────
   try {
     await prisma.auditLog.create({
       data: { action: "SMOKE_TEST", userId, projectId, meta: "{}" },
@@ -187,7 +173,7 @@ async function run() {
     fail("audit log create", err);
   }
 
-  // ── 10. Query back ────────────────────────────────────────────────────────
+  // ── 9. Query back ────────────────────────────────────────────────────────
   try {
     const result = await prisma.artifact.findMany({
       where: { projectId, deleted: false },
