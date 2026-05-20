@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const q = (searchParams.get("q") ?? "").trim();
+    const q = (searchParams.get("q") ?? "").trim().slice(0, 500);
     const type = searchParams.get("type") ?? "";
     const status = searchParams.get("status") ?? "";
     const tag = searchParams.get("tag") ?? "";

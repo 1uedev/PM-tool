@@ -118,11 +118,8 @@ export async function POST(request, { params }) {
     try {
       text = await extractText(file);
     } catch (err) {
-      return errorResponse(
-        "SERVER_ERROR",
-        `Fehler beim Lesen der Datei '${file.name}': ${err.message}`,
-        500
-      );
+      console.error(`[import] extractText failed for '${file.name}':`, err);
+      return errorResponse("SERVER_ERROR", "Fehler beim Lesen einer Datei", 500);
     }
     const trimmed = (text ?? "").trim();
     if (!trimmed) {
@@ -177,7 +174,7 @@ export async function POST(request, { params }) {
     merged = mergeExtractionResults(chunkResults);
   } catch (err) {
     console.error("[import] AI extraction error:", err);
-    return errorResponse("SERVER_ERROR", "KI-Analyse fehlgeschlagen: " + err.message, 500);
+    return errorResponse("SERVER_ERROR", "KI-Analyse fehlgeschlagen", 500);
   }
 
   // Coverage stats — over canonical types that actually have a schema.

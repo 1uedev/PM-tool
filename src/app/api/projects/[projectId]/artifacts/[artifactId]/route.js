@@ -5,6 +5,7 @@ import { validateBody } from "@/lib/validators/index.js";
 import { updateArtifactSchema } from "@/lib/validators/artifact.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { logAction } from "@/lib/audit.js";
+import { getDefaultFields } from "@/lib/artifactFields.js";
 
 function parseArtifact(artifact) {
   return {
@@ -51,8 +52,15 @@ export async function PATCH(request, { params }) {
       ? JSON.parse(artifact.fields)
       : artifact.fields;
 
+    // Merge only keys that belong to this artifact type — discard unknown keys
+    const allowedKeys = new Set(Object.keys(getDefaultFields(artifact.type)));
+    const incomingFields = data.fields
+      ? Object.fromEntries(
+          Object.entries(data.fields).filter(([k]) => allowedKeys.has(k))
+        )
+      : {};
     const newFields = data.fields
-      ? { ...currentFields, ...data.fields }
+      ? { ...currentFields, ...incomingFields }
       : currentFields;
 
     const newTitle = data.title ?? artifact.title;
