@@ -1,0 +1,66 @@
+name: PostgreSQL Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "prisma/schema.prisma"
+      - "prisma/migrations/**"
+      - "scripts/smoke-postgres.mjs"
+      - ".github/workflows/postgres-smoke.yml"
+
+jobs:
+  smoke:
+    name: Schema compatibility — PostgreSQL 15
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: pmcopilot
+          POSTGRES_PASSWORD: pmcopilot
+          POSTGRES_DB: pmcopilot_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pmcopilot -d pmcopilot_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: "postgresql://pmcopilot:pmcopilot@localhost:5432/pmcopilot_test"
+      NEXTAUTH_SECRET: "ci-smoke-test-secret"
+      NEXTAUTH_URL: "http://localhost:3000"
+      AI_PROVIDER: "disabled"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Switch schema to PostgreSQL
+        run: |
+          sed -i 's/provider = "sqlite"/provider = "postgresql"/' prisma/schema.prisma
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: Run smoke test
+        run: node scripts/smoke-postgres.mjs
+
+      - name: Restore schema (SQLite)
+        if: always()
+        run: |
+          sed -i 's/provider = "postgresql"/provider = "sqlite"/' prisma/schema.prisma
