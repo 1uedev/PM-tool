@@ -28,7 +28,7 @@ if (!DATABASE_URL || !DATABASE_URL.startsWith("postgresql")) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient({ datasourceUrl: DATABASE_URL });
+const prisma = new PrismaClient();
 
 let passed = 0;
 let failed = 0;
