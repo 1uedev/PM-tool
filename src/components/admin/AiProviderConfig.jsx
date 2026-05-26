@@ -27,9 +27,9 @@ const PROVIDERS = [
     keyPlaceholder: "sk-proj-...",
     keyHint: "API-Key aus platform.openai.com",
     models: [
-      { value: "gpt-4.1",      label: "GPT-4.1",      badge: "Leistungsstark" },
-      { value: "gpt-4.1-mini", label: "GPT-4.1 mini", badge: "Empfohlen" },
-      { value: "gpt-4o-mini",  label: "GPT-4o mini",  badge: "Schnell" },
+      { value: "gpt-5.5",      label: "GPT-5.5",      badge: "Leistungsstark" },
+      { value: "gpt-5.4",      label: "GPT-5.4",      badge: "Empfohlen" },
+      { value: "gpt-5.4-mini", label: "GPT-5.4 mini", badge: "Schnell" },
     ],
   },
   {

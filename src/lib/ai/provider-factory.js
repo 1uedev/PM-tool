@@ -30,7 +30,7 @@ export async function getAiConfig() {
 
   return {
     provider,
-    model: provider === "claude" ? "claude-sonnet-4-6" : provider === "openai" ? "gpt-4.1" : "",
+    model: provider === "claude" ? "claude-sonnet-4-6" : provider === "openai" ? "gpt-5.4" : "",
     apiKey,
     timeoutMs: parseInt(process.env.AI_TIMEOUT_MS ?? "30000", 10),
     maxTokens: parseInt(process.env.AI_MAX_TOKENS ?? "2048", 10),
