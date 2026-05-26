@@ -14,7 +14,7 @@ const PROVIDERS = [
     keyPlaceholder: "sk-ant-api03-...",
     keyHint: "API-Key aus console.anthropic.com",
     models: [
-      { value: "claude-opus-4-6",          label: "Claude Opus 4.6",   badge: "Leistungsstark" },
+      { value: "claude-opus-4-7",           label: "Claude Opus 4.7",   badge: "Leistungsstark" },
       { value: "claude-sonnet-4-6",         label: "Claude Sonnet 4.6", badge: "Empfohlen" },
       { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5",  badge: "Schnell" },
     ],
@@ -27,9 +27,9 @@ const PROVIDERS = [
     keyPlaceholder: "sk-proj-...",
     keyHint: "API-Key aus platform.openai.com",
     models: [
-      { value: "gpt-4o",       label: "GPT-4o",       badge: "Leistungsstark" },
-      { value: "gpt-4o-mini",  label: "GPT-4o mini",  badge: "Empfohlen" },
-      { value: "gpt-4-turbo",  label: "GPT-4 Turbo",  badge: "Schnell" },
+      { value: "gpt-4.1",      label: "GPT-4.1",      badge: "Leistungsstark" },
+      { value: "gpt-4.1-mini", label: "GPT-4.1 mini", badge: "Empfohlen" },
+      { value: "gpt-4o-mini",  label: "GPT-4o mini",  badge: "Schnell" },
     ],
   },
   {
