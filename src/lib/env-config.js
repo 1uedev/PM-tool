@@ -23,10 +23,28 @@ function parseEnvFile(content) {
   return entries;
 }
 
+/**
+ * Reject keys/values that would break out of the quoted .env format.
+ * A value containing a quote + newline could otherwise inject or
+ * overwrite arbitrary env vars (e.g. NEXTAUTH_SECRET).
+ */
+function assertSafeEnvEntry(key, value) {
+  if (!/^[A-Z][A-Z0-9_]*$/.test(key)) {
+    throw new Error(`Unsafe env key: ${key}`);
+  }
+  // eslint-disable-next-line no-control-regex
+  if (/["\n\r\x00-\x1f]/.test(value)) {
+    throw new Error(`Unsafe env value for ${key}: quotes and control characters are not allowed`);
+  }
+}
+
 /** Serialize a key-value map back to .env format */
 function serializeEnvFile(entries) {
   return Object.entries(entries)
-    .map(([k, v]) => `${k}="${v}"`)
+    .map(([k, v]) => {
+      assertSafeEnvEntry(k, String(v));
+      return `${k}="${v}"`;
+    })
     .join("\n") + "\n";
 }
 
@@ -51,6 +69,42 @@ export function detectDbType(url = "") {
   if (url.startsWith("postgresql://") || url.startsWith("postgres://")) return "postgresql";
   if (url.startsWith("mysql://") || url.startsWith("mariadb://")) return "mariadb";
   return "sqlite";
+}
+
+/**
+ * Strictly validate a DATABASE_URL before it is persisted or used to open
+ * a connection. Returns { ok, type } or { ok: false, message }.
+ */
+export function validateDatabaseUrl(url) {
+  if (typeof url !== "string" || !url.trim()) {
+    return { ok: false, message: "URL fehlt" };
+  }
+  if (url.length > 500) {
+    return { ok: false, message: "URL ist zu lang (max. 500 Zeichen)" };
+  }
+  // eslint-disable-next-line no-control-regex
+  if (/["'\s\x00-\x1f]/.test(url)) {
+    return { ok: false, message: "URL enthält unzulässige Zeichen (Anführungszeichen, Leerzeichen oder Steuerzeichen)" };
+  }
+
+  const type = detectDbType(url);
+
+  if (type === "sqlite") {
+    if (!/^file:[A-Za-z0-9._~/-]+$/.test(url)) {
+      return { ok: false, message: "SQLite-URLs müssen die Form file:./pfad/zur/datei.db haben" };
+    }
+    return { ok: true, type };
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname) {
+      return { ok: false, message: "Verbindungs-URL enthält keinen Host" };
+    }
+  } catch {
+    return { ok: false, message: "Ungültige Verbindungs-URL" };
+  }
+  return { ok: true, type };
 }
 
 /** Build a DATABASE_URL from structured fields */

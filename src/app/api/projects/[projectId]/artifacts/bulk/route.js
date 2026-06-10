@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma.js";
 import { ARTIFACT_FIELD_DEFS } from "@/lib/artifactFields.js";
 import { RELATION_TYPE, ARTIFACT_STATUS } from "@/lib/constants.js";
 import { logAction } from "@/lib/audit.js";
+import { updateArtifactWithVersion } from "@/lib/artifact-versioning.js";
 
 const VALID_STATUSES = new Set(Object.values(ARTIFACT_STATUS));
 const MAX_BULK_IDS = 200;
@@ -173,7 +174,7 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
 });
 
 // PATCH /api/projects/:id/artifacts/bulk — bulk status update
-export const PATCH = withProjectRoute({ role: "EDITOR" }, async (request, { params }) => {
+export const PATCH = withProjectRoute({ role: "EDITOR" }, async (request, { session, params }) => {
   const { projectId } = params;
 
   let body;
@@ -190,11 +191,29 @@ export const PATCH = withProjectRoute({ role: "EDITOR" }, async (request, { para
   }
 
   try {
-    const { count } = await prisma.artifact.updateMany({
-      where: { id: { in: ids }, projectId, deleted: false },
-      data: { status },
+    // Every status change creates a version (same rule as single-artifact
+    // saves); unchanged artifacts are skipped to avoid no-op versions.
+    const updated = await prisma.$transaction(async (tx) => {
+      const artifacts = await tx.artifact.findMany({
+        where: { id: { in: ids }, projectId, deleted: false },
+        select: { id: true, title: true, fields: true, status: true },
+      });
+
+      let count = 0;
+      for (const artifact of artifacts) {
+        if (artifact.status === status) continue;
+        await updateArtifactWithVersion(tx, artifact.id, {
+          title: artifact.title,
+          status,
+          fields: artifact.fields,
+          authorId: session.user.id,
+        });
+        count += 1;
+      }
+      return count;
     });
-    return successResponse({ updated: count });
+
+    return successResponse({ updated });
   } catch (error) {
     console.error("[PATCH bulk]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);

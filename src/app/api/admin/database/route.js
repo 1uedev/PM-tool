@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
-import { readEnvLocal, writeEnvLocal, detectDbType, parseDatabaseUrl } from "@/lib/env-config.js";
+import { writeEnvLocal, parseDatabaseUrl, validateDatabaseUrl } from "@/lib/env-config.js";
 
 // GET /api/admin/database — return current DB config (password masked)
 export async function GET() {
@@ -27,7 +27,11 @@ export async function PATCH(request) {
   const { url } = await request.json();
   if (!url) return errorResponse("VALIDATION_ERROR", "url ist erforderlich", 400);
 
-  const type = detectDbType(url);
+  // Strict validation — also blocks .env.local injection via quotes/newlines
+  const validation = validateDatabaseUrl(url);
+  if (!validation.ok) {
+    return errorResponse("VALIDATION_ERROR", validation.message, 400);
+  }
 
   try {
     writeEnvLocal({ DATABASE_URL: url });
@@ -35,5 +39,5 @@ export async function PATCH(request) {
     return errorResponse("SERVER_ERROR", `Konnte .env.local nicht schreiben: ${e.message}`, 500);
   }
 
-  return successResponse({ saved: true, type });
+  return successResponse({ saved: true, type: validation.type });
 }

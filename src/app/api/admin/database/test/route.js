@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
-import { detectDbType } from "@/lib/env-config.js";
+import { validateDatabaseUrl } from "@/lib/env-config.js";
 
 async function testSqlite(url) {
   const filePath = url.replace(/^file:/, "");
@@ -53,7 +53,12 @@ export async function POST(request) {
   const { url } = await request.json();
   if (!url) return errorResponse("VALIDATION_ERROR", "url ist erforderlich", 400);
 
-  const type = detectDbType(url);
+  const validation = validateDatabaseUrl(url);
+  if (!validation.ok) {
+    return errorResponse("VALIDATION_ERROR", validation.message, 400);
+  }
+
+  const type = validation.type;
   let result;
 
   try {

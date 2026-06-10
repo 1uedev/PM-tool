@@ -5,6 +5,7 @@ import { updateArtifactSchema } from "@/lib/validators/artifact.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { logAction } from "@/lib/audit.js";
 import { getDefaultFields } from "@/lib/artifactFields.js";
+import { updateArtifactWithVersion } from "@/lib/artifact-versioning.js";
 
 function parseArtifact(artifact) {
   return {
@@ -52,31 +53,15 @@ export const PATCH = withProjectRoute(
       const newTitle = data.title ?? artifact.title;
       const newStatus = data.status ?? artifact.status;
 
-      // Get next version number
-      const lastVersion = await prisma.artifactVersion.findFirst({
-        where: { artifactId },
-        orderBy: { version: "desc" },
-        select: { version: true },
-      });
-      const nextVersion = (lastVersion?.version ?? 0) + 1;
-
-      const updated = await prisma.artifact.update({
-        where: { id: artifactId },
-        data: {
+      // Transaction makes the version-number increment race-free
+      const updated = await prisma.$transaction((tx) =>
+        updateArtifactWithVersion(tx, artifactId, {
           title: newTitle,
           status: newStatus,
           fields: JSON.stringify(newFields),
-          versions: {
-            create: {
-              version: nextVersion,
-              title: newTitle,
-              fields: JSON.stringify(newFields),
-              status: newStatus,
-              authorId: session.user.id,
-            },
-          },
-        },
-      });
+          authorId: session.user.id,
+        })
+      );
 
       return successResponse(parseArtifact(updated));
     } catch (error) {

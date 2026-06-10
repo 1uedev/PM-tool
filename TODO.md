@@ -6,16 +6,17 @@ Last updated: 2026-06-10. All items are unstarted unless noted.
 
 ## Security Review Findings (2026-06-10)
 
-Round 1 (stale JWT role/status, `requireAdmin` consolidation, `withProjectRoute` wrapper) is done — see DONE.md Step 35. Remaining, in priority order:
+Round 1 (stale JWT role/status, `requireAdmin` consolidation, `withProjectRoute` wrapper) is done — see DONE.md Step 35.
+Round 2 (S1 env injection, S2 rate limiting, S3 version race + bulk versioning) is done — see DONE.md Step 36. Remaining:
 
-### S1. `.env.local` injection via admin database endpoint
-`serializeEnvFile` in `lib/env-config.js` quotes values without escaping — a URL containing `"` + newline can overwrite arbitrary env vars (incl. `NEXTAUTH_SECRET`). Validate the URL strictly and reject quotes/newlines/control chars; `detectDbType` currently accepts any string.
+### ~~S1. `.env.local` injection via admin database endpoint~~ ✅ DONE
+`validateDatabaseUrl()` in `lib/env-config.js` (strict per-type validation, rejects quotes/whitespace/control chars); `writeEnvLocal` additionally refuses unsafe keys/values as defense in depth.
 
-### S2. Rate limiting
-No throttling on login, register, password change, or the AI endpoints (`/ai`, `/import`, `/starter` — cost amplification). Add a small in-memory token bucket keyed by IP/user for auth + AI routes.
+### ~~S2. Rate limiting~~ ✅ DONE
+In-memory fixed-window limiter (`lib/rate-limit.js`). Login: 5 failed attempts / 15 min per email (success resets). Register: 10 / 15 min per IP. Password change: 5 failed / 15 min per user. AI suggest: 30 / h per user. Import: 10 / h per user. Responses use `RATE_LIMITED` + HTTP 429.
 
-### S3. Version-number race in artifact PATCH
-`artifacts/[artifactId]/route.js` reads max version then writes `version + 1` non-atomically — concurrent saves hit the `@@unique([artifactId, version])` constraint → 500. Wrap in `prisma.$transaction`. Same pattern in version restore. Also: bulk status PATCH creates no versions (violates "every save versions").
+### ~~S3. Version-number race~~ ✅ DONE
+`lib/artifact-versioning.js` → `updateArtifactWithVersion(tx, …)` used inside `prisma.$transaction` by artifact PATCH, version restore, and bulk status PATCH. Bulk status changes now create versions (no-op status changes are skipped).
 
 ### S4. AI API key stored in plaintext in DB
 `aiConfig.apiKey` is unencrypted in the SQLite file. Encrypt at rest (AES-GCM, key from env) or keep keys env-only.

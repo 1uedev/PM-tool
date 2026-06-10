@@ -1,10 +1,23 @@
-import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma.js";
 import { registerSchema } from "@/lib/validators/auth.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit.js";
+
+// 10 registrations per 15 minutes per IP
+const REGISTER_RATE_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 };
 
 export async function POST(request) {
+  const rate = consumeRateLimit(`register:${getClientIp(request)}`, REGISTER_RATE_LIMIT);
+  if (!rate.ok) {
+    return errorResponse(
+      "RATE_LIMITED",
+      "Zu viele Registrierungen — bitte später erneut versuchen",
+      429,
+      { retryAfterSec: rate.retryAfterSec }
+    );
+  }
+
   try {
     const body = await request.json();
     const result = registerSchema.safeParse(body);

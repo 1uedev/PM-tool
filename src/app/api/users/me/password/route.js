@@ -3,6 +3,10 @@ import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import prisma from "@/lib/prisma.js";
 import { z } from "zod";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { isRateLimited, consumeRateLimit, resetRateLimit } from "@/lib/rate-limit.js";
+
+// Only failed current-password checks count against the limit
+const PASSWORD_RATE_LIMIT = { limit: 5, windowMs: 15 * 60 * 1000 };
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Aktuelles Passwort ist erforderlich"),
@@ -29,6 +33,11 @@ export async function POST(request) {
     return errorResponse("VALIDATION_ERROR", "Validierungsfehler", 400, details);
   }
 
+  const rateKey = `pwd-change:${session.user.id}`;
+  if (isRateLimited(rateKey)) {
+    return errorResponse("RATE_LIMITED", "Zu viele Fehlversuche — bitte später erneut versuchen", 429);
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { passwordHash: true },
@@ -37,11 +46,13 @@ export async function POST(request) {
 
   const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
   if (!valid) {
+    consumeRateLimit(rateKey, PASSWORD_RATE_LIMIT);
     return errorResponse("VALIDATION_ERROR", "Aktuelles Passwort ist falsch", 400, {
       currentPassword: ["Aktuelles Passwort ist falsch"],
     });
   }
 
+  resetRateLimit(rateKey);
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
   await prisma.user.update({
     where: { id: session.user.id },

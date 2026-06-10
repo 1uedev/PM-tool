@@ -1,5 +1,6 @@
 import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { consumeRateLimit } from "@/lib/rate-limit.js";
 import { getAiConfig, getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
 import {
   buildExtractionPrompt,
@@ -16,6 +17,9 @@ import { ARTIFACT_TYPE_ORDER } from "@/lib/constants.js";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_FILES = 5;
+
+// Each import fans out into multiple AI calls — cap per user
+const IMPORT_RATE_LIMIT = { limit: 10, windowMs: 60 * 60 * 1000 };
 const MAX_TOTAL_CHARS = 250_000; // hard ceiling — anything beyond gets truncated with a warning
 const SUPPORTED_TYPES = [
   "application/pdf",
@@ -49,7 +53,17 @@ async function extractText(file) {
 
 // ─── Handler ───────────────────────────────────────────────────────────────
 
-export const POST = withProjectRoute({ role: "EDITOR" }, async (request) => {
+export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { session }) => {
+  const rate = consumeRateLimit(`ai-import:${session.user.id}`, IMPORT_RATE_LIMIT);
+  if (!rate.ok) {
+    return errorResponse(
+      "RATE_LIMITED",
+      "Import-Limit erreicht (10 Importe pro Stunde) — bitte später erneut versuchen",
+      429,
+      { retryAfterSec: rate.retryAfterSec }
+    );
+  }
+
   // Check AI availability
   const aiConfig = await getAiConfig();
   if (!isAiAvailable(aiConfig)) {

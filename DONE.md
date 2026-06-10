@@ -701,12 +701,37 @@ docker compose -f docker-compose.postgres.yml down
 
 ---
 
+### Extension Step 36 — Security Hardening Round 2: Env Injection, Rate Limiting, Version Race ✅
+
+**Goal:** Fix review findings S1–S3 (see TODO.md Security Review Findings).
+
+**S1 — `.env.local` injection fixed (`lib/env-config.js`):**
+- New `validateDatabaseUrl(url)` — strict per-type validation (sqlite `file:` path pattern, parseable postgres/mysql URL with host), rejects quotes/whitespace/control characters and >500 chars
+- `PATCH /api/admin/database` and `POST /api/admin/database/test` validate before writing/connecting
+- Defense in depth: `serializeEnvFile` now throws on unsafe keys/values instead of writing a corruptible file
+
+**S2 — Rate limiting (`lib/rate-limit.js`, new):**
+- In-memory fixed-window limiter (`consumeRateLimit`, `isRateLimited`, `resetRateLimit`, `getClientIp`); per-process, documented as Redis-replaceable for multi-instance
+- Login (`lib/auth.js`): 5 **failed** attempts / 15 min per email — successful login resets the counter; consume-on-failure so legitimate logins are never throttled
+- Register: 10 / 15 min per IP · Password change: 5 failed current-password checks / 15 min per user
+- AI suggest: 30 / h per user · Document import: 10 / h per user (cost-amplification caps)
+- New error code `RATE_LIMITED` with HTTP 429 + `retryAfterSec` detail
+
+**S3 — Version-number race fixed (`lib/artifact-versioning.js`, new):**
+- `updateArtifactWithVersion(tx, artifactId, …)` computes the next version and writes artifact + version row in one transaction
+- Used by artifact PATCH, version restore, and bulk status PATCH (all wrapped in `prisma.$transaction`)
+- Bulk status updates now create an `ArtifactVersion` per changed artifact (rule 13 compliance); unchanged artifacts are skipped to avoid no-op versions
+
+**Tests:** new `rate-limit.test.js` (window expiry, peek/consume/reset semantics) and `env-config.test.js` (URL validation incl. injection payloads, `writeEnvLocal` rejection); artifact PATCH mock updated for `$transaction`. Suite now 197 Vitest tests — all passing.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 35)
-- Tests: 179 Vitest (15 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 36)
+- Tests: 197 Vitest (17 files) + 17 Playwright E2E — all passing
 - Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Open: security-review findings round 2 (see TODO.md — rate limiting, .env.local injection, API-key encryption, version race)
+- Open: security-review findings S4–S6 (see TODO.md — API-key encryption, registration flag, CSP/email-normalization/health-check/MIME/adapter items)

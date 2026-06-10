@@ -1,6 +1,11 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "./prisma.js";
+import { isRateLimited, consumeRateLimit, resetRateLimit } from "./rate-limit.js";
+
+// Brute-force protection: only FAILED attempts count against the limit,
+// a successful login resets the counter.
+const LOGIN_RATE_LIMIT = { limit: 5, windowMs: 15 * 60 * 1000 };
 
 export const authOptions = {
   providers: [
@@ -15,11 +20,17 @@ export const authOptions = {
           return null;
         }
 
+        const rateKey = `login:${credentials.email.trim().toLowerCase()}`;
+        if (isRateLimited(rateKey)) return null;
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
-        if (!user) return null;
+        if (!user) {
+          consumeRateLimit(rateKey, LOGIN_RATE_LIMIT);
+          return null;
+        }
         if (user.status === "INACTIVE") return null;
 
         const passwordValid = await bcrypt.compare(
@@ -27,7 +38,12 @@ export const authOptions = {
           user.passwordHash
         );
 
-        if (!passwordValid) return null;
+        if (!passwordValid) {
+          consumeRateLimit(rateKey, LOGIN_RATE_LIMIT);
+          return null;
+        }
+
+        resetRateLimit(rateKey);
 
         return {
           id: user.id,

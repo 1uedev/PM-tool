@@ -3,12 +3,26 @@ import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { getAiConfig, getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
 import { hasPromptBuilder } from "@/lib/ai/prompts/index.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { consumeRateLimit } from "@/lib/rate-limit.js";
+
+// Caps AI spend per user: 30 suggestion requests per hour
+const AI_RATE_LIMIT = { limit: 30, windowMs: 60 * 60 * 1000 };
 
 // POST /api/projects/:id/artifacts/:aid/ai — request AI suggestions
 export const POST = withProjectRoute(
   { role: "EDITOR", artifact: true },
   async (request, { session, params }) => {
     const { artifactId } = params;
+
+    const rate = consumeRateLimit(`ai-suggest:${session.user.id}`, AI_RATE_LIMIT);
+    if (!rate.ok) {
+      return errorResponse(
+        "RATE_LIMITED",
+        "KI-Limit erreicht (30 Anfragen pro Stunde) — bitte später erneut versuchen",
+        429,
+        { retryAfterSec: rate.retryAfterSec }
+      );
+    }
 
     const aiConfig = await getAiConfig();
     if (!isAiAvailable(aiConfig)) {

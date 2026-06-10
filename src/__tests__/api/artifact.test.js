@@ -6,12 +6,15 @@ import prisma from "@/lib/prisma.js";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
-vi.mock("@/lib/prisma.js", () => ({
-  default: {
+vi.mock("@/lib/prisma.js", () => {
+  const client = {
     artifact: { update: vi.fn() },
     artifactVersion: { findFirst: vi.fn() },
-  },
-}));
+    // Interactive transaction: run the callback against the same mock client
+    $transaction: vi.fn((cb) => cb(client)),
+  };
+  return { default: client };
+});
 
 vi.mock("@/lib/audit.js", () => ({
   logAction: vi.fn().mockResolvedValue(undefined),

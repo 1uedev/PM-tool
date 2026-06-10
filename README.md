@@ -1470,3 +1470,26 @@ Field values are stored as Tiptap HTML; the generator strips tags and converts b
 **Tests:** suite extended to 179 Vitest tests — all passing. Remaining review findings are tracked in `TODO.md` (Security Review Findings).
 
 ---
+
+### Extension Step 36 — Security Hardening Round 2 ✅
+
+**Goal:** Fix security-review findings S1–S3: `.env.local` injection, missing rate limiting, version-number race.
+
+**`.env.local` injection closed (`lib/env-config.js`):**
+- `validateDatabaseUrl()` strictly validates database URLs per type (SQLite `file:` path pattern; parseable Postgres/MySQL URL with host) and rejects quotes, whitespace, and control characters — a crafted URL can no longer inject env vars like `NEXTAUTH_SECRET`
+- The env-file writer itself refuses unsafe keys/values as a second line of defense
+
+**Rate limiting (`lib/rate-limit.js`):**
+- In-memory fixed-window limiter, per-process (single-instance MVP; swap for Redis when scaling out)
+- Login: 5 *failed* attempts per 15 min per email — successful logins reset the counter and are never throttled
+- Register: 10 per 15 min per IP · Password change: 5 failed checks per 15 min
+- AI suggestions: 30 per hour per user · Document import: 10 per hour per user (caps AI spend)
+- New `RATE_LIMITED` error code with HTTP 429 and `retryAfterSec`
+
+**Version-number race fixed (`lib/artifact-versioning.js`):**
+- Next-version computation and the artifact+version write now run in a single `prisma.$transaction` (artifact save, version restore, bulk status update) — concurrent saves no longer 500 on the unique constraint
+- Bulk status updates now create a version per changed artifact, matching the "every save creates a version" rule
+
+**Tests:** 18 new tests (rate limiter, URL validation incl. injection payloads) — suite at 197 Vitest tests, all passing.
+
+---
