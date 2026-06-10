@@ -20,11 +20,13 @@ export const authOptions = {
           return null;
         }
 
-        const rateKey = `login:${credentials.email.trim().toLowerCase()}`;
+        // Emails are stored lowercase — normalize before lookup
+        const email = credentials.email.trim().toLowerCase();
+        const rateKey = `login:${email}`;
         if (isRateLimited(rateKey)) return null;
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         });
 
         if (!user) {

@@ -1493,3 +1493,33 @@ Field values are stored as Tiptap HTML; the generator strips tags and converts b
 **Tests:** 18 new tests (rate limiter, URL validation incl. injection payloads) — suite at 197 Vitest tests, all passing.
 
 ---
+
+### Extension Step 37 — Security Hardening Round 3 ✅
+
+**Goal:** Close the remaining security-review findings S4–S6. All findings from the 2026-06-10 review are now resolved.
+
+**AI API key encrypted at rest (`lib/crypto.js`):**
+- AES-256-GCM with a key derived from `CONFIG_SECRET` (falls back to `NEXTAUTH_SECRET` — no new required env var)
+- Legacy plaintext keys keep working and are encrypted transparently on the next save
+
+**Self-registration is now opt-in (`REGISTRATION_ENABLED`, default off):**
+- The register API returns 403, the register page shows a notice, and the login page hides the register link unless `REGISTRATION_ENABLED="true"` is set
+- Matches the intended model: accounts are created by admins under `/admin/users`
+
+**Hardening batch:**
+- Emails are normalized (trim + lowercase) on registration, login, admin user creation, and member invites
+- Security headers (incl. a conservative `Content-Security-Policy`) moved to `next.config.mjs` and now cover public pages as well
+- `/api/health` verifies DB connectivity (`SELECT 1`) and returns 503 when unreachable — Docker healthchecks are meaningful now
+- Document import verifies file magic bytes (PDF/DOCX/text), rejecting spoofed MIME types
+- The Prisma client picks its driver adapter from the `DATABASE_URL` scheme — SQLite and PostgreSQL both work at runtime (`@prisma/adapter-pg` is now a production dependency)
+
+**New env vars (both optional):**
+
+```env
+REGISTRATION_ENABLED="true"   # enable self-service registration (default: disabled)
+CONFIG_SECRET="..."           # dedicated secret for encrypting stored API keys (default: NEXTAUTH_SECRET)
+```
+
+**Tests:** 12 new tests (crypto round-trip/wrong-key/legacy, email normalization) — suite at 209 Vitest tests, all passing.
+
+---

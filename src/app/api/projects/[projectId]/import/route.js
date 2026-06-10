@@ -30,10 +30,23 @@ const SUPPORTED_TYPES = [
 
 // ─── Text extraction ───────────────────────────────────────────────────────
 
-async function extractText(file) {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const mime = file.type;
+// The client-declared MIME type is spoofable — verify magic bytes before
+// handing the buffer to a parser.
+function matchesDeclaredType(buffer, mime) {
+  if (mime === "application/pdf") {
+    // "%PDF" must appear within the first 1024 bytes (per spec, leading
+    // junk before the header is allowed)
+    return buffer.subarray(0, 1024).includes("%PDF");
+  }
+  if (mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+    // DOCX is a ZIP container: "PK\x03\x04"
+    return buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04;
+  }
+  // Plain text / markdown: reject binary content (NUL bytes)
+  return !buffer.subarray(0, 8192).includes(0);
+}
 
+async function extractText(buffer, mime) {
   if (mime === "application/pdf") {
     const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: buffer });
@@ -115,9 +128,18 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
   const warnings = [];
   const perFileText = [];
   for (const file of files) {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    if (!matchesDeclaredType(buffer, file.type)) {
+      return errorResponse(
+        "VALIDATION_ERROR",
+        `Datei '${file.name}' entspricht nicht dem angegebenen Format`,
+        400
+      );
+    }
+
     let text = "";
     try {
-      text = await extractText(file);
+      text = await extractText(buffer, file.type);
     } catch (err) {
       console.error(`[import] extractText failed for '${file.name}':`, err);
       return errorResponse("SERVER_ERROR", "Fehler beim Lesen einer Datei", 500);

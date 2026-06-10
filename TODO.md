@@ -6,8 +6,10 @@ Last updated: 2026-06-10. All items are unstarted unless noted.
 
 ## Security Review Findings (2026-06-10)
 
-Round 1 (stale JWT role/status, `requireAdmin` consolidation, `withProjectRoute` wrapper) is done — see DONE.md Step 35.
-Round 2 (S1 env injection, S2 rate limiting, S3 version race + bulk versioning) is done — see DONE.md Step 36. Remaining:
+**All security-review findings are resolved.**
+Round 1 (stale JWT role/status, `requireAdmin` consolidation, `withProjectRoute` wrapper) — DONE.md Step 35.
+Round 2 (S1 env injection, S2 rate limiting, S3 version race + bulk versioning) — DONE.md Step 36.
+Round 3 (S4 key encryption, S5 registration flag, S6 hardening batch) — DONE.md Step 37.
 
 ### ~~S1. `.env.local` injection via admin database endpoint~~ ✅ DONE
 `validateDatabaseUrl()` in `lib/env-config.js` (strict per-type validation, rejects quotes/whitespace/control chars); `writeEnvLocal` additionally refuses unsafe keys/values as defense in depth.
@@ -18,18 +20,18 @@ In-memory fixed-window limiter (`lib/rate-limit.js`). Login: 5 failed attempts /
 ### ~~S3. Version-number race~~ ✅ DONE
 `lib/artifact-versioning.js` → `updateArtifactWithVersion(tx, …)` used inside `prisma.$transaction` by artifact PATCH, version restore, and bulk status PATCH. Bulk status changes now create versions (no-op status changes are skipped).
 
-### S4. AI API key stored in plaintext in DB
-`aiConfig.apiKey` is unencrypted in the SQLite file. Encrypt at rest (AES-GCM, key from env) or keep keys env-only.
+### ~~S4. AI API key stored in plaintext in DB~~ ✅ DONE
+AES-256-GCM via `lib/crypto.js` (key derived from `CONFIG_SECRET`, falls back to `NEXTAUTH_SECRET`). Legacy plaintext rows keep working and are encrypted on the next save.
 
-### S5. Registration is open but admin-only user creation is the intended model
-`/api/auth/register` is publicly reachable. Either remove it or gate it behind a `REGISTRATION_ENABLED` env flag (default off).
+### ~~S5. Registration gated behind env flag~~ ✅ DONE
+`REGISTRATION_ENABLED="true"` enables self-registration; **default is off** (API returns 403, register page shows a notice, login page hides the link).
 
-### S6. Smaller items
-- Normalize emails to lowercase on register + login (case-duplicate accounts possible)
-- Add `Content-Security-Policy` header in `src/middleware.js` (at least `frame-ancestors 'none'; object-src 'none'; base-uri 'self'`)
-- `/api/health` should do a `SELECT 1` so the Docker healthcheck actually verifies the DB
-- Import route trusts client MIME (`file.type`) — consider magic-byte sniffing
-- Runtime Prisma client hard-codes the better-sqlite3 adapter while the admin DB page writes Postgres URLs — branch the adapter on URL scheme or make the page view/test-only
+### ~~S6. Smaller items~~ ✅ DONE
+- Emails normalized (trim + lowercase) in register/login/admin-create/invite
+- Security headers incl. CSP moved to `next.config.mjs` `headers()` — now cover public pages too
+- `/api/health` runs `SELECT 1` and returns 503 when the DB is unreachable
+- Import verifies magic bytes (PDF `%PDF`, DOCX `PK\x03\x04`, text = no NUL bytes)
+- Prisma client picks the adapter from the URL scheme (better-sqlite3 / `@prisma/adapter-pg`); MariaDB URLs fail with a clear error
 
 ---
 

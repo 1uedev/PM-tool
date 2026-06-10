@@ -8,7 +8,7 @@ import Input from "@/components/ui/Input.jsx";
 import Button from "@/components/ui/Button.jsx";
 import Spinner from "@/components/ui/Spinner.jsx";
 
-export default function LoginForm() {
+export default function LoginForm({ registrationEnabled = true }) {
   const router = useRouter();
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -99,12 +99,14 @@ export default function LoginForm() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
-        Noch kein Konto?{" "}
-        <Link href="/register" className="font-medium text-blue-600 hover:underline">
-          Registrieren
-        </Link>
-      </p>
+      {registrationEnabled && (
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Noch kein Konto?{" "}
+          <Link href="/register" className="font-medium text-blue-600 hover:underline">
+            Registrieren
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

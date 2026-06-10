@@ -8,6 +8,12 @@ import { consumeRateLimit, getClientIp } from "@/lib/rate-limit.js";
 const REGISTER_RATE_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 };
 
 export async function POST(request) {
+  // Self-service registration is opt-in — admin-created accounts are the
+  // intended model. Enable with REGISTRATION_ENABLED="true".
+  if (process.env.REGISTRATION_ENABLED !== "true") {
+    return errorResponse("FORBIDDEN", "Die Selbstregistrierung ist deaktiviert. Bitte wende dich an einen Administrator.", 403);
+  }
+
   const rate = consumeRateLimit(`register:${getClientIp(request)}`, REGISTER_RATE_LIMIT);
   if (!rate.ok) {
     return errorResponse(

@@ -5,7 +5,7 @@ import { errorResponse, successResponse } from "@/lib/errors.js";
 import { z } from "zod";
 
 const inviteSchema = z.object({
-  email: z.string().email("Ungültige E-Mail-Adresse"),
+  email: z.string().trim().toLowerCase().email("Ungültige E-Mail-Adresse"),
   role: z.enum(["VIEWER", "EDITOR", "OWNER"]).default("EDITOR"),
 });
 

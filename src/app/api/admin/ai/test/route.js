@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma.js";
 import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { getAiProvider } from "@/lib/ai/provider-factory.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { decryptSecret } from "@/lib/crypto.js";
 
 // POST /api/admin/ai/test — test a given provider config
 export async function POST(request) {
@@ -19,7 +20,7 @@ export async function POST(request) {
   let apiKey = bodyApiKey;
   if (!apiKey) {
     const record = await prisma.aiConfig.findUnique({ where: { id: "singleton" } });
-    apiKey = record?.apiKey ?? "";
+    apiKey = decryptSecret(record?.apiKey ?? "");
   }
 
   if (!apiKey) {

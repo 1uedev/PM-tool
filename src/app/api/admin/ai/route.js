@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma.js";
 import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
+import { encryptSecret } from "@/lib/crypto.js";
 
 // GET /api/admin/ai — return current AI config (API key masked)
 export async function GET() {
@@ -53,9 +54,10 @@ export async function PATCH(request) {
     maxTokens: maxTokens ?? 2048,
   };
 
-  // Only update apiKey if explicitly provided (non-empty string)
+  // Only update apiKey if explicitly provided (non-empty string).
+  // Stored encrypted (AES-GCM) so the DB file does not expose it.
   if (typeof apiKey === "string" && apiKey.length > 0) {
-    data.apiKey = apiKey;
+    data.apiKey = encryptSecret(apiKey);
   } else if (existing) {
     data.apiKey = existing.apiKey; // preserve existing key
   } else {

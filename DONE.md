@@ -726,12 +726,40 @@ docker compose -f docker-compose.postgres.yml down
 
 ---
 
+### Extension Step 37 — Security Hardening Round 3: Key Encryption, Registration Flag, Hardening Batch ✅
+
+**Goal:** Resolve the remaining review findings S4–S6. All security-review findings are now closed.
+
+**S4 — AI API key encrypted at rest (`lib/crypto.js`, new):**
+- AES-256-GCM, key derived (SHA-256) from `CONFIG_SECRET` with fallback to `NEXTAUTH_SECRET` — no new required env var
+- Stored format `enc:v1:<base64(iv|tag|ciphertext)>`; values without the prefix are treated as legacy plaintext, so existing rows keep working and are encrypted on the next save
+- Wrong key / corrupted ciphertext decrypts to `""` (treated as unset) instead of crashing
+- Integrated in `admin/ai` PATCH (encrypt), `provider-factory` `getAiConfig` (decrypt), `admin/ai/test` (decrypt stored fallback)
+
+**S5 — Self-registration gated (`REGISTRATION_ENABLED`, default OFF):**
+- `/api/auth/register` returns 403 unless `REGISTRATION_ENABLED="true"` (matches the intended admin-only user creation model)
+- Register page renders a "Registrierung deaktiviert" notice with a login link instead of the form
+- Login page hides the "Registrieren" link via a `registrationEnabled` prop
+
+**S6 — Hardening batch:**
+- **Email normalization:** trim + lowercase in `registerSchema`, `createUserSchema`/`updateUserSchema`, member-invite schema, and `authorize()` — case-variant duplicate accounts are no longer possible
+- **Security headers global:** moved from middleware to `next.config.mjs` `headers()` so public pages (landing, login) are covered too; added `Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'` (conservative — cannot break Next inline scripts); middleware reduced to pure auth
+- **Health check:** `/api/health` runs `SELECT 1` through Prisma and returns 503 with `db: "unreachable"` on failure — the Docker healthcheck now actually verifies the DB
+- **Import MIME sniffing:** magic-byte check before parsing (PDF: `%PDF` in first 1 KB; DOCX: ZIP `PK\x03\x04`; text/markdown: no NUL bytes) — spoofed `file.type` gets a 400
+- **Prisma adapter by URL scheme** (`lib/prisma.js`): `postgresql://` → `@prisma/adapter-pg` (moved to dependencies), `file:` → better-sqlite3, MariaDB → clear error (no adapter installed); the admin DB switch to Postgres now actually works after restart
+
+**New env vars (both optional):** `REGISTRATION_ENABLED` ("true" to enable self-registration), `CONFIG_SECRET` (dedicated encryption secret; defaults to `NEXTAUTH_SECRET`).
+
+**Tests:** new `crypto.test.js` (round-trip, random IV, legacy passthrough, wrong-key/corruption, CONFIG_SECRET precedence) and `validators/auth.test.js` (email normalization). Suite now 209 Vitest tests — all passing. Live-verified: health returns `db: ok`, register returns 403, CSP present on `/login`.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 36)
-- Tests: 197 Vitest (17 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 37)
+- Tests: 209 Vitest (19 files) + 17 Playwright E2E — all passing
 - Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- Open: security-review findings S4–S6 (see TODO.md — API-key encryption, registration flag, CSP/email-normalization/health-check/MIME/adapter items)
+- **All security-review findings (Rounds 1–3) resolved.** Note: self-registration is now OFF by default — set `REGISTRATION_ENABLED="true"` to re-enable.

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma.js";
+import { decryptSecret } from "@/lib/crypto.js";
 import { ClaudeAdapter } from "./claude-adapter.js";
 import { OpenAiAdapter } from "./openai-adapter.js";
 
@@ -10,13 +11,16 @@ export async function getAiConfig() {
   try {
     const record = await prisma.aiConfig.findUnique({ where: { id: "singleton" } });
     if (record && record.provider !== "disabled" && record.apiKey) {
-      return {
-        provider: record.provider,
-        model: record.model,
-        apiKey: record.apiKey,
-        timeoutMs: record.timeoutMs,
-        maxTokens: record.maxTokens,
-      };
+      const apiKey = decryptSecret(record.apiKey);
+      if (apiKey) {
+        return {
+          provider: record.provider,
+          model: record.model,
+          apiKey,
+          timeoutMs: record.timeoutMs,
+          maxTokens: record.maxTokens,
+        };
+      }
     }
   } catch {
     // DB not available — fall through to env fallback
