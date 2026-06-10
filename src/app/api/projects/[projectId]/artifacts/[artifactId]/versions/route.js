@@ -1,19 +1,10 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 
 // GET /api/projects/:id/artifacts/:aid/versions — list all versions (newest first)
-export async function GET(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
-  if (accessErr) return accessErr;
-
-  const { response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artifactErr) return artifactErr;
+export const GET = withProjectRoute({ role: "VIEWER", artifact: true }, async (request, { params }) => {
+  const { artifactId } = params;
 
   try {
     const versions = await prisma.artifactVersion.findMany({
@@ -32,4 +23,4 @@ export async function GET(request, { params }) {
     console.error("[GET /versions]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});

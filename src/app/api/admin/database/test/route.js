@@ -1,13 +1,6 @@
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
+import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { detectDbType } from "@/lib/env-config.js";
-
-function requireAdmin(session) {
-  if (session.user.systemRole !== "ADMIN") {
-    return errorResponse("FORBIDDEN", "Nur Administratoren haben Zugriff", 403);
-  }
-  return null;
-}
 
 async function testSqlite(url) {
   const filePath = url.replace(/^file:/, "");
@@ -54,10 +47,8 @@ async function testMariadb(url) {
 
 // POST /api/admin/database/test — test a connection URL
 export async function POST(request) {
-  const { session, response: authErr } = await requireAuth();
+  const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
-  const adminErr = requireAdmin(session);
-  if (adminErr) return adminErr;
 
   const { url } = await request.json();
   if (!url) return errorResponse("VALIDATION_ERROR", "url ist erforderlich", 400);

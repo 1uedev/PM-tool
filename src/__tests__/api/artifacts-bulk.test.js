@@ -12,20 +12,23 @@ vi.mock("@/lib/prisma.js", () => ({
   },
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: vi.fn() }));
-vi.mock("@/lib/auth.js", () => ({ authOptions: {} }));
+vi.mock("@/lib/middleware/auth-guard.js", () => ({
+  requireAuth: vi.fn(),
+}));
 vi.mock("@/lib/middleware/project-access.js", () => ({
   requireProjectAccess: vi.fn(),
+  requireArtifactAccess: vi.fn(),
 }));
 
-import { getServerSession } from "next-auth";
+import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import { requireProjectAccess } from "@/lib/middleware/project-access.js";
+import { errorResponse } from "@/lib/errors.js";
 
 const SESSION = { user: { id: "u-1" } };
 const PARAMS = { params: Promise.resolve({ projectId: "p-1" }) };
 
 function authOk() {
-  getServerSession.mockResolvedValue(SESSION);
+  requireAuth.mockResolvedValue({ session: SESSION, response: null });
 }
 function accessOk() {
   requireProjectAccess.mockResolvedValue({ membership: { role: "EDITOR" }, response: null });
@@ -40,7 +43,10 @@ beforeEach(() => vi.clearAllMocks());
 
 describe("POST /api/projects/:id/artifacts/bulk", () => {
   it("returns 401 when unauthenticated", async () => {
-    getServerSession.mockResolvedValue(null);
+    requireAuth.mockResolvedValue({
+      session: null,
+      response: errorResponse("AUTH_ERROR", "Not authenticated", 401),
+    });
     const res = await POST(makeRequest({ artifacts: [] }), PARAMS);
     expect(res.status).toBe(401);
   });

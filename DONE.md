@@ -674,12 +674,39 @@ docker compose -f docker-compose.postgres.yml down
 
 ---
 
+### Extension Step 35 — Security Hardening Round 1: DB-fresh Auth + Guard Consolidation ✅
+
+**Goal:** Fix the three highest-priority findings of the architecture/security review (2026-06-10): stale JWT role/status, three divergent `requireAdmin` implementations, and per-route auth boilerplate drift.
+
+**1. DB-fresh session checks (`lib/middleware/auth-guard.js`):**
+- `requireAuth()` now selects `id, status, systemRole` (it already did a per-request DB lookup, so no extra query)
+- `INACTIVE` users are rejected with 401 immediately — deactivation no longer waits for JWT expiry
+- `session.user.systemRole` is overwritten with the DB role — admin demotion applies without re-login
+- `lib/auth.js`: explicit `session.maxAge` of 24 h (was NextAuth default 30 days)
+
+**2. Single `requireAdmin` (`lib/middleware/auth-guard.js`):**
+- Deleted `lib/middleware/admin-guard.js` (duplicate that skipped the DB existence check)
+- Removed 6 inline `requireAdmin(session)` copies from `admin/ai`, `admin/ai/test`, `admin/database`, `admin/database/test`, `admin/languages`, `admin/languages/[code]`
+- All 9 admin routes now use the one auth-guard implementation, which is DB-fresh per item 1
+
+**3. `withProjectRoute` wrapper (`lib/middleware/with-project-route.js`):**
+- Encapsulates the guard chain: `requireAuth` → `requireProjectAccess(role)` → optional `requireArtifactAccess`
+- Handler receives `(request, { session, params, membership, artifact? })` with params already awaited
+- All 21 project-scoped route files converted; routes that had drifted to bare `getServerSession` (bulk POST, import, export) now get the full stale-JWT/INACTIVE checks
+- `users/me`, `users/me/password` switched from bare `getServerSession` to `requireAuth`
+- `requireProjectAccess` gained an `allowArchived` option
+- **Bug fix:** un-archiving was impossible (archive toggle required OWNER write access, which the archived-project guard blocked with 403) — `archive` route now sets `allowArchived: true`; same for project DELETE so archived projects can be deleted
+
+**Tests:** `auth-guard.test.js` extended (INACTIVE rejection, DB-role override beats token role); `artifacts-bulk.test.js` mocks updated to the wrapper chain. 179 Vitest tests passing.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 34)
-- Tests: 176 Vitest (15 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 35)
+- Tests: 179 Vitest (15 files) + 17 Playwright E2E — all passing
 - Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
-- **All TODO items complete.** No remaining open work.
+- Open: security-review findings round 2 (see TODO.md — rate limiting, .env.local injection, API-key encryption, version race)

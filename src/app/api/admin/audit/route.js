@@ -1,13 +1,10 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.js";
-import { requireAdmin } from "@/lib/middleware/admin-guard.js";
+import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import prisma from "@/lib/prisma.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 
 // GET /api/admin/audit?page=1&limit=50&action=ARTIFACT_DELETE
 export async function GET(request) {
-  const session = await getServerSession(authOptions);
-  const { response: adminErr } = await requireAdmin(session);
+  const { response: adminErr } = await requireAdmin();
   if (adminErr) return adminErr;
 
   const url = new URL(request.url);

@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.js";
+import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import prisma from "@/lib/prisma.js";
 import { z } from "zod";
 import { errorResponse, successResponse } from "@/lib/errors.js";
@@ -12,8 +11,8 @@ const changePasswordSchema = z.object({
 
 // POST /api/users/me/password — change own password
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return authErr;
 
   let body;
   try {

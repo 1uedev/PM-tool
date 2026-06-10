@@ -14,7 +14,7 @@ const ROLE_LEVELS = { VIEWER: 0, EDITOR: 1, OWNER: 2 };
  *   const { membership, response } = await requireProjectAccess(userId, projectId, "EDITOR");
  *   if (response) return response;
  */
-export async function requireProjectAccess(userId, projectId, requiredRole = "VIEWER") {
+export async function requireProjectAccess(userId, projectId, requiredRole = "VIEWER", { allowArchived = false } = {}) {
   const membership = await prisma.projectMember.findUnique({
     where: { userId_projectId: { userId, projectId } },
     include: { project: { select: { id: true, status: true } } },
@@ -27,8 +27,10 @@ export async function requireProjectAccess(userId, projectId, requiredRole = "VI
     };
   }
 
-  // Archived projects are read-only — block any write operations
-  if (membership.project?.status === "ARCHIVED" && requiredRole !== "VIEWER") {
+  // Archived projects are read-only — block any write operations.
+  // allowArchived exempts routes that must write to archived projects
+  // (e.g. un-archiving).
+  if (!allowArchived && membership.project?.status === "ARCHIVED" && requiredRole !== "VIEWER") {
     return {
       membership: null,
       response: errorResponse("FORBIDDEN", "Dieses Projekt ist archiviert und kann nicht bearbeitet werden", 403),

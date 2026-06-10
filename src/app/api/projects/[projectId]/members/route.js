@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { validateBody } from "@/lib/validators/index.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { z } from "zod";
@@ -11,13 +10,8 @@ const inviteSchema = z.object({
 });
 
 // GET /api/projects/:id/members — list all members (VIEWER+)
-export async function GET(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
-  if (accessErr) return accessErr;
+export const GET = withProjectRoute({ role: "VIEWER" }, async (request, { session, params }) => {
+  const { projectId } = params;
 
   try {
     const members = await prisma.projectMember.findMany({
@@ -39,16 +33,11 @@ export async function GET(request, { params }) {
     console.error("[GET /members]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});
 
 // POST /api/projects/:id/members — invite user by email (OWNER only)
-export async function POST(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "OWNER");
-  if (accessErr) return accessErr;
+export const POST = withProjectRoute({ role: "OWNER" }, async (request, { params }) => {
+  const { projectId } = params;
 
   const { data, response: validErr } = await validateBody(request, inviteSchema);
   if (validErr) return validErr;
@@ -84,4 +73,4 @@ export async function POST(request, { params }) {
     console.error("[POST /members]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});

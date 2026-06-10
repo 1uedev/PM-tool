@@ -1,20 +1,11 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
+import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
-
-function requireAdmin(session) {
-  if (session.user.systemRole !== "ADMIN") {
-    return errorResponse("FORBIDDEN", "Nur Administratoren haben Zugriff", 403);
-  }
-  return null;
-}
 
 // PATCH /api/admin/languages/[code] — update language (toggle active, set default)
 export async function PATCH(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
+  const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
-  const adminErr = requireAdmin(session);
-  if (adminErr) return adminErr;
 
   const { code } = await params;
   const body = await request.json();
@@ -45,10 +36,8 @@ export async function PATCH(request, { params }) {
 
 // DELETE /api/admin/languages/[code]
 export async function DELETE(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
+  const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
-  const adminErr = requireAdmin(session);
-  if (adminErr) return adminErr;
 
   const { code } = await params;
 

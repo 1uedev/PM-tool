@@ -1,7 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import prisma from "@/lib/prisma.js";
 import { ARTIFACT_FIELD_DEFS } from "@/lib/artifactFields.js";
@@ -21,17 +18,8 @@ function getDefaultFields(type) {
   return Object.fromEntries(defs.map((f) => [f.key, ""]));
 }
 
-export async function POST(request, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(
-    session.user.id,
-    projectId,
-    "EDITOR"
-  );
-  if (accessErr) return accessErr;
+export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { session, params }) => {
+  const { projectId } = params;
 
   let body;
   try {
@@ -182,16 +170,11 @@ export async function POST(request, { params }) {
     },
     201
   );
-}
+});
 
 // PATCH /api/projects/:id/artifacts/bulk — bulk status update
-export async function PATCH(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
+export const PATCH = withProjectRoute({ role: "EDITOR" }, async (request, { params }) => {
+  const { projectId } = params;
 
   let body;
   try { body = await request.json(); } catch {
@@ -216,16 +199,11 @@ export async function PATCH(request, { params }) {
     console.error("[PATCH bulk]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});
 
 // DELETE /api/projects/:id/artifacts/bulk — bulk soft-delete
-export async function DELETE(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
+export const DELETE = withProjectRoute({ role: "EDITOR" }, async (request, { session, params }) => {
+  const { projectId } = params;
 
   let body;
   try { body = await request.json(); } catch {
@@ -253,4 +231,4 @@ export async function DELETE(request, { params }) {
     console.error("[DELETE bulk]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});

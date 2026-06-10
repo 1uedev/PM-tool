@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { validateBody } from "@/lib/validators/index.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { z } from "zod";
@@ -8,15 +7,8 @@ import { z } from "zod";
 const addTagSchema = z.object({ tagId: z.string().min(1) });
 
 // GET /api/projects/:id/artifacts/:aid/tags — tags on this artifact
-export async function GET(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
-  if (accessErr) return accessErr;
-  const { response: artErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artErr) return artErr;
+export const GET = withProjectRoute({ role: "VIEWER", artifact: true }, async (request, { params }) => {
+  const { artifactId } = params;
 
   try {
     const artifact = await prisma.artifact.findUnique({
@@ -29,18 +21,11 @@ export async function GET(request, { params }) {
     console.error("[GET /artifact/tags]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});
 
 // POST /api/projects/:id/artifacts/:aid/tags — assign tag (EDITOR+)
-export async function POST(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
-  const { response: artErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artErr) return artErr;
+export const POST = withProjectRoute({ role: "EDITOR", artifact: true }, async (request, { params }) => {
+  const { projectId, artifactId } = params;
 
   const { data, response: validErr } = await validateBody(request, addTagSchema);
   if (validErr) return validErr;
@@ -60,18 +45,11 @@ export async function POST(request, { params }) {
     console.error("[POST /artifact/tags]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});
 
 // DELETE /api/projects/:id/artifacts/:aid/tags?tagId=... — remove tag (EDITOR+)
-export async function DELETE(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
-  const { response: artErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artErr) return artErr;
+export const DELETE = withProjectRoute({ role: "EDITOR", artifact: true }, async (request, { params }) => {
+  const { artifactId } = params;
 
   const { searchParams } = new URL(request.url);
   const tagId = searchParams.get("tagId");
@@ -84,4 +62,4 @@ export async function DELETE(request, { params }) {
     console.error("[DELETE /artifact/tags]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});

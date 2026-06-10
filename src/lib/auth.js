@@ -41,6 +41,9 @@ export const authOptions = {
 
   session: {
     strategy: "jwt",
+    // Keep sessions short — server-side guards re-check status/role per
+    // request, but a short JWT lifetime limits the exposure window.
+    maxAge: 60 * 60 * 24, // 24 hours
   },
 
   callbacks: {

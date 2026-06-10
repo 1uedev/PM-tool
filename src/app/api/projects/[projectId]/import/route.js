@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { getAiConfig, getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
 import {
@@ -51,18 +49,7 @@ async function extractText(file) {
 
 // ─── Handler ───────────────────────────────────────────────────────────────
 
-export async function POST(request, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(
-    session.user.id,
-    projectId,
-    "EDITOR"
-  );
-  if (accessErr) return accessErr;
-
+export const POST = withProjectRoute({ role: "EDITOR" }, async (request) => {
   // Check AI availability
   const aiConfig = await getAiConfig();
   if (!isAiAvailable(aiConfig)) {
@@ -209,4 +196,4 @@ export async function POST(request, { params }) {
       warnings: allWarnings,
     },
   });
-}
+});

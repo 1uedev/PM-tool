@@ -1,19 +1,11 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import prisma from "@/lib/prisma.js";
-import { errorResponse } from "@/lib/errors.js";
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants.js";
 import { generateProjectReport } from "@/lib/pdf/generateProjectReport.js";
 
 // GET /api/projects/:id/export?format=json|csv|pdf
-export async function GET(request, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
-  if (accessErr) return accessErr;
+export const GET = withProjectRoute({ role: "VIEWER" }, async (request, { params }) => {
+  const { projectId } = params;
 
   const format = new URL(request.url).searchParams.get("format") ?? "json";
 
@@ -89,4 +81,4 @@ export async function GET(request, { params }) {
       "Content-Disposition": `attachment; filename="${filename}.json"`,
     },
   });
-}
+});

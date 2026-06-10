@@ -1,16 +1,10 @@
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
-import { successResponse, errorResponse } from "@/lib/errors.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
+import { successResponse } from "@/lib/errors.js";
 import { STARTER_DEFAULTS } from "@/lib/starterContext.js";
 import prisma from "@/lib/prisma.js";
 
-export async function GET(request, { params }) {
-  const { projectId } = await params;
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
-  if (accessErr) return accessErr;
+export const GET = withProjectRoute({ role: "VIEWER" }, async (request, { params }) => {
+  const { projectId } = params;
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -28,15 +22,10 @@ export async function GET(request, { params }) {
   }
 
   return successResponse({ starter });
-}
+});
 
-export async function PATCH(request, { params }) {
-  const { projectId } = await params;
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
+export const PATCH = withProjectRoute({ role: "EDITOR" }, async (request, { params }) => {
+  const { projectId } = params;
 
   const body = await request.json();
 
@@ -51,4 +40,4 @@ export async function PATCH(request, { params }) {
   });
 
   return successResponse({ starter: sanitized });
-}
+});

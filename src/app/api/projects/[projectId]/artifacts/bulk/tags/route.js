@@ -1,5 +1,4 @@
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import prisma from "@/lib/prisma.js";
 
@@ -7,13 +6,8 @@ const MAX_BULK_IDS = 200;
 
 // POST /api/projects/:id/artifacts/bulk/tags — assign tags to multiple artifacts
 // Body: { ids: string[], tagIds: string[] }
-export async function POST(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
+export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { params }) => {
+  const { projectId } = params;
 
   let body;
   try { body = await request.json(); } catch {
@@ -70,4 +64,4 @@ export async function POST(request, { params }) {
     console.error("[POST bulk/tags]", error);
     return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
   }
-}
+});

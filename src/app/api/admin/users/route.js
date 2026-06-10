@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma.js";
-import { requireAdmin } from "@/lib/middleware/admin-guard.js";
+import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { createUserSchema, safeUser } from "@/lib/validators/user.js";
 

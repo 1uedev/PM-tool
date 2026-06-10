@@ -1,20 +1,11 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
+import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
-
-function requireAdmin(session) {
-  if (session.user.systemRole !== "ADMIN") {
-    return errorResponse("FORBIDDEN", "Nur Administratoren haben Zugriff", 403);
-  }
-  return null;
-}
 
 // GET /api/admin/ai — return current AI config (API key masked)
 export async function GET() {
-  const { session, response: authErr } = await requireAuth();
+  const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
-  const adminErr = requireAdmin(session);
-  if (adminErr) return adminErr;
 
   const record = await prisma.aiConfig.findUnique({ where: { id: "singleton" } });
   if (!record) {
@@ -41,10 +32,8 @@ export async function GET() {
 
 // PATCH /api/admin/ai — save AI config to DB
 export async function PATCH(request) {
-  const { session, response: authErr } = await requireAuth();
+  const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
-  const adminErr = requireAdmin(session);
-  if (adminErr) return adminErr;
 
   const body = await request.json();
   const { provider, model, apiKey, timeoutMs, maxTokens } = body;

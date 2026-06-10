@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
-import { requireProjectAccess, requireArtifactAccess } from "@/lib/middleware/project-access.js";
+import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { validateBody } from "@/lib/validators/index.js";
 import { updateArtifactSchema } from "@/lib/validators/artifact.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
@@ -17,114 +16,97 @@ function parseArtifact(artifact) {
 }
 
 // GET /api/projects/:id/artifacts/:aid
-export async function GET(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
-
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "VIEWER");
-  if (accessErr) return accessErr;
-
-  const { artifact, response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artifactErr) return artifactErr;
-
-  // artifact is already fetched by requireArtifactAccess — return it directly
-  return successResponse(parseArtifact(artifact));
-}
+export const GET = withProjectRoute(
+  { role: "VIEWER", artifact: true },
+  async (request, { artifact }) => {
+    // artifact is already fetched by the guard chain — return it directly
+    return successResponse(parseArtifact(artifact));
+  }
+);
 
 // PATCH /api/projects/:id/artifacts/:aid — update + auto-version
-export async function PATCH(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
+export const PATCH = withProjectRoute(
+  { role: "EDITOR", artifact: true },
+  async (request, { session, params, artifact }) => {
+    const { artifactId } = params;
 
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
+    const { data, response: validErr } = await validateBody(request, updateArtifactSchema);
+    if (validErr) return validErr;
 
-  const { artifact, response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artifactErr) return artifactErr;
+    try {
+      const currentFields = typeof artifact.fields === "string"
+        ? JSON.parse(artifact.fields)
+        : artifact.fields;
 
-  const { data, response: validErr } = await validateBody(request, updateArtifactSchema);
-  if (validErr) return validErr;
+      // Merge only keys that belong to this artifact type — discard unknown keys
+      const allowedKeys = new Set(Object.keys(getDefaultFields(artifact.type)));
+      const incomingFields = data.fields
+        ? Object.fromEntries(
+            Object.entries(data.fields).filter(([k]) => allowedKeys.has(k))
+          )
+        : {};
+      const newFields = data.fields
+        ? { ...currentFields, ...incomingFields }
+        : currentFields;
 
-  try {
-    const currentFields = typeof artifact.fields === "string"
-      ? JSON.parse(artifact.fields)
-      : artifact.fields;
+      const newTitle = data.title ?? artifact.title;
+      const newStatus = data.status ?? artifact.status;
 
-    // Merge only keys that belong to this artifact type — discard unknown keys
-    const allowedKeys = new Set(Object.keys(getDefaultFields(artifact.type)));
-    const incomingFields = data.fields
-      ? Object.fromEntries(
-          Object.entries(data.fields).filter(([k]) => allowedKeys.has(k))
-        )
-      : {};
-    const newFields = data.fields
-      ? { ...currentFields, ...incomingFields }
-      : currentFields;
+      // Get next version number
+      const lastVersion = await prisma.artifactVersion.findFirst({
+        where: { artifactId },
+        orderBy: { version: "desc" },
+        select: { version: true },
+      });
+      const nextVersion = (lastVersion?.version ?? 0) + 1;
 
-    const newTitle = data.title ?? artifact.title;
-    const newStatus = data.status ?? artifact.status;
-
-    // Get next version number
-    const lastVersion = await prisma.artifactVersion.findFirst({
-      where: { artifactId },
-      orderBy: { version: "desc" },
-      select: { version: true },
-    });
-    const nextVersion = (lastVersion?.version ?? 0) + 1;
-
-    const updated = await prisma.artifact.update({
-      where: { id: artifactId },
-      data: {
-        title: newTitle,
-        status: newStatus,
-        fields: JSON.stringify(newFields),
-        versions: {
-          create: {
-            version: nextVersion,
-            title: newTitle,
-            fields: JSON.stringify(newFields),
-            status: newStatus,
-            authorId: session.user.id,
+      const updated = await prisma.artifact.update({
+        where: { id: artifactId },
+        data: {
+          title: newTitle,
+          status: newStatus,
+          fields: JSON.stringify(newFields),
+          versions: {
+            create: {
+              version: nextVersion,
+              title: newTitle,
+              fields: JSON.stringify(newFields),
+              status: newStatus,
+              authorId: session.user.id,
+            },
           },
         },
-      },
-    });
+      });
 
-    return successResponse(parseArtifact(updated));
-  } catch (error) {
-    console.error("[PATCH artifact]", error);
-    return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+      return successResponse(parseArtifact(updated));
+    } catch (error) {
+      console.error("[PATCH artifact]", error);
+      return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+    }
   }
-}
+);
 
 // DELETE /api/projects/:id/artifacts/:aid — soft delete (sets deleted: true)
-export async function DELETE(request, { params }) {
-  const { session, response: authErr } = await requireAuth();
-  if (authErr) return authErr;
+export const DELETE = withProjectRoute(
+  { role: "EDITOR", artifact: true },
+  async (request, { session, params, artifact }) => {
+    const { projectId, artifactId } = params;
 
-  const { projectId, artifactId } = await params;
-  const { response: accessErr } = await requireProjectAccess(session.user.id, projectId, "EDITOR");
-  if (accessErr) return accessErr;
+    try {
+      await prisma.artifact.update({
+        where: { id: artifactId },
+        data: { deleted: true },
+      });
 
-  const { artifact, response: artifactErr } = await requireArtifactAccess(artifactId, projectId);
-  if (artifactErr) return artifactErr;
+      await logAction("ARTIFACT_DELETE", session.user.id, projectId, artifactId, {
+        artifactTitle: artifact.title,
+        artifactType: artifact.type,
+      });
 
-  try {
-    await prisma.artifact.update({
-      where: { id: artifactId },
-      data: { deleted: true },
-    });
-
-    await logAction("ARTIFACT_DELETE", session.user.id, projectId, artifactId, {
-      artifactTitle: artifact.title,
-      artifactType: artifact.type,
-    });
-
-    return successResponse({ deleted: true });
-  } catch (error) {
-    console.error("[DELETE artifact]", error);
-    return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+      return successResponse({ deleted: true });
+    } catch (error) {
+      console.error("[DELETE artifact]", error);
+      return errorResponse("SERVER_ERROR", "Interner Serverfehler", 500);
+    }
   }
-}
+);

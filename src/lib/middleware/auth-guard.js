@@ -5,8 +5,12 @@ import prisma from "@/lib/prisma.js";
 
 /**
  * Retrieves the current session or returns a 401 response.
- * Also verifies the session user still exists in the DB —
- * catches stale JWTs after a DB reset without exposing a 500.
+ * Also verifies the session user against the DB on every request:
+ * - user must still exist (stale JWTs after a DB reset)
+ * - user must not be INACTIVE (deactivation takes effect immediately,
+ *   not only after the JWT expires)
+ * - systemRole is taken from the DB, not the token, so role changes
+ *   apply without re-login
  */
 export async function requireAuth() {
   const session = await getServerSession(authOptions);
@@ -18,18 +22,27 @@ export async function requireAuth() {
     };
   }
 
-  // Verify the user still exists (guards against stale JWTs after DB migrations)
-  const exists = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true },
+    select: { id: true, status: true, systemRole: true },
   });
 
-  if (!exists) {
+  if (!user) {
     return {
       session: null,
       response: errorResponse("AUTH_ERROR", "Session expired — please log in again", 401),
     };
   }
+
+  if (user.status === "INACTIVE") {
+    return {
+      session: null,
+      response: errorResponse("AUTH_ERROR", "Dieses Konto wurde deaktiviert", 401),
+    };
+  }
+
+  // Override the token role with the current DB role
+  session.user.systemRole = user.systemRole;
 
   return { session, response: null };
 }

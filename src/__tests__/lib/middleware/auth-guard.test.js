@@ -25,7 +25,7 @@ beforeEach(() => {
 describe("requireAuth", () => {
   it("returns session when authenticated and user exists in DB", async () => {
     getServerSession.mockResolvedValue({ user: { id: "user-1", systemRole: "USER" } });
-    prisma.user.findUnique.mockResolvedValue({ id: "user-1" });
+    prisma.user.findUnique.mockResolvedValue({ id: "user-1", status: "ACTIVE", systemRole: "USER" });
 
     const { session, response } = await requireAuth();
     expect(response).toBeNull();
@@ -59,22 +59,41 @@ describe("requireAuth", () => {
     expect(response.data.error.message).toMatch(/session expired/i);
   });
 
-  it("verifies user existence using only the id select", async () => {
+  it("returns 401 when the user has been deactivated", async () => {
+    getServerSession.mockResolvedValue({ user: { id: "user-1", systemRole: "USER" } });
+    prisma.user.findUnique.mockResolvedValue({ id: "user-1", status: "INACTIVE", systemRole: "USER" });
+
+    const { session, response } = await requireAuth();
+    expect(session).toBeNull();
+    expect(response.status).toBe(401);
+  });
+
+  it("verifies the user with a select on id, status and systemRole", async () => {
     getServerSession.mockResolvedValue({ user: { id: "user-1" } });
-    prisma.user.findUnique.mockResolvedValue({ id: "user-1" });
+    prisma.user.findUnique.mockResolvedValue({ id: "user-1", status: "ACTIVE", systemRole: "USER" });
 
     await requireAuth();
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { id: "user-1" },
-      select: { id: true },
+      select: { id: true, status: true, systemRole: true },
     });
+  });
+
+  it("overrides the token role with the current DB role", async () => {
+    // Token still claims ADMIN, but the user has been demoted in the DB
+    getServerSession.mockResolvedValue({ user: { id: "user-1", systemRole: "ADMIN" } });
+    prisma.user.findUnique.mockResolvedValue({ id: "user-1", status: "ACTIVE", systemRole: "USER" });
+
+    const { session, response } = await requireAuth();
+    expect(response).toBeNull();
+    expect(session.user.systemRole).toBe("USER");
   });
 });
 
 describe("requireAdmin", () => {
   it("returns session when authenticated user is ADMIN", async () => {
     getServerSession.mockResolvedValue({ user: { id: "admin-1", systemRole: "ADMIN" } });
-    prisma.user.findUnique.mockResolvedValue({ id: "admin-1" });
+    prisma.user.findUnique.mockResolvedValue({ id: "admin-1", status: "ACTIVE", systemRole: "ADMIN" });
 
     const { session, response } = await requireAdmin();
     expect(response).toBeNull();
@@ -83,12 +102,21 @@ describe("requireAdmin", () => {
 
   it("returns 403 when authenticated user is not ADMIN", async () => {
     getServerSession.mockResolvedValue({ user: { id: "user-1", systemRole: "USER" } });
-    prisma.user.findUnique.mockResolvedValue({ id: "user-1" });
+    prisma.user.findUnique.mockResolvedValue({ id: "user-1", status: "ACTIVE", systemRole: "USER" });
 
     const { session, response } = await requireAdmin();
     expect(session).toBeNull();
     expect(response.status).toBe(403);
     expect(response.data.error.code).toBe("FORBIDDEN");
+  });
+
+  it("returns 403 when the token claims ADMIN but the DB role is USER", async () => {
+    getServerSession.mockResolvedValue({ user: { id: "user-1", systemRole: "ADMIN" } });
+    prisma.user.findUnique.mockResolvedValue({ id: "user-1", status: "ACTIVE", systemRole: "USER" });
+
+    const { session, response } = await requireAdmin();
+    expect(session).toBeNull();
+    expect(response.status).toBe(403);
   });
 
   it("returns 401 when not authenticated", async () => {

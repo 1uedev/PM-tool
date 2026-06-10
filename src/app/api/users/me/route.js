@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth.js";
+import { requireAuth } from "@/lib/middleware/auth-guard.js";
 import prisma from "@/lib/prisma.js";
 import { z } from "zod";
 import { errorResponse, successResponse } from "@/lib/errors.js";
@@ -10,8 +9,8 @@ const updateProfileSchema = z.object({
 
 // GET /api/users/me — current user profile
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return authErr;
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -24,8 +23,8 @@ export async function GET() {
 
 // PATCH /api/users/me — update display name
 export async function PATCH(request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return errorResponse("AUTH_ERROR", "Nicht authentifiziert", 401);
+  const { session, response: authErr } = await requireAuth();
+  if (authErr) return authErr;
 
   let body;
   try {

@@ -1,21 +1,12 @@
 import prisma from "@/lib/prisma.js";
-import { requireAuth } from "@/lib/middleware/auth-guard.js";
+import { requireAdmin } from "@/lib/middleware/auth-guard.js";
 import { getAiProvider } from "@/lib/ai/provider-factory.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 
-function requireAdmin(session) {
-  if (session.user.systemRole !== "ADMIN") {
-    return errorResponse("FORBIDDEN", "Nur Administratoren haben Zugriff", 403);
-  }
-  return null;
-}
-
 // POST /api/admin/ai/test — test a given provider config
 export async function POST(request) {
-  const { session, response: authErr } = await requireAuth();
+  const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
-  const adminErr = requireAdmin(session);
-  if (adminErr) return adminErr;
 
   const body = await request.json();
   const { provider, model, apiKey: bodyApiKey } = body;

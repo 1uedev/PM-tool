@@ -1447,3 +1447,26 @@ Field values are stored as Tiptap HTML; the generator strips tags and converts b
 **Tests:** 2 new/updated test files; total suite now 176 Vitest tests (15 files) — all passing.
 
 ---
+
+### Extension Step 35 — Security Hardening Round 1 ✅
+
+**Goal:** Fix the top three findings of the 2026-06-10 architecture/security review.
+
+**DB-fresh auth on every request (`lib/middleware/auth-guard.js`):**
+- `requireAuth()` now verifies `status` and `systemRole` against the DB (the per-request lookup already existed — it now selects three columns instead of one)
+- Deactivated (`INACTIVE`) users are locked out immediately instead of after JWT expiry
+- Admin demotion takes effect without re-login — the token role is overwritten with the DB role
+- JWT session lifetime reduced from the NextAuth default (30 days) to 24 hours
+
+**One `requireAdmin` instead of three:**
+- `lib/middleware/admin-guard.js` deleted; 6 inline per-route copies removed
+- All admin routes use the single auth-guard implementation (DB-fresh per the above)
+
+**`withProjectRoute` guard wrapper (`lib/middleware/with-project-route.js`):**
+- Single wrapper encapsulating auth → project membership/role → optional artifact tenant check
+- All 21 project-scoped API route files converted; three routes that had drifted to bare `getServerSession` (bulk create, import, export) regained the full check chain
+- Bug fix: un-archiving a project was impossible (the archived-project write block also blocked the unarchive call) — fixed via a new `allowArchived` option, also applied to project deletion
+
+**Tests:** suite extended to 179 Vitest tests — all passing. Remaining review findings are tracked in `TODO.md` (Security Review Findings).
+
+---
