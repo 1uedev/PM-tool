@@ -193,7 +193,7 @@ all AI endpoints into clean 503s; the UI keeps working without AI.
 | Explicit accept (single or all) | ✅ per-field accept, accept-all; per-proposal checkboxes on import |
 | Accepting creates a new version | ✅ accept → form state → save → `ArtifactVersion`; bulk create writes v1 |
 | Timeouts + provider errors don't block editing | ✅ configurable timeout, caught errors, error states in UI |
-| Every request logged in `AiSession` | ⚠️ **suggestions yes (incl. failures), document import not at all** — see finding E3 |
+| Every request logged in `AiSession` | ✅ suggestions (incl. failures) and document imports (one project-level row per run, incl. failures), both with token usage |
 | Cost control | ✅ rate limits (30 suggest/h, 10 imports/h per user), 250k char cap, max_tokens caps |
 
 ---
@@ -227,16 +227,15 @@ use with a JSON schema**, OpenAI supports `response_format: json_schema`. Using 
 eliminate the `{raw}` fallback and the trailing-comma repair entirely, and the schemas already
 exist (`buildTypeSchemas()`). Highest robustness win per line of code.
 
-**E3 — Document import is not logged.**
-`AiSession` only records suggestion calls; import calls (the most expensive ones — one per
-chunk) leave no trace. Blocker: `AiSession.artifactId` is required, and an import has no
-artifact. Make `artifactId` optional / add `projectId`, then log one row per chunk
-(or one per import with chunk count) including duration.
+**E3 — Document import is not logged.** ✅ **implemented (Step 40)**
+`AiSession.artifactId` is now optional and a `projectId` column exists; every import run logs
+one project-level row (file/chunk/limit summary as prompt, result counts as response, total
+duration) — failures included.
 
-**E4 — No token/cost tracking.**
-Both SDKs return token usage on every response; the app only stores `durationMs`. Persist
-`inputTokens`/`outputTokens` in `AiSession` and show an aggregate on `/admin/ai` — that turns
-the rate limits from guesses into informed settings.
+**E4 — No token/cost tracking.** ✅ **implemented (Step 40)**
+Both adapters return normalized `{ inputTokens, outputTokens }`; suggest and import sessions
+persist them, and `/admin/ai` shows a 30-day usage card (requests, tokens, Ø duration,
+per-feature breakdown).
 
 **E5 — Sequential chunk processing.**
 A 250k-char document means ~21 chunks processed one after another (potentially minutes).
@@ -275,7 +274,7 @@ Cross-chunk dedupe matches exact `(type, lowercased title)` — „Login-Feature
 | Step | Items | Effort | Payoff |
 |---|---|---|---|
 | 1 | ~~**E1** (volume/scope control) + **E6** (model constants)~~ ✅ done (Step 39) | small | direct user value, requested |
-| 2 | **E3 + E4** (import logging + token tracking) | small | visibility before tuning anything else |
+| 2 | ~~**E3 + E4** (import logging + token tracking)~~ ✅ done (Step 40) | small | visibility before tuning anything else |
 | 3 | **E2** (structured output) | medium | robustness, removes parser heuristics |
 | 4 | **E5** (parallel chunks + progress) | medium | UX on large documents |
 | 5 | **E7–E10** | small–medium | polish |

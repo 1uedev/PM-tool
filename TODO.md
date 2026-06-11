@@ -45,11 +45,11 @@ Import UI: „Max. Vorschläge" selector (10/25/50/unbegrenzt, Standard 25) + Ar
 ### ~~A2. Single source for default model names~~ ✅ DONE
 `AI_DEFAULT_MODELS` in `constants.js`; adapters + provider-factory use it (fixed `gpt-4o` drift).
 
-### A3. Log document-import calls in AiSession
-Imports (the most expensive AI calls) are currently not logged. Requires making `AiSession.artifactId` optional / adding `projectId`.
+### ~~A3. Log document-import calls in AiSession~~ ✅ DONE
+`artifactId` optional + `projectId`/`inputTokens`/`outputTokens` columns (migration `ai_session_import_logging`); every import run logs one project-level row incl. failures.
 
-### A4. Token/cost tracking
-Persist input/output token usage per AiSession; aggregate on `/admin/ai`.
+### ~~A4. Token/cost tracking~~ ✅ DONE
+Adapters return normalized token usage; suggest + import sessions persist it; `/admin/ai` shows a 30-day usage card (requests, tokens, Ø duration, per-feature table).
 
 ### A5. Structured output instead of prompt discipline
 Anthropic forced tool-use / OpenAI `response_format: json_schema` using the existing `buildTypeSchemas()` — removes the `{raw}` fallback and JSON-repair heuristics.

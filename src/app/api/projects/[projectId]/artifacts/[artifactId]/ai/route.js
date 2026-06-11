@@ -93,6 +93,7 @@ export const POST = withProjectRoute(
           prompt: "",
           response: error.message ?? "error",
           artifactId,
+          projectId: params.projectId,
           userId: session.user.id,
           durationMs: Date.now() - startMs,
         },
@@ -101,19 +102,23 @@ export const POST = withProjectRoute(
     }
 
     const durationMs = Date.now() - startMs;
+    const { usage, ...suggestions } = result;
 
     await prisma.aiSession.create({
       data: {
         provider: aiConfig.provider,
         mode: "suggest",
         prompt: `${artifact.type}/${artifactId}`,
-        response: JSON.stringify(result),
+        response: JSON.stringify(suggestions),
         artifactId,
+        projectId: params.projectId,
         userId: session.user.id,
         durationMs,
+        inputTokens: usage?.inputTokens ?? null,
+        outputTokens: usage?.outputTokens ?? null,
       },
     }).catch(() => {});
 
-    return successResponse({ ...result, durationMs });
+    return successResponse({ ...suggestions, durationMs });
   }
 );

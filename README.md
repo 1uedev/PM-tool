@@ -1553,3 +1553,17 @@ threaded through the API into the prompt and a confidence-sorted post-filter.
 **Tests:** 9 new extractor tests — suite at 218 Vitest tests, all passing.
 
 ---
+
+### Extension Step 40 — AI Observability: Import Logging + Token Tracking ✅
+
+**Goal:** Make every AI call visible and measurable (AI review findings E3 + E4).
+
+**What changed:**
+- **Schema:** `AiSession.artifactId` is optional now; new `projectId`, `inputTokens`, `outputTokens` columns (migration `ai_session_import_logging`)
+- **Import logging:** every document-import run writes one project-level `AiSession` row — file/chunk/limit summary, result counts, total duration, aggregated token usage; failures included
+- **Token tracking:** both provider adapters return normalized token usage; suggestion and import sessions persist it
+- **Admin UI:** `/admin/ai` shows a "Nutzung (letzte 30 Tage)" card — requests, input/output tokens, average duration, and a per-feature breakdown (Feld-Vorschläge / Dokument-Import)
+
+**Tests:** suite at 218 Vitest tests, all passing.
+
+---

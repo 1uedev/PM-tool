@@ -3,6 +3,14 @@ import { AiProvider } from "./provider.js";
 import { buildPrompt, parseSuggestions } from "./prompts/index.js";
 import { AI_DEFAULT_MODELS } from "@/lib/constants.js";
 
+// Normalize Anthropic usage reporting to { inputTokens, outputTokens }
+function extractUsage(response) {
+  return {
+    inputTokens: response?.usage?.input_tokens ?? null,
+    outputTokens: response?.usage?.output_tokens ?? null,
+  };
+}
+
 export class ClaudeAdapter extends AiProvider {
   constructor(config) {
     super();
@@ -25,7 +33,7 @@ export class ClaudeAdapter extends AiProvider {
     );
 
     const text = response.content[0]?.text ?? "";
-    return parseSuggestions(text, artifact.type);
+    return { ...parseSuggestions(text, artifact.type), usage: extractUsage(response) };
   }
 
   async extractFromDocument(prompt) {
@@ -37,7 +45,10 @@ export class ClaudeAdapter extends AiProvider {
       },
       { timeout: this.timeoutMs }
     );
-    return response.content[0]?.text ?? "";
+    return {
+      text: response.content[0]?.text ?? "",
+      usage: extractUsage(response),
+    };
   }
 
   async testConnection() {

@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma.js";
 import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { consumeRateLimit } from "@/lib/rate-limit.js";
@@ -70,7 +71,8 @@ async function extractText(buffer, mime) {
 
 // ─── Handler ───────────────────────────────────────────────────────────────
 
-export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { session }) => {
+export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { session, params }) => {
+  const { projectId } = params;
   const rate = consumeRateLimit(`ai-import:${session.user.id}`, IMPORT_RATE_LIMIT);
   if (!rate.ok) {
     return errorResponse(
@@ -218,6 +220,10 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
 
   // Chunk and analyze.
   const chunks = chunkText(combinedText, { chunkSize: DEFAULT_CHUNK_CHARS });
+  const startMs = Date.now();
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let sawTokenUsage = false;
   let merged;
   try {
     const provider = getAiProvider(aiConfig);
@@ -230,7 +236,14 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
         includeTypes,
         maxArtifacts,
       });
-      const responseText = await provider.extractFromDocument(prompt);
+      const { text: responseText, usage } = await provider.extractFromDocument(prompt);
+      if (typeof usage?.inputTokens === "number") {
+        totalInputTokens += usage.inputTokens;
+        sawTokenUsage = true;
+      }
+      if (typeof usage?.outputTokens === "number") {
+        totalOutputTokens += usage.outputTokens;
+      }
       const parsed = parseExtractionResponse(responseText, { includeTypes });
       chunkResults.push(parsed);
     }
@@ -239,8 +252,42 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
     merged = applyProposalLimit(mergeExtractionResults(chunkResults), maxArtifacts);
   } catch (err) {
     console.error("[import] AI extraction error:", err);
+    await prisma.aiSession.create({
+      data: {
+        provider: aiConfig.provider,
+        mode: "import",
+        prompt: `${files.length} Dateien / ${chunks.length} Chunks`,
+        response: err.message ?? "error",
+        projectId,
+        userId: session.user.id,
+        durationMs: Date.now() - startMs,
+        inputTokens: sawTokenUsage ? totalInputTokens : null,
+        outputTokens: sawTokenUsage ? totalOutputTokens : null,
+      },
+    }).catch(() => {});
     return errorResponse("SERVER_ERROR", "KI-Analyse fehlgeschlagen", 500);
   }
+
+  // Log the import run (project-level — no single artifact to attach to)
+  await prisma.aiSession.create({
+    data: {
+      provider: aiConfig.provider,
+      mode: "import",
+      prompt: `${files.length} Dateien / ${chunks.length} Chunks` +
+        (maxArtifacts ? ` / Limit ${maxArtifacts}` : "") +
+        (includeTypes ? ` / ${includeTypes.length} Typen` : ""),
+      response: JSON.stringify({
+        proposedArtifactCount: merged.artifacts.length,
+        relationCount: merged.relations.length,
+        warningCount: merged.warnings.length,
+      }),
+      projectId,
+      userId: session.user.id,
+      durationMs: Date.now() - startMs,
+      inputTokens: sawTokenUsage ? totalInputTokens : null,
+      outputTokens: sawTokenUsage ? totalOutputTokens : null,
+    },
+  }).catch(() => {});
 
   // Coverage stats — over the types in scope for this run.
   const extractableTypes = includeTypes ?? allExtractableTypes;

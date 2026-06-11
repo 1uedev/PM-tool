@@ -57,6 +57,7 @@ model Project {
 
   members     ProjectMember[]
   artifacts   Artifact[]
+  aiSessions  AiSession[]
 }
 
 model ProjectMember {
@@ -205,20 +206,26 @@ model AuditLog {
 // ─── AI Sessions ───
 
 model AiSession {
-  id         String   @id @default(cuid())
-  provider   String
-  mode       String
-  prompt     String
-  response   String
-  artifactId String
-  userId     String
-  durationMs Int?
-  createdAt  DateTime @default(now())
+  id           String   @id @default(cuid())
+  provider     String
+  mode         String   // "suggest" | "import"
+  prompt       String
+  response     String
+  artifactId   String?  // set for suggest calls; null for project-level imports
+  projectId    String?  // set for import calls
+  userId       String
+  durationMs   Int?
+  inputTokens  Int?     // token usage as reported by the provider
+  outputTokens Int?
+  createdAt    DateTime @default(now())
 
-  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id])
+  artifact Artifact? @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+  project  Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id])
 
   @@index([artifactId])
+  @@index([projectId])
+  @@index([createdAt])
 }
 
 // ─── Notifications ───

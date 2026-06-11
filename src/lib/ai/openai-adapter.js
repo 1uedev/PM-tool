@@ -3,6 +3,14 @@ import { AiProvider } from "./provider.js";
 import { buildPrompt, parseSuggestions } from "./prompts/index.js";
 import { AI_DEFAULT_MODELS } from "@/lib/constants.js";
 
+// Normalize OpenAI usage reporting to { inputTokens, outputTokens }
+function extractUsage(response) {
+  return {
+    inputTokens: response?.usage?.prompt_tokens ?? null,
+    outputTokens: response?.usage?.completion_tokens ?? null,
+  };
+}
+
 export class OpenAiAdapter extends AiProvider {
   constructor(config) {
     super();
@@ -25,7 +33,7 @@ export class OpenAiAdapter extends AiProvider {
     );
 
     const text = response.choices[0]?.message?.content ?? "";
-    return parseSuggestions(text, artifact.type);
+    return { ...parseSuggestions(text, artifact.type), usage: extractUsage(response) };
   }
 
   async extractFromDocument(prompt) {
@@ -37,7 +45,10 @@ export class OpenAiAdapter extends AiProvider {
       },
       { timeout: this.timeoutMs }
     );
-    return response.choices[0]?.message?.content ?? "";
+    return {
+      text: response.choices[0]?.message?.content ?? "",
+      usage: extractUsage(response),
+    };
   }
 
   async testConnection() {

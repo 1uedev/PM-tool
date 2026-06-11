@@ -800,12 +800,38 @@ limit ordering, relation pruning, stats/warnings). Suite now 218 Vitest tests �
 
 ---
 
+### Extension Step 40 — AI Observability: Import Logging (A3) + Token Tracking (A4) ✅
+
+**Goal:** Make every AI call visible and measurable (review findings E3/E4).
+
+**Schema (migration `ai_session_import_logging`):**
+- `AiSession.artifactId` now optional (imports have no single artifact)
+- New columns: `projectId` (optional FK → Project, cascade), `inputTokens`, `outputTokens`
+- New indexes on `projectId` and `createdAt`
+
+**A3 — Import logging (`import/route.js`):**
+- One project-level `AiSession` row per import run (mode `"import"`): prompt = file/chunk/limit
+  summary, response = result counts, total duration, aggregated token usage
+- Failures are logged too (error message + tokens consumed up to the failure)
+
+**A4 — Token tracking:**
+- Both adapters return normalized `{ inputTokens, outputTokens }` (`usage.input_tokens`/
+  `output_tokens` for Anthropic, `prompt_tokens`/`completion_tokens` for OpenAI)
+- Suggest route persists tokens per session (and now also sets `projectId`); the `usage` key is
+  stripped from the client response
+- `/admin/ai` shows a **„Nutzung (letzte 30 Tage)"** card: requests, input/output tokens
+  (k/M-formatted), Ø duration, and a per-feature breakdown table (Feld-Vorschläge / Dokument-Import)
+
+**Tests:** suite unchanged at 218 passing (no behavioral change to parsing/limits); build clean.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 39)
+- Build: last verified clean (Step 40)
 - Tests: 218 Vitest (19 files) + 17 Playwright E2E — all passing
-- Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
+- Migrations: 9 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`, `ai_session_import_logging`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
 - **All security-review findings (Rounds 1–3) resolved.** Note: self-registration is now OFF by default — set `REGISTRATION_ENABLED="true"` to re-enable.
