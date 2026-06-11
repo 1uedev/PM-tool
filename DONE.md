@@ -754,11 +754,27 @@ docker compose -f docker-compose.postgres.yml down
 
 ---
 
+### Extension Step 38 — AI Process Documentation & Evaluation ✅
+
+**Goal:** Document end-to-end how the software uses AI, evaluate the process, and produce a prioritized improvement backlog.
+
+**`docs/AI.md` (new):**
+- §1–§5: complete process documentation — provider abstraction (adapter pattern, config precedence DB → env, encrypted keys), field-suggestion flow (guard chain, context building from relations, 39 per-type prompt templates, defensive parsing, separate-panel UI, AiSession logging), document-import pipeline (validation/magic bytes → extraction → 250k cap → 12k chunking → per-chunk prompt with 16 anti-hallucination rules → sanitizing parser → cross-chunk merge/dedupe → review UI with confidence/evidence), configuration reference
+- §6: guardrail (F5) status table — all green except import logging
+- §7: evaluation — strengths (adapter pattern, single-source schemas, defensive parsing, evidence-based extraction, human-in-the-loop) and findings E1–E10 with an implementation-order table
+
+**Findings carried into TODO.md as backlog items A1–A7**, headlined by the requested
+**A1: user-controlled extraction volume & scope** (max-proposals selector + artifact-group filter on the import page, `maxArtifacts`/`includeTypes` through to the prompt + confidence-sorted post-filter).
+
+Notable defects found while documenting: import calls are not logged to `AiSession` (schema requires `artifactId`), and the OpenAI default model has drifted (`gpt-4o` in the adapter vs `gpt-5.4` in the factory).
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 37)
+- Build: last verified clean (Step 38)
 - Tests: 209 Vitest (19 files) + 17 Playwright E2E — all passing
 - Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved

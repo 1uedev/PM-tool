@@ -35,6 +35,37 @@ AES-256-GCM via `lib/crypto.js` (key derived from `CONFIG_SECRET`, falls back to
 
 ---
 
+## AI Process Improvements (review 2026-06-11, see docs/AI.md §7)
+
+Documented and evaluated in [docs/AI.md](./docs/AI.md). Prioritized backlog:
+
+### A1. User-controlled extraction volume & scope ⭐ (requested)
+Import UI: „Max. Vorschläge" selector (10/25/50/unbegrenzt) + artifact-group filter.
+API: `maxArtifacts` + `includeTypes[]` → prompt rule + confidence-sorted post-filter in the merge step.
+
+### A2. Single source for default model names
+`openai-adapter.js` defaults to `gpt-4o`, `provider-factory.js` to `gpt-5.4` — extract to a shared constant.
+
+### A3. Log document-import calls in AiSession
+Imports (the most expensive AI calls) are currently not logged. Requires making `AiSession.artifactId` optional / adding `projectId`.
+
+### A4. Token/cost tracking
+Persist input/output token usage per AiSession; aggregate on `/admin/ai`.
+
+### A5. Structured output instead of prompt discipline
+Anthropic forced tool-use / OpenAI `response_format: json_schema` using the existing `buildTypeSchemas()` — removes the `{raw}` fallback and JSON-repair heuristics.
+
+### A6. Parallel chunk processing + progress feedback
+Bounded concurrency (~3) for import chunks; progress bar instead of a bare spinner.
+
+### A7. Polish
+- Suggestion prompts: target-language parameter instead of hard-coded German
+- Cross-chunk relation pass (one extra call over merged titles)
+- Cap suggestion context (size + relation count)
+- Smarter cross-chunk dedupe than exact title match
+
+---
+
 ## High Priority
 
 ### ~~1. Test Suite~~ ✅ DONE

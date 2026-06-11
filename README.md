@@ -1523,3 +1523,19 @@ CONFIG_SECRET="..."           # dedicated secret for encrypting stored API keys 
 **Tests:** 12 new tests (crypto round-trip/wrong-key/legacy, email normalization) — suite at 209 Vitest tests, all passing.
 
 ---
+
+### Extension Step 38 — AI Process Documentation & Evaluation ✅
+
+**Goal:** Document exactly how PM Copilot uses AI, evaluate the process, and derive an improvement backlog.
+
+**New: [`docs/AI.md`](./docs/AI.md)** — the complete AI architecture reference:
+- Provider abstraction (Claude/OpenAI adapters, DB-first config with env fallback, encrypted API keys)
+- Field suggestions: guard chain, relation-based context, 39 per-type prompt templates, defensive JSON parsing, separate suggestion panel (guardrail F5), AiSession logging
+- Document import: file validation → text extraction → chunking (12k chars) → per-chunk extraction prompt with anti-hallucination rules → sanitizing parser → cross-chunk merge/dedupe → review UI with confidence badges and evidence quotes
+- Guardrail status table and a prioritized evaluation (findings E1–E10)
+
+**Improvement backlog added to `TODO.md` (A1–A7)**, headlined by the requested **user-controlled
+extraction volume**: a "max proposals" selector and artifact-group filter for the document import,
+threaded through the API into the prompt and a confidence-sorted post-filter.
+
+---
