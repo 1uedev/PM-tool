@@ -213,6 +213,59 @@ DOKUMENTINHALT:
 ${documentText}`;
 }
 
+/**
+ * JSON schema for the structured extraction result. Used for Anthropic
+ * forced tool use; field values are type-specific, so `fields` stays a
+ * generic string map — the sanitizing parser enforces the per-type keys.
+ */
+export const EXTRACTION_RESULT_SCHEMA = {
+  type: "object",
+  properties: {
+    artifacts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          clientId: { type: "string" },
+          type: { type: "string" },
+          title: { type: "string" },
+          fields: { type: "object", additionalProperties: { type: "string" } },
+          confidence: { type: "number" },
+          inferred: { type: "boolean" },
+          evidence: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                fileName: { type: "string" },
+                quote: { type: "string" },
+              },
+              required: ["quote"],
+            },
+          },
+          rationale: { type: "string" },
+        },
+        required: ["type", "title"],
+      },
+    },
+    relations: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          sourceClientId: { type: "string" },
+          targetClientId: { type: "string" },
+          type: { type: "string" },
+          confidence: { type: "number" },
+          rationale: { type: "string" },
+        },
+        required: ["sourceClientId", "targetClientId", "type"],
+      },
+    },
+  },
+  required: ["artifacts", "relations"],
+};
+
 // ─── Parsing ───────────────────────────────────────────────────────────────
 
 function safeString(v) {
@@ -500,8 +553,17 @@ export function chunkText(text, opts = {}) {
 // ─── Merging across chunks ─────────────────────────────────────────────────
 
 function dedupKey(a) {
-  // Same type + same case-folded title is treated as a duplicate.
-  return `${a.type}::${a.title.trim().toLowerCase()}`;
+  // Same type + same normalized title is treated as a duplicate. Titles are
+  // case-folded, stripped of punctuation, and token-sorted so wording
+  // variants like "Login-Feature" vs. "Feature: Login" collapse too.
+  const normalized = a.title
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .split(" ")
+    .filter(Boolean)
+    .sort()
+    .join(" ");
+  return `${a.type}::${normalized}`;
 }
 
 /**
@@ -657,3 +719,63 @@ export function applyProposalLimit(result, maxArtifacts) {
     },
   };
 }
+
+// ─── Cross-chunk relation pass ─────────────────────────────────────────────
+
+/**
+ * Builds a follow-up prompt that proposes relations across ALL merged
+ * artifacts. Chunked extraction can only link artifacts within one chunk
+ * (rule 13) — this second pass closes that gap cheaply by sending only the
+ * artifact titles, not the document.
+ */
+export function buildRelationPassPrompt(artifacts) {
+  const list = artifacts
+    .map((a) => `- ${a.clientId}: [${a.type}] ${a.title}`)
+    .join("\n");
+
+  return `Du bist ein Senior Product Manager. Die folgenden PM-Artefakte wurden aus einem Produktdokument extrahiert. Schlage plausible Relationen zwischen ihnen vor.
+
+Regeln:
+1. Relationstypen ausschließlich aus dieser Liste:
+${describeRelationTypes()}
+2. Verweise auf Artefakte ausschließlich über ihre clientId.
+3. Nur fachlich begründbare Relationen — keine erzwungenen Verknüpfungen.
+4. Confidence ist eine Zahl zwischen 0 und 1; gib eine kurze rationale an.
+5. Antworte ausschließlich mit gültigem JSON in dieser Form:
+{ "relations": [ { "sourceClientId": "a1", "targetClientId": "a2", "type": "DERIVES_FROM", "confidence": 0.8, "rationale": "..." } ] }
+6. Wenn keine sinnvollen Relationen existieren, gib { "relations": [] } zurück.
+
+Artefakte:
+${list}`;
+}
+
+/**
+ * Parses the relation-pass response. Reuses the relation sanitizer —
+ * invalid types or unknown clientIds are dropped with warnings. Never throws.
+ */
+export function parseRelationPassResponse(responseText, validClientIds) {
+  const warnings = [];
+  const block = extractJsonBlock(responseText);
+  const parsed = tryParseJson(block);
+  const raw = Array.isArray(parsed)
+    ? parsed
+    : Array.isArray(parsed?.relations)
+      ? parsed.relations
+      : [];
+
+  const relations = [];
+  for (const r of raw) {
+    const rel = sanitizeRelation(r, validClientIds, warnings);
+    if (rel) relations.push(rel);
+  }
+  return { relations, warnings };
+}
+
+/** JSON schema for the relation-pass result (Anthropic forced tool use). */
+export const RELATION_PASS_SCHEMA = {
+  type: "object",
+  properties: {
+    relations: EXTRACTION_RESULT_SCHEMA.properties.relations,
+  },
+  required: ["relations"],
+};

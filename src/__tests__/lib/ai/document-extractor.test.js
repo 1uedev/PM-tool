@@ -6,6 +6,8 @@ import {
   buildTypeSchemas,
   mergeExtractionResults,
   applyProposalLimit,
+  buildRelationPassPrompt,
+  parseRelationPassResponse,
   chunkText,
 } from "@/lib/ai/document-extractor.js";
 import { ARTIFACT_FIELD_DEFS } from "@/lib/artifactFields.js";
@@ -455,5 +457,65 @@ describe("applyProposalLimit", () => {
     expect(limited.stats.droppedRelationCount).toBe(1);
     expect(limited.stats.limitApplied).toBe(2);
     expect(limited.warnings.some((w) => w.includes("Limit von 2"))).toBe(true);
+  });
+});
+
+// ─── A7: dedupe normalization + cross-chunk relation pass ───────────────────
+
+describe("cross-chunk dedupe normalization", () => {
+  function chunkWith(title) {
+    return parseExtractionResponse(JSON.stringify({
+      artifacts: [{ clientId: "a1", type: "FEATURE", title, fields: {}, confidence: 0.8 }],
+      relations: [],
+    }));
+  }
+
+  it("collapses punctuation and word-order variants of the same title", () => {
+    const merged = mergeExtractionResults([
+      chunkWith("Login-Feature"),
+      chunkWith("Feature: Login"),
+    ]);
+    expect(merged.artifacts).toHaveLength(1);
+  });
+
+  it("keeps genuinely different titles", () => {
+    const merged = mergeExtractionResults([
+      chunkWith("Login-Feature"),
+      chunkWith("Logout-Feature"),
+    ]);
+    expect(merged.artifacts).toHaveLength(2);
+  });
+});
+
+describe("buildRelationPassPrompt / parseRelationPassResponse", () => {
+  const artifacts = [
+    { clientId: "a1", type: "PRODUCT_VISION", title: "Vision" },
+    { clientId: "a2", type: "FEATURE", title: "Suche" },
+  ];
+
+  it("lists every artifact with clientId and type", () => {
+    const prompt = buildRelationPassPrompt(artifacts);
+    expect(prompt).toContain("a1: [PRODUCT_VISION] Vision");
+    expect(prompt).toContain("a2: [FEATURE] Suche");
+    expect(prompt).toContain("JSON");
+  });
+
+  it("parses valid relations and drops unknown ids / invalid types", () => {
+    const validIds = new Set(["a1", "a2"]);
+    const { relations, warnings } = parseRelationPassResponse(JSON.stringify({
+      relations: [
+        { sourceClientId: "a2", targetClientId: "a1", type: "DERIVES_FROM", confidence: 0.8 },
+        { sourceClientId: "a2", targetClientId: "missing", type: "DERIVES_FROM" },
+        { sourceClientId: "a1", targetClientId: "a2", type: "NOT_A_TYPE" },
+      ],
+    }), validIds);
+    expect(relations).toHaveLength(1);
+    expect(relations[0].type).toBe("DERIVES_FROM");
+    expect(warnings.length).toBe(2);
+  });
+
+  it("never throws on malformed input", () => {
+    expect(parseRelationPassResponse("not json at all", new Set()).relations).toEqual([]);
+    expect(parseRelationPassResponse("", new Set()).relations).toEqual([]);
   });
 });

@@ -119,10 +119,39 @@ export function hasPromptBuilder(artifactType) {
   return Boolean(PROMPT_BUILDERS[artifactType]);
 }
 
-export function buildPrompt(artifactType, fields, context = "") {
+// Display names for the language override instruction. Fallback: the raw code.
+const LANGUAGE_NAMES = {
+  de: "Deutsch",
+  en: "Englisch",
+  fr: "Französisch",
+  es: "Spanisch",
+  it: "Italienisch",
+};
+
+export function buildPrompt(artifactType, fields, context = "", language = "de") {
   const builder = PROMPT_BUILDERS[artifactType];
   if (!builder) throw new Error(`No prompt builder for type: ${artifactType}`);
-  return builder(fields, context);
+  let prompt = builder(fields, context);
+
+  // The templates instruct German output; for any other target language we
+  // append an overriding instruction (the last explicit rule wins).
+  if (language && language !== "de") {
+    const name = LANGUAGE_NAMES[language] ?? language;
+    prompt += `\n\nWICHTIG: Verfasse alle Feldinhalte auf ${name} — diese Anweisung überschreibt die Sprachregel oben.`;
+  }
+  return prompt;
+}
+
+/**
+ * JSON schema for structured suggestion output: one string property per
+ * field key of the artifact type. Used for Anthropic forced tool use.
+ */
+export function buildSuggestionSchema(fieldKeys) {
+  return {
+    type: "object",
+    properties: Object.fromEntries(fieldKeys.map((key) => [key, { type: "string" }])),
+    additionalProperties: false,
+  };
 }
 
 // Parse the AI response into structured field suggestions.

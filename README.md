@@ -1567,3 +1567,18 @@ threaded through the API into the prompt and a confidence-sorted post-filter.
 **Tests:** suite at 218 Vitest tests, all passing.
 
 ---
+
+### Extension Step 41 — AI Robustness & Polish ✅
+
+**Goal:** Close the remaining AI-review backlog (A5–A7). All findings from the AI process review ([docs/AI.md](./docs/AI.md)) are now implemented.
+
+**What changed:**
+- **Structured output:** Claude uses forced tool-use with JSON schemas (per-type suggestion schema, extraction schema, relation-pass schema) — responses are guaranteed parseable; OpenAI uses JSON mode. The sanitizing parsers stay as the validation layer, free-text parsing remains as fallback.
+- **Parallel chunk analysis:** import chunks run 3-at-a-time (large documents ~3× faster); the analyze button shows an elapsed-seconds counter.
+- **Language-aware suggestions:** suggestion prompts follow the user's `preferredLanguage` instead of always answering in German.
+- **Cross-chunk relations:** multi-chunk imports run one cheap follow-up call over the merged artifact titles to propose relations across chunk boundaries (previously impossible).
+- **Tighter prompts & dedupe:** suggestion context capped (10 related artifacts × 300 chars); cross-chunk duplicate detection normalizes titles (case, punctuation, word order).
+
+**Tests:** 10 new tests — suite at 228 Vitest tests, all passing.
+
+---

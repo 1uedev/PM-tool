@@ -38,8 +38,13 @@ Every adapter implements three methods:
 | Method | Used by | max_tokens | Timeout |
 |---|---|---|---|
 | `suggest(artifact, context)` | field suggestions | from config (default 2048) | from config (default 30 s) |
-| `extractFromDocument(prompt)` | document import | 4096 (hard-coded) | from config |
+| `extractFromDocument(prompt, { schema })` | document import + relation pass | 4096 (hard-coded) | from config |
 | `testConnection()` | admin test button | 10 | 10 s (hard-coded) |
+
+Both adapters enforce **structured output** (Step 41): Claude via forced tool use with a JSON
+schema per call type, OpenAI via JSON mode. They return normalized token usage
+(`{ inputTokens, outputTokens }`) with every result, and `suggest` honors the artifact's
+target `language`.
 
 ### Configuration resolution (`getAiConfig()`)
 
@@ -221,11 +226,12 @@ API into the prompt (rule 17 + restricted type catalogue), the parser (type whit
 global confidence-sorted hard cap (`applyProposalLimit`) after the cross-chunk merge — relations
 whose endpoints were cut are pruned, and the drop count surfaces as a warning in the review UI.
 
-**E2 — Enforce structured output instead of prompt discipline.**
-Both adapters parse free text with regex/repair heuristics. Anthropic supports **forced tool
-use with a JSON schema**, OpenAI supports `response_format: json_schema`. Using them would
-eliminate the `{raw}` fallback and the trailing-comma repair entirely, and the schemas already
-exist (`buildTypeSchemas()`). Highest robustness win per line of code.
+**E2 — Enforce structured output instead of prompt discipline.** ✅ **implemented (Step 41)**
+Claude uses forced tool use (`tool_choice`) with JSON schemas (`buildSuggestionSchema` per
+artifact type, `EXTRACTION_RESULT_SCHEMA`, `RELATION_PASS_SCHEMA`); the tool input is the
+guaranteed-parseable result. OpenAI uses JSON mode (`response_format: json_object`). The
+sanitizing parsers stay in place as the validation layer; the free-text path remains as a
+defensive fallback.
 
 **E3 — Document import is not logged.** ✅ **implemented (Step 40)**
 `AiSession.artifactId` is now optional and a `projectId` column exists; every import run logs
@@ -237,37 +243,32 @@ Both adapters return normalized `{ inputTokens, outputTokens }`; suggest and imp
 persist them, and `/admin/ai` shows a 30-day usage card (requests, tokens, Ø duration,
 per-feature breakdown).
 
-**E5 — Sequential chunk processing.**
-A 250k-char document means ~21 chunks processed one after another (potentially minutes).
-Process chunks with bounded concurrency (e.g. 3 in parallel) — the merge step is already
-order-independent. Combine with progress feedback (the UI currently shows only a spinner;
-chunk count is already in the stats, so an SSE/polling progress bar is straightforward).
+**E5 — Sequential chunk processing.** ✅ **implemented (Step 41)**
+Chunks are analyzed with bounded concurrency (3 in parallel, order-preserving); the analyze
+button shows an elapsed-seconds counter plus a hint during analysis. True per-chunk SSE
+progress remains a possible future refinement.
 
 **E6 — Model-default drift.** ✅ **implemented (Step 39)**
 Default model names live in `AI_DEFAULT_MODELS` (`lib/constants.js`); both adapters and the
 provider factory consume it. (The admin UI's curated dropdown list is still its own list —
 acceptable, since it's a display concern.)
 
-**E7 — Suggestion prompts are hard-coded German.**
-The import follows the document's language, but all 39 suggestion templates instruct German
-output regardless of the artifact's language. Since next-intl and per-user language settings
-already exist, the templates should take a target language parameter.
+**E7 — Suggestion prompts are hard-coded German.** ✅ **implemented (Step 41)**
+`buildPrompt(type, fields, context, language)` appends an overriding output-language
+instruction when the user's `preferredLanguage` is not German; the suggest route passes the
+preference from the DB.
 
-**E8 — Cross-chunk relations are impossible.**
-Rule 13 restricts relations to artifacts of the same chunk, so a Vision in chunk 1 and a
-Feature in chunk 9 are never linked. A cheap second pass — one extra LLM call with only the
-merged titles+types, asking for plausible relations — would close this without re-sending
-the document.
+**E8 — Cross-chunk relations are impossible.** ✅ **implemented (Step 41)**
+Multi-chunk imports run one follow-up call (`buildRelationPassPrompt`) over the merged
+artifact titles+types only; results are sanitized against the known clientIds, deduped
+against existing relations, token-tracked, and non-fatal on failure.
 
-**E9 — Unbounded suggestion context.**
-The suggest route concatenates **all** related artifacts' full field values into the prompt.
-A heavily linked artifact produces a very large prompt. Cap the context (e.g. first 300 chars
-per related artifact, max 10 relations, prefer DERIVES_FROM/VALIDATES).
+**E9 — Unbounded suggestion context.** ✅ **implemented (Step 41)**
+Context capped at 10 related artifacts × 300 chars each.
 
-**E10 — Title-only deduplication.**
-Cross-chunk dedupe matches exact `(type, lowercased title)` — „Login-Feature" and
-„Feature: Login" both survive. Acceptable for now; a normalized-token similarity check
-(or including dedupe in the E8 second pass) would tighten it.
+**E10 — Title-only deduplication.** ✅ **implemented (Step 41)**
+The dedupe key now normalizes titles (case-fold, strip punctuation, token-sort), so wording
+variants like „Login-Feature" vs. „Feature: Login" collapse.
 
 ### Suggested implementation order
 
@@ -275,6 +276,8 @@ Cross-chunk dedupe matches exact `(type, lowercased title)` — „Login-Feature
 |---|---|---|---|
 | 1 | ~~**E1** (volume/scope control) + **E6** (model constants)~~ ✅ done (Step 39) | small | direct user value, requested |
 | 2 | ~~**E3 + E4** (import logging + token tracking)~~ ✅ done (Step 40) | small | visibility before tuning anything else |
-| 3 | **E2** (structured output) | medium | robustness, removes parser heuristics |
-| 4 | **E5** (parallel chunks + progress) | medium | UX on large documents |
-| 5 | **E7–E10** | small–medium | polish |
+| 3 | ~~**E2** (structured output)~~ ✅ done (Step 41) | medium | robustness, removes parser heuristics |
+| 4 | ~~**E5** (parallel chunks + progress)~~ ✅ done (Step 41) | medium | UX on large documents |
+| 5 | ~~**E7–E10**~~ ✅ done (Step 41) | small–medium | polish |
+
+**All findings from this review are implemented** (Steps 39–41).

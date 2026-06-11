@@ -826,12 +826,43 @@ limit ordering, relation pruning, stats/warnings). Suite now 218 Vitest tests �
 
 ---
 
+### Extension Step 41 — AI Robustness & Polish: Structured Output, Parallel Chunks, A7 Batch ✅
+
+**Goal:** Close the remaining AI-review backlog (A5–A7 / findings E2, E5, E7–E10). The AI review is now fully implemented.
+
+**A5 — Structured output (E2):**
+- Claude adapter: forced tool use (`tool_choice: { type: "tool" }`) with per-call JSON schemas —
+  `buildSuggestionSchema(fieldKeys)` for suggestions, `EXTRACTION_RESULT_SCHEMA` for imports,
+  `RELATION_PASS_SCHEMA` for the relation pass; the tool input is guaranteed-parseable JSON
+- OpenAI adapter: JSON mode (`response_format: { type: "json_object" }`)
+- Sanitizing parsers unchanged (still the validation layer); free-text parsing kept as fallback
+
+**A6 — Parallel chunks + progress (E5):**
+- `mapWithConcurrency` (3 parallel) for import chunks — large documents ~3× faster
+- Analyze button shows an elapsed-seconds counter; hint text explains multi-part analysis
+
+**A7 — Polish batch (E7–E10):**
+- **Language:** `buildPrompt(..., language)` appends an overriding output-language instruction;
+  the suggest route passes the user's `preferredLanguage` from the DB
+- **Cross-chunk relation pass:** for multi-chunk imports, one follow-up call over merged
+  titles+types proposes relations across chunk boundaries (sanitized, deduped, token-tracked,
+  non-fatal on failure with a user-visible warning)
+- **Context cap:** suggestion context limited to 10 related artifacts × 300 chars
+- **Smarter dedupe:** dedup key normalizes titles (case-fold, strip punctuation, token-sort) —
+  „Login-Feature" and „Feature: Login" now collapse
+
+**Tests:** 10 new tests (relation-pass prompt/parser, dedupe normalization, language override,
+suggestion schema). Suite now 228 Vitest tests — all passing.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 40)
-- Tests: 218 Vitest (19 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 41)
+- Tests: 228 Vitest (20 files) + 17 Playwright E2E — all passing
+- **AI review (docs/AI.md) fully implemented** — backlog A1–A7 / findings E1–E10 all closed
 - Migrations: 9 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`, `ai_session_import_logging`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
 - **All security-review findings (Rounds 1–3) resolved.** Note: self-registration is now OFF by default — set `REGISTRATION_ENABLED="true"` to re-enable.

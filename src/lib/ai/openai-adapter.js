@@ -21,12 +21,15 @@ export class OpenAiAdapter extends AiProvider {
   }
 
   async suggest(artifact, context = "") {
-    const prompt = buildPrompt(artifact.type, artifact.fields, context);
+    const prompt = buildPrompt(artifact.type, artifact.fields, context, artifact.language);
 
     const response = await this.client.chat.completions.create(
       {
         model: this.model,
         max_tokens: this.maxTokens,
+        // JSON mode guarantees syntactically valid JSON (the prompts already
+        // describe the exact shape); the sanitizing parsers enforce the rest.
+        response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
       },
       { timeout: this.timeoutMs }
@@ -41,6 +44,7 @@ export class OpenAiAdapter extends AiProvider {
       {
         model: this.model,
         max_tokens: 4096,
+        response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
       },
       { timeout: this.timeoutMs }

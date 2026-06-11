@@ -37,7 +37,7 @@ AES-256-GCM via `lib/crypto.js` (key derived from `CONFIG_SECRET`, falls back to
 
 ## AI Process Improvements (review 2026-06-11, see docs/AI.md §7)
 
-Documented and evaluated in [docs/AI.md](./docs/AI.md). Prioritized backlog:
+Documented and evaluated in [docs/AI.md](./docs/AI.md). **All backlog items (A1–A7) are done** — see DONE.md Steps 39–41.
 
 ### ~~A1. User-controlled extraction volume & scope~~ ✅ DONE
 Import UI: „Max. Vorschläge" selector (10/25/50/unbegrenzt, Standard 25) + Artefaktgruppen-Filter (Chips, Standard: alle). API: `maxArtifacts` + `includeTypes[]` (multipart) → Prompt-Regel 17 + Typ-Whitelist im Parser + confidence-sortierter Hard-Cap (`applyProposalLimit`) nach dem Merge.
@@ -51,17 +51,17 @@ Import UI: „Max. Vorschläge" selector (10/25/50/unbegrenzt, Standard 25) + Ar
 ### ~~A4. Token/cost tracking~~ ✅ DONE
 Adapters return normalized token usage; suggest + import sessions persist it; `/admin/ai` shows a 30-day usage card (requests, tokens, Ø duration, per-feature table).
 
-### A5. Structured output instead of prompt discipline
-Anthropic forced tool-use / OpenAI `response_format: json_schema` using the existing `buildTypeSchemas()` — removes the `{raw}` fallback and JSON-repair heuristics.
+### ~~A5. Structured output instead of prompt discipline~~ ✅ DONE
+Claude: forced tool-use with JSON schemas (`buildSuggestionSchema`, `EXTRACTION_RESULT_SCHEMA`, `RELATION_PASS_SCHEMA`). OpenAI: JSON mode (`response_format: json_object`). Sanitizing parsers remain as the validation layer; free-text fallback kept as defense.
 
-### A6. Parallel chunk processing + progress feedback
-Bounded concurrency (~3) for import chunks; progress bar instead of a bare spinner.
+### ~~A6. Parallel chunk processing + progress feedback~~ ✅ DONE
+Import chunks run with bounded concurrency (3). UI shows an elapsed-seconds counter + hint during analysis. (True per-chunk SSE progress remains a possible future refinement.)
 
-### A7. Polish
-- Suggestion prompts: target-language parameter instead of hard-coded German
-- Cross-chunk relation pass (one extra call over merged titles)
-- Cap suggestion context (size + relation count)
-- Smarter cross-chunk dedupe than exact title match
+### ~~A7. Polish~~ ✅ DONE
+- `buildPrompt(type, fields, context, language)` — suggestions follow the user's `preferredLanguage` (override instruction appended for non-German)
+- Cross-chunk relation pass: one follow-up call over merged titles when an import has >1 chunk (non-fatal, deduped, token-tracked)
+- Suggestion context capped: max 10 related artifacts, 300 chars each
+- Cross-chunk dedupe normalizes titles (case, punctuation, token order)
 
 ---
 

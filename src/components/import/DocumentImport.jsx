@@ -219,6 +219,7 @@ export default function DocumentImport({ projectId }) {
   const [fileWarning, setFileWarning] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState("");
+  const [elapsedSec, setElapsedSec] = useState(0);
 
   const [proposals, setProposals] = useState(null); // null = not yet analyzed
   const [relations, setRelations] = useState([]);
@@ -343,6 +344,9 @@ export default function DocumentImport({ projectId }) {
     setAnalyzing(true);
     setAnalyzeError("");
 
+    setElapsedSec(0);
+    const elapsedTimer = setInterval(() => setElapsedSec((s) => s + 1), 1000);
+
     try {
       const formData = new FormData();
       for (const file of files) formData.append("files", file);
@@ -394,6 +398,7 @@ export default function DocumentImport({ projectId }) {
     } catch {
       setAnalyzeError("Netzwerkfehler. Bitte versuche es erneut.");
     } finally {
+      clearInterval(elapsedTimer);
       setAnalyzing(false);
     }
   }
@@ -608,7 +613,7 @@ export default function DocumentImport({ projectId }) {
             {analyzing ? (
               <>
                 <Spinner className="h-4 w-4" />
-                KI analysiert…
+                KI analysiert… {elapsedSec > 0 ? `(${elapsedSec} s)` : ""}
               </>
             ) : (
               <>
@@ -617,6 +622,11 @@ export default function DocumentImport({ projectId }) {
               </>
             )}
           </Button>
+          {analyzing && (
+            <p className="text-center text-xs text-gray-400">
+              Große Dokumente werden in mehreren Teilen parallel analysiert — das kann bis zu einer Minute dauern.
+            </p>
+          )}
           {analyzeError && (
             <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />

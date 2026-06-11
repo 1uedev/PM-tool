@@ -8,6 +8,9 @@ import {
   parseExtractionResponse,
   mergeExtractionResults,
   applyProposalLimit,
+  buildRelationPassPrompt,
+  parseRelationPassResponse,
+  RELATION_PASS_SCHEMA,
   chunkText,
   getCanonicalExtractableTypes,
   getMissingSchemaTypes,
@@ -32,6 +35,26 @@ const SUPPORTED_TYPES = [
 
 // Hard ceiling for the user-provided proposal limit (0 = unlimited)
 const MAX_PROPOSAL_LIMIT = 200;
+
+// How many chunks are analyzed in parallel. Keeps large imports fast without
+// hammering the provider's rate limits.
+const CHUNK_CONCURRENCY = 3;
+
+// Run fn over items with bounded concurrency; results keep the input order.
+async function mapWithConcurrency(items, limit, fn) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < items.length) {
+      const i = nextIndex++;
+      results[i] = await fn(items[i], i);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => worker())
+  );
+  return results;
+}
 
 // ─── Text extraction ───────────────────────────────────────────────────────
 
@@ -227,16 +250,8 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
   let merged;
   try {
     const provider = getAiProvider(aiConfig);
-    const chunkResults = [];
-    for (let i = 0; i < chunks.length; i++) {
-      const prompt = buildExtractionPrompt({
-        documentText: chunks[i],
-        chunkIndex: i,
-        totalChunks: chunks.length,
-        includeTypes,
-        maxArtifacts,
-      });
-      const { text: responseText, usage } = await provider.extractFromDocument(prompt);
+
+    function trackUsage(usage) {
       if (typeof usage?.inputTokens === "number") {
         totalInputTokens += usage.inputTokens;
         sawTokenUsage = true;
@@ -244,12 +259,57 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
       if (typeof usage?.outputTokens === "number") {
         totalOutputTokens += usage.outputTokens;
       }
-      const parsed = parseExtractionResponse(responseText, { includeTypes });
-      chunkResults.push(parsed);
     }
+
+    // Chunks are independent — analyze them in parallel (bounded).
+    const chunkResults = await mapWithConcurrency(chunks, CHUNK_CONCURRENCY, async (chunk, i) => {
+      const prompt = buildExtractionPrompt({
+        documentText: chunk,
+        chunkIndex: i,
+        totalChunks: chunks.length,
+        includeTypes,
+        maxArtifacts,
+      });
+      const { text: responseText, usage } = await provider.extractFromDocument(prompt);
+      trackUsage(usage);
+      return parseExtractionResponse(responseText, { includeTypes });
+    });
+
     // The prompt rule is only a soft cap per chunk — enforce the hard cap
     // across all chunks after merging (highest confidence wins).
     merged = applyProposalLimit(mergeExtractionResults(chunkResults), maxArtifacts);
+
+    // Cross-chunk relation pass: per-chunk prompts can only link artifacts
+    // within their own chunk. One cheap follow-up call over the merged
+    // titles proposes relations across chunk boundaries. Non-fatal.
+    if (chunks.length > 1 && merged.artifacts.length >= 2) {
+      try {
+        const { text, usage } = await provider.extractFromDocument(
+          buildRelationPassPrompt(merged.artifacts),
+          { schema: RELATION_PASS_SCHEMA }
+        );
+        trackUsage(usage);
+        const validIds = new Set(merged.artifacts.map((a) => a.clientId));
+        const { relations: extraRelations, warnings: relationWarnings } =
+          parseRelationPassResponse(text, validIds);
+
+        const seen = new Set(
+          merged.relations.map((r) => `${r.sourceClientId}::${r.targetClientId}::${r.type}`)
+        );
+        for (const rel of extraRelations) {
+          const key = `${rel.sourceClientId}::${rel.targetClientId}::${rel.type}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          merged.relations.push(rel);
+        }
+        merged.warnings.push(...relationWarnings);
+      } catch (relErr) {
+        console.error("[import] cross-chunk relation pass failed:", relErr);
+        merged.warnings.push(
+          "Die chunk-übergreifende Relationsanalyse ist fehlgeschlagen — Relationen sind ggf. unvollständig."
+        );
+      }
+    }
   } catch (err) {
     console.error("[import] AI extraction error:", err);
     await prisma.aiSession.create({

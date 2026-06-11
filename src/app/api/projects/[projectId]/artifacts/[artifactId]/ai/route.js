@@ -59,15 +59,20 @@ export const POST = withProjectRoute(
       return errorResponse("NOT_FOUND", "Artefakt nicht gefunden", 404);
     }
 
-    // Build context string from related artifacts
+    // Build context string from related artifacts — capped so heavily linked
+    // artifacts cannot blow up the prompt (max 10 relations, 300 chars each)
+    const MAX_CONTEXT_ARTIFACTS = 10;
+    const MAX_CONTEXT_CHARS_PER_ARTIFACT = 300;
     const relatedArtifacts = [
       ...artifact.relationsFrom.map((r) => r.target),
       ...artifact.relationsTo.map((r) => r.source),
-    ];
+    ].slice(0, MAX_CONTEXT_ARTIFACTS);
     const context = relatedArtifacts.length > 0
       ? relatedArtifacts.map((a) => {
           const fields = typeof a.fields === "string" ? JSON.parse(a.fields) : a.fields;
-          return `[${a.type}] ${a.title}: ${Object.values(fields).filter(Boolean).join(" | ")}`;
+          const values = Object.values(fields).filter(Boolean).join(" | ")
+            .slice(0, MAX_CONTEXT_CHARS_PER_ARTIFACT);
+          return `[${a.type}] ${a.title}: ${values}`;
         }).join("\n")
       : "";
 
@@ -75,13 +80,20 @@ export const POST = withProjectRoute(
       ? JSON.parse(artifact.fields)
       : artifact.fields;
 
+    // Suggestions follow the user's language preference (templates default to German)
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { preferredLanguage: true },
+    });
+    const language = user?.preferredLanguage || "de";
+
     const provider = getAiProvider(aiConfig);
     const startMs = Date.now();
     let result;
 
     try {
       result = await provider.suggest(
-        { type: artifact.type, fields: parsedFields },
+        { type: artifact.type, fields: parsedFields, language },
         context
       );
     } catch (error) {
