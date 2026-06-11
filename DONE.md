@@ -770,12 +770,42 @@ Notable defects found while documenting: import calls are not logged to `AiSessi
 
 ---
 
+### Extension Step 39 — AI Import: User-Controlled Volume & Scope (A1) + Model Constants (A2) ✅
+
+**Goal:** Implement backlog items A1 and A2 from the AI process review (docs/AI.md §7, findings E1/E6).
+
+**A1 — Extraction volume & scope control:**
+- **UI (`DocumentImport.jsx`):** new options card between upload and auto-create —
+  „Max. Vorschläge" select (10 / 25 / 50 / Unbegrenzt, default **25**) and toggle chips per
+  artifact group (default: all; excluding all groups disables the analyze button)
+- **API (`import/route.js`):** accepts `maxArtifacts` (0–200, 0 = unlimited) and repeated
+  `includeTypes` form fields; both validated server-side (unknown types → 400, full selection
+  collapses to "no restriction"); options echoed back in `stats`
+- **Prompt (`document-extractor.js`):** `buildExtractionPrompt` takes `includeTypes`
+  (restricts the type catalogue via `describeGroups`) and `maxArtifacts` (new rule 17:
+  „Schlage höchstens N Artefakte vor — priorisiere die mit der stärksten Evidenz")
+- **Parser:** `parseExtractionResponse(text, { includeTypes })` /
+  `buildTypeSchemas(includeTypes)` drop out-of-scope proposals with a warning
+- **Hard cap:** new `applyProposalLimit(result, max)` runs AFTER `mergeExtractionResults` —
+  per-chunk prompts only know the soft cap, so the authoritative cut is global: sort by
+  confidence (stable, document order as tiebreaker), slice to N, drop relations whose
+  endpoints were cut, append a user-visible warning with the drop count
+
+**A2 — Model default constants:**
+- `AI_DEFAULT_MODELS` (`claude-sonnet-4-6` / `gpt-5.4`) in `constants.js`; both adapters and
+  `provider-factory` consume it — fixes the stale `gpt-4o` default in the OpenAI adapter
+
+**Tests:** 9 new tests (schema whitelist, prompt rule on/off, type scoping in prompt+parser,
+limit ordering, relation pruning, stats/warnings). Suite now 218 Vitest tests — all passing.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 38)
-- Tests: 209 Vitest (19 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 39)
+- Tests: 218 Vitest (19 files) + 17 Playwright E2E — all passing
 - Migrations: 8 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
 - **All security-review findings (Rounds 1–3) resolved.** Note: self-registration is now OFF by default — set `REGISTRATION_ENABLED="true"` to re-enable.

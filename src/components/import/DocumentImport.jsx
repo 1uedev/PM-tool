@@ -231,6 +231,20 @@ export default function DocumentImport({ projectId }) {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
+  // Extraction options: proposal cap ("0" = unlimited) and group scope
+  // (groups NOT in this set are excluded; empty set = everything).
+  const [maxProposals, setMaxProposals] = useState("25");
+  const [excludedGroups, setExcludedGroups] = useState(new Set());
+
+  function toggleGroup(groupKey) {
+    setExcludedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupKey)) next.delete(groupKey);
+      else next.add(groupKey);
+      return next;
+    });
+  }
+
   // ── File handling ──────────────────────────────────────────────────────────
 
   function addFiles(newFiles) {
@@ -332,6 +346,14 @@ export default function DocumentImport({ projectId }) {
     try {
       const formData = new FormData();
       for (const file of files) formData.append("files", file);
+
+      if (maxProposals !== "0") formData.append("maxArtifacts", maxProposals);
+      if (excludedGroups.size > 0) {
+        const includeTypes = ARTIFACT_GROUPS
+          .filter((g) => !excludedGroups.has(g.key))
+          .flatMap((g) => g.types);
+        for (const type of includeTypes) formData.append("includeTypes", type);
+      }
 
       const res = await fetch(`/api/projects/${projectId}/import`, {
         method: "POST",
@@ -497,6 +519,63 @@ export default function DocumentImport({ projectId }) {
         )}
       </section>
 
+      {/* Extraction options: proposal cap + group scope */}
+      {files.length > 0 && !proposals && (
+        <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-3">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="max-proposals" className="text-sm text-gray-700">
+              <span className="font-medium text-gray-900">Max. Vorschläge</span>
+              <span className="block text-xs text-gray-500">
+                Begrenzt die Anzahl der KI-Vorschläge — bei Überschreitung werden die mit der höchsten Confidence behalten.
+              </span>
+            </label>
+            <select
+              id="max-proposals"
+              value={maxProposals}
+              onChange={(e) => setMaxProposals(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-400 focus:outline-none"
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="0">Unbegrenzt</option>
+            </select>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-gray-900">Artefaktgruppen</p>
+            <p className="text-xs text-gray-500">
+              Nur ausgewählte Gruppen werden extrahiert. Standard: alle.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Artefaktgruppen für die Extraktion">
+              {ARTIFACT_GROUPS.map((group) => {
+                const active = !excludedGroups.has(group.key);
+                return (
+                  <button
+                    key={group.key}
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    aria-pressed={active}
+                    className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      active
+                        ? "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        : "border-gray-200 bg-gray-50 text-gray-400 line-through hover:bg-gray-100"
+                    }`}
+                  >
+                    {group.label}
+                  </button>
+                );
+              })}
+            </div>
+            {excludedGroups.size === ARTIFACT_GROUPS.length && (
+              <p className="mt-2 text-xs text-red-600">
+                Mindestens eine Gruppe muss ausgewählt sein.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Auto-create opt-in */}
       {files.length > 0 && !proposals && (
         <label className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-700 cursor-pointer">
@@ -522,7 +601,7 @@ export default function DocumentImport({ projectId }) {
         <div className="flex flex-col gap-2">
           <Button
             onClick={handleAnalyze}
-            disabled={analyzing || creating}
+            disabled={analyzing || creating || excludedGroups.size === ARTIFACT_GROUPS.length}
             variant="primary"
             className="w-full justify-center"
           >

@@ -214,19 +214,12 @@ all AI endpoints into clean 503s; the UI keeps working without AI.
 
 ### Findings & improvement roadmap (prioritized)
 
-**E1 — User-controlled extraction volume and scope (requested).** ⭐
-The import currently extracts „as much as the model finds" — the user has no way to say
-„give me at most 10 proposals" or „only User Stories and Use Cases". Design:
-- UI (step 1, next to auto-create): a **„Max. Vorschläge" selector** (10 / 25 / 50 / unbegrenzt)
-  and a **type-group filter** (checkboxes per artifact group, default: all).
-- API: `maxArtifacts` + `includeTypes[]` fields in the import request.
-- Prompt: pass the cap into `buildExtractionPrompt` as an additional rule
-  („Schlage höchstens N Artefakte vor — priorisiere die mit der stärksten Evidenz")
-  and restrict `describeGroups()` to the selected types.
-- Server: post-filter in the merge step — sort by confidence, cut to N — so the cap holds
-  even across chunks (per-chunk prompts can't see the global total).
-This is cheap to build (one prompt rule, one sort+slice, two UI controls) and directly
-addresses runaway proposal lists on large documents.
+**E1 — User-controlled extraction volume and scope (requested).** ⭐ ✅ **implemented (Step 39)**
+The import page now has a **„Max. Vorschläge" selector** (10 / 25 / 50 / unbegrenzt, default 25)
+and **per-group toggle chips** (default: all). `maxArtifacts` + `includeTypes[]` go through the
+API into the prompt (rule 17 + restricted type catalogue), the parser (type whitelist), and a
+global confidence-sorted hard cap (`applyProposalLimit`) after the cross-chunk merge — relations
+whose endpoints were cut are pruned, and the drop count surfaces as a warning in the review UI.
 
 **E2 — Enforce structured output instead of prompt discipline.**
 Both adapters parse free text with regex/repair heuristics. Anthropic supports **forced tool
@@ -251,10 +244,10 @@ Process chunks with bounded concurrency (e.g. 3 in parallel) — the merge step 
 order-independent. Combine with progress feedback (the UI currently shows only a spinner;
 chunk count is already in the stats, so an SSE/polling progress bar is straightforward).
 
-**E6 — Model-default drift.**
-`openai-adapter.js` defaults to `gpt-4o` while `provider-factory.js` defaults to `gpt-5.4`
-(`claude-sonnet-4-6` is consistent). Move default model names into one constant so the two
-can't diverge; the admin UI's model dropdown should source the same list.
+**E6 — Model-default drift.** ✅ **implemented (Step 39)**
+Default model names live in `AI_DEFAULT_MODELS` (`lib/constants.js`); both adapters and the
+provider factory consume it. (The admin UI's curated dropdown list is still its own list —
+acceptable, since it's a display concern.)
 
 **E7 — Suggestion prompts are hard-coded German.**
 The import follows the document's language, but all 39 suggestion templates instruct German
@@ -281,7 +274,7 @@ Cross-chunk dedupe matches exact `(type, lowercased title)` — „Login-Feature
 
 | Step | Items | Effort | Payoff |
 |---|---|---|---|
-| 1 | **E1** (volume/scope control) + **E6** (model constants) | small | direct user value, requested |
+| 1 | ~~**E1** (volume/scope control) + **E6** (model constants)~~ ✅ done (Step 39) | small | direct user value, requested |
 | 2 | **E3 + E4** (import logging + token tracking) | small | visibility before tuning anything else |
 | 3 | **E2** (structured output) | medium | robustness, removes parser heuristics |
 | 4 | **E5** (parallel chunks + progress) | medium | UX on large documents |

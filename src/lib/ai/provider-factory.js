@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma.js";
 import { decryptSecret } from "@/lib/crypto.js";
+import { AI_DEFAULT_MODELS } from "@/lib/constants.js";
 import { ClaudeAdapter } from "./claude-adapter.js";
 import { OpenAiAdapter } from "./openai-adapter.js";
 
@@ -34,7 +35,7 @@ export async function getAiConfig() {
 
   return {
     provider,
-    model: provider === "claude" ? "claude-sonnet-4-6" : provider === "openai" ? "gpt-5.4" : "",
+    model: AI_DEFAULT_MODELS[provider] ?? "",
     apiKey,
     timeoutMs: parseInt(process.env.AI_TIMEOUT_MS ?? "30000", 10),
     maxTokens: parseInt(process.env.AI_MAX_TOKENS ?? "2048", 10),

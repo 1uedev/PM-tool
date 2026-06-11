@@ -5,6 +5,7 @@ import {
   getCanonicalExtractableTypes,
   buildTypeSchemas,
   mergeExtractionResults,
+  applyProposalLimit,
   chunkText,
 } from "@/lib/ai/document-extractor.js";
 import { ARTIFACT_FIELD_DEFS } from "@/lib/artifactFields.js";
@@ -355,5 +356,104 @@ describe("mergeExtractionResults", () => {
 \`\`\``);
     const merged = mergeExtractionResults([make(), make()]);
     expect(merged.relations).toHaveLength(1);
+  });
+});
+
+// ─── A1: extraction scope + proposal limit ──────────────────────────────────
+
+describe("buildTypeSchemas with includeTypes", () => {
+  it("restricts the schema map to the whitelist", () => {
+    const schemas = buildTypeSchemas(["USER_STORY", "FEATURE"]);
+    expect(Object.keys(schemas).sort()).toEqual(["FEATURE", "USER_STORY"]);
+  });
+
+  it("returns all types for null or empty whitelist", () => {
+    expect(Object.keys(buildTypeSchemas(null)).length).toBe(
+      getCanonicalExtractableTypes().length
+    );
+    expect(Object.keys(buildTypeSchemas([])).length).toBe(
+      getCanonicalExtractableTypes().length
+    );
+  });
+});
+
+describe("buildExtractionPrompt with options", () => {
+  it("includes a max-artifacts rule when maxArtifacts > 0", () => {
+    const prompt = buildExtractionPrompt({ documentText: "x", maxArtifacts: 25 });
+    expect(prompt).toContain("höchstens 25 Artefakte");
+  });
+
+  it("omits the max-artifacts rule when unlimited", () => {
+    const prompt = buildExtractionPrompt({ documentText: "x", maxArtifacts: 0 });
+    expect(prompt).not.toContain("höchstens");
+  });
+
+  it("restricts the listed types to includeTypes", () => {
+    const prompt = buildExtractionPrompt({
+      documentText: "x",
+      includeTypes: ["USER_STORY"],
+    });
+    expect(prompt).toContain("USER_STORY —");
+    expect(prompt).not.toContain("PRODUCT_VISION —");
+  });
+});
+
+describe("parseExtractionResponse with includeTypes", () => {
+  it("drops proposals outside the whitelist with a warning", () => {
+    const res = parseExtractionResponse(
+      JSON.stringify({
+        artifacts: [
+          { clientId: "a1", type: "USER_STORY", title: "S", fields: {} },
+          { clientId: "a2", type: "PRODUCT_VISION", title: "V", fields: {} },
+        ],
+        relations: [],
+      }),
+      { includeTypes: ["USER_STORY"] }
+    );
+    expect(res.artifacts).toHaveLength(1);
+    expect(res.artifacts[0].type).toBe("USER_STORY");
+    expect(res.warnings.some((w) => w.includes("PRODUCT_VISION"))).toBe(true);
+  });
+});
+
+describe("applyProposalLimit", () => {
+  function makeResult(confidences) {
+    return {
+      artifacts: confidences.map((c, i) => ({
+        clientId: `a${i + 1}`,
+        type: "FEATURE",
+        title: `F${i + 1}`,
+        fields: {},
+        confidence: c,
+      })),
+      relations: [
+        { sourceClientId: "a1", targetClientId: "a2", type: "RELATES_TO" },
+        { sourceClientId: "a1", targetClientId: "a3", type: "RELATES_TO" },
+      ],
+      warnings: [],
+      stats: { rawArtifactCount: confidences.length, droppedArtifactCount: 0, droppedRelationCount: 0 },
+    };
+  }
+
+  it("returns the result unchanged when under the limit or unlimited", () => {
+    const r = makeResult([0.9, 0.8]);
+    expect(applyProposalLimit(r, 0)).toBe(r);
+    expect(applyProposalLimit(r, 5)).toBe(r);
+  });
+
+  it("keeps the highest-confidence proposals in original order", () => {
+    const limited = applyProposalLimit(makeResult([0.5, 0.9, 0.7, 0.2]), 2);
+    expect(limited.artifacts.map((a) => a.clientId)).toEqual(["a2", "a3"]);
+  });
+
+  it("drops relations whose endpoints did not survive", () => {
+    // keep a1 (0.9) and a2 (0.8); a3 (0.1) is cut → relation a1→a3 dropped
+    const limited = applyProposalLimit(makeResult([0.9, 0.8, 0.1]), 2);
+    expect(limited.relations).toEqual([
+      { sourceClientId: "a1", targetClientId: "a2", type: "RELATES_TO" },
+    ]);
+    expect(limited.stats.droppedRelationCount).toBe(1);
+    expect(limited.stats.limitApplied).toBe(2);
+    expect(limited.warnings.some((w) => w.includes("Limit von 2"))).toBe(true);
   });
 });

@@ -392,6 +392,15 @@ export const RELATION_SUGGESTIONS = {
   },
 };
 
+// ─── AI ───
+
+// Single source of truth for default model names — adapters and the
+// provider factory must not hard-code their own (they drift apart).
+export const AI_DEFAULT_MODELS = {
+  claude: "claude-sonnet-4-6",
+  openai: "gpt-5.4",
+};
+
 // ─── Marketing / Public Site ───
 
 export const SITE = {

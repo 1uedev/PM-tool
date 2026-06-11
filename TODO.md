@@ -39,12 +39,11 @@ AES-256-GCM via `lib/crypto.js` (key derived from `CONFIG_SECRET`, falls back to
 
 Documented and evaluated in [docs/AI.md](./docs/AI.md). Prioritized backlog:
 
-### A1. User-controlled extraction volume & scope ⭐ (requested)
-Import UI: „Max. Vorschläge" selector (10/25/50/unbegrenzt) + artifact-group filter.
-API: `maxArtifacts` + `includeTypes[]` → prompt rule + confidence-sorted post-filter in the merge step.
+### ~~A1. User-controlled extraction volume & scope~~ ✅ DONE
+Import UI: „Max. Vorschläge" selector (10/25/50/unbegrenzt, Standard 25) + Artefaktgruppen-Filter (Chips, Standard: alle). API: `maxArtifacts` + `includeTypes[]` (multipart) → Prompt-Regel 17 + Typ-Whitelist im Parser + confidence-sortierter Hard-Cap (`applyProposalLimit`) nach dem Merge.
 
-### A2. Single source for default model names
-`openai-adapter.js` defaults to `gpt-4o`, `provider-factory.js` to `gpt-5.4` — extract to a shared constant.
+### ~~A2. Single source for default model names~~ ✅ DONE
+`AI_DEFAULT_MODELS` in `constants.js`; adapters + provider-factory use it (fixed `gpt-4o` drift).
 
 ### A3. Log document-import calls in AiSession
 Imports (the most expensive AI calls) are currently not logged. Requires making `AiSession.artifactId` optional / adding `projectId`.

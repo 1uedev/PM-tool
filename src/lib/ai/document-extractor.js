@@ -65,11 +65,17 @@ export function getMissingSchemaTypes() {
  * Builds a per-type schema usable by both the prompt and the parser:
  *   { TYPE: { fieldKeys: [...], fields: [{ key, label, placeholder }], label } }
  *
+ * @param {string[]|null} [includeTypes] - optional whitelist; restricts the
+ *   schema map (and therefore prompt + parser) to these types.
  * @returns {Object<string, { fieldKeys: string[], fields: Array<{key:string,label:string,placeholder?:string}>, label: string }>}
  */
-export function buildTypeSchemas() {
+export function buildTypeSchemas(includeTypes = null) {
+  const allowed = Array.isArray(includeTypes) && includeTypes.length > 0
+    ? new Set(includeTypes)
+    : null;
   const out = {};
   for (const type of getCanonicalExtractableTypes()) {
+    if (allowed && !allowed.has(type)) continue;
     const defs = ARTIFACT_FIELD_DEFS[type];
     out[type] = {
       label: ARTIFACT_TYPE_LABELS[type] ?? type,
@@ -86,10 +92,15 @@ export function buildTypeSchemas() {
 
 // ─── Prompt building ───────────────────────────────────────────────────────
 
-function describeGroups() {
+function describeGroups(allowedTypes = null) {
+  const allowed = Array.isArray(allowedTypes) && allowedTypes.length > 0
+    ? new Set(allowedTypes)
+    : null;
   const lines = [];
   for (const group of ARTIFACT_GROUPS) {
-    const usable = group.types.filter((t) => Array.isArray(ARTIFACT_FIELD_DEFS[t]));
+    const usable = group.types.filter(
+      (t) => Array.isArray(ARTIFACT_FIELD_DEFS[t]) && (!allowed || allowed.has(t))
+    );
     if (usable.length === 0) continue;
     lines.push(`### ${group.label}`);
     for (const type of usable) {
@@ -112,7 +123,10 @@ function describeRelationTypes() {
 /**
  * Builds the extraction prompt.
  *
- * @param {string | { documentText: string, chunkIndex?: number, totalChunks?: number }} input
+ * @param {string | { documentText: string, chunkIndex?: number, totalChunks?: number, includeTypes?: string[]|null, maxArtifacts?: number }} input
+ *   - includeTypes: restrict extraction to these artifact types (null/empty = all)
+ *   - maxArtifacts: soft cap announced to the model (> 0); the hard cap is
+ *     enforced after merging via applyProposalLimit()
  * @returns {string}
  */
 export function buildExtractionPrompt(input) {
@@ -120,10 +134,17 @@ export function buildExtractionPrompt(input) {
     typeof input === "string" ? input : input?.documentText ?? "";
   const chunkIndex = typeof input === "object" ? input?.chunkIndex : undefined;
   const totalChunks = typeof input === "object" ? input?.totalChunks : undefined;
+  const includeTypes = typeof input === "object" ? input?.includeTypes ?? null : null;
+  const maxArtifacts = typeof input === "object" ? input?.maxArtifacts : undefined;
 
   const chunkNote =
     typeof chunkIndex === "number" && typeof totalChunks === "number" && totalChunks > 1
       ? `\nDIES IST CHUNK ${chunkIndex + 1} VON ${totalChunks}. Konzentriere dich nur auf Inhalte in diesem Chunk. Erfinde keine Artefakte aus anderen Chunks.\n`
+      : "";
+
+  const limitRule =
+    typeof maxArtifacts === "number" && maxArtifacts > 0
+      ? `\n17. Schlage höchstens ${maxArtifacts} Artefakte vor. Priorisiere die mit der stärksten Evidenz und der höchsten Relevanz für das Produkt.`
       : "";
 
   return `Du bist ein Senior Product Manager und Requirements Analyst.
@@ -148,10 +169,10 @@ Regeln:
 14. Relationstypen dürfen ausschließlich aus dieser Liste stammen:
 ${describeRelationTypes()}
 15. Halluziniere nicht. Bei Unsicherheit lieber weniger Artefakte erzeugen.
-16. Gib ausschließlich gültiges JSON zurück — kein Fließtext, kein Kommentar.
+16. Gib ausschließlich gültiges JSON zurück — kein Fließtext, kein Kommentar.${limitRule}
 ${chunkNote}
 Unterstützte Artefakttypen (gruppiert):
-${describeGroups()}
+${describeGroups(includeTypes)}
 
 Antwortformat (striktes JSON-Objekt):
 \`\`\`json
@@ -267,7 +288,8 @@ function sanitizeArtifact(raw, schemas, warnings) {
   const type = safeString(raw.type).trim();
   const schema = schemas[type];
   if (!schema) {
-    if (type) warnings.push(`Unbekannter Artefakttyp '${type}' wurde verworfen`);
+    // Unknown type OR a type excluded by the user's scope filter
+    if (type) warnings.push(`Artefakttyp '${type}' wird nicht unterstützt oder wurde ausgeschlossen — Vorschlag verworfen`);
     return null;
   }
 
@@ -357,11 +379,13 @@ function sanitizeRelation(raw, validClientIds, warnings) {
  * Never throws.
  *
  * @param {string} responseText
+ * @param {{ includeTypes?: string[]|null }} [options] - restrict accepted
+ *   artifact types; proposals outside the whitelist are dropped with a warning.
  * @returns {{ artifacts: Array, relations: Array, warnings: string[], stats: object }}
  */
-export function parseExtractionResponse(responseText) {
+export function parseExtractionResponse(responseText, options = {}) {
   const warnings = [];
-  const schemas = buildTypeSchemas();
+  const schemas = buildTypeSchemas(options.includeTypes ?? null);
   const empty = {
     artifacts: [],
     relations: [],
@@ -577,6 +601,59 @@ export function mergeExtractionResults(results) {
       rawArtifactCount: allArtifacts.length,
       droppedArtifactCount: allArtifacts.length - finalArtifacts.length,
       droppedRelationCount,
+    },
+  };
+}
+
+// ─── Proposal limit ────────────────────────────────────────────────────────
+
+/**
+ * Enforces a hard cap on the number of proposed artifacts AFTER merging.
+ * The per-chunk prompt only announces the cap as a soft rule — chunks cannot
+ * see the global total, so the authoritative cut happens here.
+ *
+ * Keeps the highest-confidence proposals (stable for equal confidence, so the
+ * document order is preserved as a tiebreaker) and drops relations whose
+ * endpoints did not survive.
+ *
+ * @param {{ artifacts: Array, relations: Array, warnings: string[], stats: object }} result
+ * @param {number} maxArtifacts - 0 or negative = unlimited
+ * @returns {{ artifacts: Array, relations: Array, warnings: string[], stats: object }}
+ */
+export function applyProposalLimit(result, maxArtifacts) {
+  if (!result || typeof maxArtifacts !== "number" || maxArtifacts <= 0) return result;
+  if (result.artifacts.length <= maxArtifacts) return result;
+
+  const ranked = result.artifacts
+    .map((a, idx) => ({ a, idx }))
+    .sort((x, y) => (y.a.confidence - x.a.confidence) || (x.idx - y.idx));
+
+  const kept = ranked
+    .slice(0, maxArtifacts)
+    .sort((x, y) => x.idx - y.idx) // restore original order for the review UI
+    .map((entry) => entry.a);
+
+  const keptIds = new Set(kept.map((a) => a.clientId));
+  const relations = result.relations.filter(
+    (r) => keptIds.has(r.sourceClientId) && keptIds.has(r.targetClientId)
+  );
+
+  const droppedCount = result.artifacts.length - kept.length;
+  const droppedRelationCount = result.relations.length - relations.length;
+
+  return {
+    artifacts: kept,
+    relations,
+    warnings: [
+      ...result.warnings,
+      `Limit von ${maxArtifacts} Vorschlägen angewendet — ${droppedCount} Vorschläge mit niedrigerer Confidence wurden verworfen` +
+        (droppedRelationCount > 0 ? ` (inkl. ${droppedRelationCount} Relationen)` : ""),
+    ],
+    stats: {
+      ...result.stats,
+      droppedArtifactCount: (result.stats?.droppedArtifactCount ?? 0) + droppedCount,
+      droppedRelationCount: (result.stats?.droppedRelationCount ?? 0) + droppedRelationCount,
+      limitApplied: maxArtifacts,
     },
   };
 }

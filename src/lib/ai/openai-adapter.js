@@ -1,12 +1,13 @@
 import OpenAI from "openai";
 import { AiProvider } from "./provider.js";
 import { buildPrompt, parseSuggestions } from "./prompts/index.js";
+import { AI_DEFAULT_MODELS } from "@/lib/constants.js";
 
 export class OpenAiAdapter extends AiProvider {
   constructor(config) {
     super();
     this.client = new OpenAI({ apiKey: config.apiKey });
-    this.model = config.model || "gpt-4o";
+    this.model = config.model || AI_DEFAULT_MODELS.openai;
     this.maxTokens = config.maxTokens || 2048;
     this.timeoutMs = config.timeoutMs || 30000;
   }

@@ -1539,3 +1539,17 @@ extraction volume**: a "max proposals" selector and artifact-group filter for th
 threaded through the API into the prompt and a confidence-sorted post-filter.
 
 ---
+
+### Extension Step 39 — AI Import: Volume & Scope Control ✅
+
+**Goal:** Give users control over how many artifacts the document import proposes, and over which artifact groups are in scope (AI review findings E1 + E6, see [docs/AI.md](./docs/AI.md)).
+
+**What changed:**
+- **Import page:** new options card — „Max. Vorschläge" (10 / 25 / 50 / Unbegrenzt, default 25) and per-group toggle chips (default: all groups). Excluding every group disables analysis.
+- **API:** `POST /api/projects/:id/import` accepts `maxArtifacts` (0–200) and repeated `includeTypes` form fields, both strictly validated.
+- **Pipeline:** the cap is announced to the model as a prompt rule (soft, per chunk), out-of-scope types are filtered by prompt *and* parser, and a global hard cap (`applyProposalLimit`) runs after the cross-chunk merge — keeping the highest-confidence proposals in document order and pruning relations whose endpoints were cut. Dropped counts surface as a warning in the review UI.
+- **Model defaults:** `AI_DEFAULT_MODELS` constant — adapters and provider factory share one source (fixes the OpenAI adapter still defaulting to `gpt-4o`).
+
+**Tests:** 9 new extractor tests — suite at 218 Vitest tests, all passing.
+
+---

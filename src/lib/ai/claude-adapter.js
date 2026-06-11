@@ -1,12 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { AiProvider } from "./provider.js";
 import { buildPrompt, parseSuggestions } from "./prompts/index.js";
+import { AI_DEFAULT_MODELS } from "@/lib/constants.js";
 
 export class ClaudeAdapter extends AiProvider {
   constructor(config) {
     super();
     this.client = new Anthropic({ apiKey: config.apiKey });
-    this.model = config.model || "claude-sonnet-4-6";
+    this.model = config.model || AI_DEFAULT_MODELS.claude;
     this.maxTokens = config.maxTokens || 2048;
     this.timeoutMs = config.timeoutMs || 30000;
   }

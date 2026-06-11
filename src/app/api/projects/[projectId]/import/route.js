@@ -6,6 +6,7 @@ import {
   buildExtractionPrompt,
   parseExtractionResponse,
   mergeExtractionResults,
+  applyProposalLimit,
   chunkText,
   getCanonicalExtractableTypes,
   getMissingSchemaTypes,
@@ -27,6 +28,9 @@ const SUPPORTED_TYPES = [
   "text/plain",
   "text/markdown",
 ];
+
+// Hard ceiling for the user-provided proposal limit (0 = unlimited)
+const MAX_PROPOSAL_LIMIT = 200;
 
 // ─── Text extraction ───────────────────────────────────────────────────────
 
@@ -94,6 +98,40 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
   const files = formData.getAll("files");
   if (!files || files.length === 0) {
     return errorResponse("VALIDATION_ERROR", "Keine Dateien hochgeladen", 400);
+  }
+
+  // Optional extraction options: proposal cap + type scope
+  const rawMax = formData.get("maxArtifacts");
+  let maxArtifacts = 0; // 0 = unlimited
+  if (typeof rawMax === "string" && rawMax.trim() !== "") {
+    const parsed = parseInt(rawMax, 10);
+    if (Number.isNaN(parsed) || parsed < 0 || parsed > MAX_PROPOSAL_LIMIT) {
+      return errorResponse(
+        "VALIDATION_ERROR",
+        `maxArtifacts muss eine Zahl zwischen 0 und ${MAX_PROPOSAL_LIMIT} sein`,
+        400
+      );
+    }
+    maxArtifacts = parsed;
+  }
+
+  const allExtractableTypes = getCanonicalExtractableTypes();
+  const rawIncludeTypes = formData
+    .getAll("includeTypes")
+    .filter((t) => typeof t === "string" && t.trim() !== "");
+  let includeTypes = null; // null = all types
+  if (rawIncludeTypes.length > 0) {
+    const validSet = new Set(allExtractableTypes);
+    includeTypes = [...new Set(rawIncludeTypes)].filter((t) => validSet.has(t));
+    if (includeTypes.length === 0) {
+      return errorResponse(
+        "VALIDATION_ERROR",
+        "includeTypes enthält keine gültigen Artefakttypen",
+        400
+      );
+    }
+    // All types selected = no restriction
+    if (includeTypes.length === allExtractableTypes.length) includeTypes = null;
   }
   if (files.length > MAX_FILES) {
     return errorResponse(
@@ -189,19 +227,23 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
         documentText: chunks[i],
         chunkIndex: i,
         totalChunks: chunks.length,
+        includeTypes,
+        maxArtifacts,
       });
       const responseText = await provider.extractFromDocument(prompt);
-      const parsed = parseExtractionResponse(responseText);
+      const parsed = parseExtractionResponse(responseText, { includeTypes });
       chunkResults.push(parsed);
     }
-    merged = mergeExtractionResults(chunkResults);
+    // The prompt rule is only a soft cap per chunk — enforce the hard cap
+    // across all chunks after merging (highest confidence wins).
+    merged = applyProposalLimit(mergeExtractionResults(chunkResults), maxArtifacts);
   } catch (err) {
     console.error("[import] AI extraction error:", err);
     return errorResponse("SERVER_ERROR", "KI-Analyse fehlgeschlagen", 500);
   }
 
-  // Coverage stats — over canonical types that actually have a schema.
-  const extractableTypes = getCanonicalExtractableTypes();
+  // Coverage stats — over the types in scope for this run.
+  const extractableTypes = includeTypes ?? allExtractableTypes;
   const canonicalTypeCount = ARTIFACT_TYPE_ORDER.length;
   const coveredTypes = new Set(merged.artifacts.map((a) => a.type));
   const coveredTypeCount = coveredTypes.size;
@@ -229,6 +271,8 @@ export const POST = withProjectRoute({ role: "EDITOR" }, async (request, { sessi
       coveredTypeCount,
       missingTypes,
       chunkCount: chunks.length,
+      maxArtifacts: maxArtifacts || null,
+      includeTypes,
       warnings: allWarnings,
     },
   });
