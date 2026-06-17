@@ -38,7 +38,12 @@ export async function PATCH(request) {
   const { response: authErr } = await requireAdmin();
   if (authErr) return authErr;
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse("VALIDATION_ERROR", "Ungültiger JSON-Body", 400);
+  }
   const { provider, model, apiKey, timeoutMs, maxTokens, baseUrl } = body;
 
   if (!provider) return errorResponse("VALIDATION_ERROR", "provider ist erforderlich", 400);
@@ -80,11 +85,16 @@ export async function PATCH(request) {
     data.apiKey = "";
   }
 
-  await prisma.aiConfig.upsert({
-    where: { id: "singleton" },
-    create: { id: "singleton", ...data },
-    update: data,
-  });
+  try {
+    await prisma.aiConfig.upsert({
+      where: { id: "singleton" },
+      create: { id: "singleton", ...data },
+      update: data,
+    });
+  } catch (error) {
+    console.error("[PATCH /api/admin/ai]", error);
+    return errorResponse("SERVER_ERROR", "Konfiguration konnte nicht gespeichert werden", 500);
+  }
 
   return successResponse({ saved: true, provider, apiKeySet: data.apiKey.length > 0 });
 }

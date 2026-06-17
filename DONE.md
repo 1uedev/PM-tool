@@ -235,6 +235,7 @@ Expanded from 6 original types to 35 across 8 groups:
 | `48cabc4` | 9 code-review bugs (critical → low) including Rules of Hooks, status de-sync, silent error discard |
 | `dc728ed` | `FieldHelpers` dual API + missing PRD Q5 coverage |
 | `a2b3fde` | `pdf-parse` v2 class-based API update |
+| _(post-Step 42)_ | Saving Ollama config failed: Prisma client not regenerated after the `baseUrl` migration → bodyless 500 surfaced as „Unexpected end of JSON input". Regenerated client + restart; hardened `PATCH /api/admin/ai` with `try/catch` (like all other routes) and made `AiProviderConfig` parse responses defensively (`readJson`) so a bodyless error shows a real message. |
 
 ---
 

@@ -66,6 +66,18 @@ function formatSize(bytes) {
   return `${(bytes / 1e6).toFixed(0)} MB`;
 }
 
+// Parse a response body defensively — a bodyless 500 (e.g. server crash)
+// must not surface as a cryptic "Unexpected end of JSON input".
+async function readJson(res) {
+  const text = await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
+}
+
 export default function AiProviderConfig({ initial }) {
   const [provider, setProvider] = useState(initial.provider ?? "disabled");
   const [model, setModel] = useState(initial.model ?? "");
@@ -118,8 +130,8 @@ export default function AiProviderConfig({ initial }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ baseUrl: baseUrl || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.message ?? "Fehler");
+      const json = await readJson(res);
+      if (!res.ok) throw new Error(json.error?.message ?? `Anfrage fehlgeschlagen (HTTP ${res.status})`);
       const models = json.data.models ?? [];
       setOllamaModels(models);
       if (models.length === 0) {
@@ -150,8 +162,8 @@ export default function AiProviderConfig({ initial }) {
           baseUrl: isLocal ? effectiveBaseUrl : undefined,
         }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.message ?? "Fehler");
+      const json = await readJson(res);
+      if (!res.ok) throw new Error(json.error?.message ?? `Anfrage fehlgeschlagen (HTTP ${res.status})`);
       setTestResult(json.data);
     } catch (e) {
       setTestResult({ ok: false, message: e.message });
@@ -179,8 +191,8 @@ export default function AiProviderConfig({ initial }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.message ?? "Fehler");
+      const json = await readJson(res);
+      if (!res.ok) throw new Error(json.error?.message ?? `Anfrage fehlgeschlagen (HTTP ${res.status})`);
       setSaved(true);
       if (json.data.apiKeySet) {
         setApiKeySet(true);
