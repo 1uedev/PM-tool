@@ -1,6 +1,13 @@
 # PM Copilot — Remaining Tasks
 
-Last updated: 2026-06-10. All items are unstarted unless noted.
+Last updated: 2026-06-17. All items are unstarted unless noted.
+
+---
+
+## Recently shipped
+
+- **Local Ollama support** ✅ (DONE.md Step 42) — third AI provider, runs models on the user's
+  own machine with no API key; admin picks from the live list of installed models.
 
 ---
 

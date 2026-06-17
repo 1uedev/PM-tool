@@ -1,8 +1,9 @@
 import prisma from "@/lib/prisma.js";
 import { decryptSecret } from "@/lib/crypto.js";
-import { AI_DEFAULT_MODELS } from "@/lib/constants.js";
+import { AI_DEFAULT_MODELS, OLLAMA_DEFAULT_BASE_URL } from "@/lib/constants.js";
 import { ClaudeAdapter } from "./claude-adapter.js";
 import { OpenAiAdapter } from "./openai-adapter.js";
+import { OllamaAdapter } from "./ollama-adapter.js";
 
 /**
  * Load AI config from DB. Falls back to env vars if no DB record exists.
@@ -11,16 +12,30 @@ import { OpenAiAdapter } from "./openai-adapter.js";
 export async function getAiConfig() {
   try {
     const record = await prisma.aiConfig.findUnique({ where: { id: "singleton" } });
-    if (record && record.provider !== "disabled" && record.apiKey) {
-      const apiKey = decryptSecret(record.apiKey);
-      if (apiKey) {
+    if (record && record.provider !== "disabled") {
+      // Ollama is local and needs no API key — only a reachable server.
+      if (record.provider === "ollama") {
         return {
-          provider: record.provider,
+          provider: "ollama",
           model: record.model,
-          apiKey,
+          apiKey: "",
+          baseUrl: record.baseUrl || OLLAMA_DEFAULT_BASE_URL,
           timeoutMs: record.timeoutMs,
           maxTokens: record.maxTokens,
         };
+      }
+      if (record.apiKey) {
+        const apiKey = decryptSecret(record.apiKey);
+        if (apiKey) {
+          return {
+            provider: record.provider,
+            model: record.model,
+            apiKey,
+            baseUrl: "",
+            timeoutMs: record.timeoutMs,
+            maxTokens: record.maxTokens,
+          };
+        }
       }
     }
   } catch {
@@ -32,11 +47,17 @@ export async function getAiConfig() {
   const apiKey =
     provider === "claude" ? (process.env.AI_CLAUDE_API_KEY ?? "") :
     provider === "openai"  ? (process.env.AI_OPENAI_API_KEY ?? "")  : "";
+  const model =
+    provider === "ollama" ? (process.env.AI_OLLAMA_MODEL ?? "") :
+    (AI_DEFAULT_MODELS[provider] ?? "");
 
   return {
     provider,
-    model: AI_DEFAULT_MODELS[provider] ?? "",
+    model,
     apiKey,
+    baseUrl: provider === "ollama"
+      ? (process.env.AI_OLLAMA_BASE_URL ?? OLLAMA_DEFAULT_BASE_URL)
+      : "",
     timeoutMs: parseInt(process.env.AI_TIMEOUT_MS ?? "30000", 10),
     maxTokens: parseInt(process.env.AI_MAX_TOKENS ?? "2048", 10),
   };
@@ -44,7 +65,10 @@ export async function getAiConfig() {
 
 /** Returns true if a usable AI provider is configured */
 export function isAiAvailable(config) {
-  return config.provider !== "disabled" && Boolean(config.apiKey);
+  if (config.provider === "disabled") return false;
+  // Ollama needs a reachable server (base URL), not an API key.
+  if (config.provider === "ollama") return Boolean(config.baseUrl);
+  return Boolean(config.apiKey);
 }
 
 /** Returns an adapter instance for the given config. Throws if provider unknown. */
@@ -52,6 +76,7 @@ export function getAiProvider(config) {
   switch (config.provider) {
     case "claude": return new ClaudeAdapter(config);
     case "openai": return new OpenAiAdapter(config);
+    case "ollama": return new OllamaAdapter(config);
     default: throw new Error(`Unknown AI provider: ${config.provider}`);
   }
 }

@@ -10,24 +10,28 @@ export async function POST(request) {
   if (authErr) return authErr;
 
   const body = await request.json();
-  const { provider, model, apiKey: bodyApiKey } = body;
+  const { provider, model, apiKey: bodyApiKey, baseUrl } = body;
 
   if (!provider || provider === "disabled") {
     return errorResponse("VALIDATION_ERROR", "Kein Provider ausgewählt", 400);
   }
 
-  // Resolve API key: use body key if provided, otherwise fall back to stored key
-  let apiKey = bodyApiKey;
-  if (!apiKey) {
-    const record = await prisma.aiConfig.findUnique({ where: { id: "singleton" } });
-    apiKey = decryptSecret(record?.apiKey ?? "");
+  let config;
+  if (provider === "ollama") {
+    // Local — no API key, just a (defaulted) server URL.
+    config = { provider, model, baseUrl, timeoutMs: 10000, maxTokens: 10 };
+  } else {
+    // Resolve API key: use body key if provided, otherwise fall back to stored key
+    let apiKey = bodyApiKey;
+    if (!apiKey) {
+      const record = await prisma.aiConfig.findUnique({ where: { id: "singleton" } });
+      apiKey = decryptSecret(record?.apiKey ?? "");
+    }
+    if (!apiKey) {
+      return errorResponse("VALIDATION_ERROR", "Kein API-Key vorhanden", 400);
+    }
+    config = { provider, model, apiKey, timeoutMs: 10000, maxTokens: 10 };
   }
-
-  if (!apiKey) {
-    return errorResponse("VALIDATION_ERROR", "Kein API-Key vorhanden", 400);
-  }
-
-  const config = { provider, model, apiKey, timeoutMs: 10000, maxTokens: 10 };
 
   try {
     const adapter = getAiProvider(config);

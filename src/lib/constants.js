@@ -399,7 +399,11 @@ export const RELATION_SUGGESTIONS = {
 export const AI_DEFAULT_MODELS = {
   claude: "claude-sonnet-4-6",
   openai: "gpt-5.4",
+  ollama: "", // user-installed; chosen from the live model list
 };
+
+// Default endpoint for a local Ollama installation.
+export const OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434";
 
 // ─── Marketing / Public Site ───
 

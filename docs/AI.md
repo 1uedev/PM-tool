@@ -1,6 +1,6 @@
 # AI Architecture & Process Documentation
 
-> How PM Copilot uses AI, end to end — documented from the implementation as of 2026-06-11.
+> How PM Copilot uses AI, end to end — documented from the implementation as of 2026-06-17.
 > Covers: provider abstraction, the two AI features (field suggestions, document import),
 > guardrails, logging, configuration, and an evaluation with an improvement roadmap.
 
@@ -14,7 +14,7 @@ PM Copilot uses AI in exactly **two user-facing features**, plus an admin config
 |---|---|---|---|
 | **Field suggestions** | „KI-Vorschläge" button in the artifact form | `POST /api/projects/:id/artifacts/:aid/ai` | Improves/completes the fields of **one existing artifact**, using linked artifacts as context |
 | **Document import** | `/projects/:id/import` upload page | `POST /api/projects/:id/import` | Reads uploaded documents (PDF/DOCX/TXT/MD) and **proposes new artifacts + relations** for review |
-| Admin: AI settings | `/admin/ai` | `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test` | Configure provider/model/key, run a live connection test |
+| Admin: AI settings | `/admin/ai` | `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test`, `POST /api/admin/ai/ollama-models` | Configure provider/model/key (or local Ollama server + model), run a live connection test |
 
 The AI **never writes to the database on its own**. Every output is a proposal that a human
 explicitly accepts (guardrail F5, see §6).
@@ -29,32 +29,47 @@ lib/ai/
 ├── provider-factory.js   # config resolution + adapter selection
 ├── claude-adapter.js     # Anthropic SDK
 ├── openai-adapter.js     # OpenAI SDK
+├── ollama-adapter.js     # local Ollama (OpenAI-compatible API) + model listing
 ├── prompts/              # 39 per-artifact-type prompt templates + parser
 └── document-extractor.js # extraction prompt, parser, chunking, merging
 ```
 
-Every adapter implements three methods:
+Three providers: **claude** (Anthropic SDK), **openai** (OpenAI SDK), and **ollama** (local,
+via Ollama's OpenAI-compatible `/v1` endpoint — reuses the OpenAI SDK with a custom `baseURL`
+and a placeholder key). Every adapter implements:
 
 | Method | Used by | max_tokens | Timeout |
 |---|---|---|---|
 | `suggest(artifact, context)` | field suggestions | from config (default 2048) | from config (default 30 s) |
 | `extractFromDocument(prompt, { schema })` | document import + relation pass | 4096 (hard-coded) | from config |
-| `testConnection()` | admin test button | 10 | 10 s (hard-coded) |
+| `testConnection()` | admin test button | 10 (cloud) | 10 s (hard-coded) |
 
-Both adapters enforce **structured output** (Step 41): Claude via forced tool use with a JSON
-schema per call type, OpenAI via JSON mode. They return normalized token usage
-(`{ inputTokens, outputTokens }`) with every result, and `suggest` honors the artifact's
-target `language`.
+Cloud adapters enforce **structured output** (Step 41): Claude via forced tool use with a JSON
+schema per call type, OpenAI via JSON mode. The Ollama adapter uses JSON mode too; its
+`testConnection()` instead checks server reachability + that the chosen model is installed
+(via `/api/tags`), avoiding a slow cold model load. All adapters return normalized token usage
+(`{ inputTokens, outputTokens }`), and `suggest` honors the artifact's target `language`.
+
+### Local models (Ollama)
+
+`ollama-adapter.js` also exports `listOllamaModels(baseUrl)`, which queries Ollama's native
+`GET /api/tags` to enumerate **locally installed models**. The admin route
+`POST /api/admin/ai/ollama-models` exposes this so the settings UI can populate a live model
+picker. No API key is involved; the only config is the server URL (`baseUrl`, default
+`http://localhost:11434`) and the chosen model name.
 
 ### Configuration resolution (`getAiConfig()`)
 
-1. **DB first:** the `AiConfig` singleton row (`provider`, `model`, `apiKey`, `timeoutMs`, `maxTokens`)
-   maintained via `/admin/ai`. The API key is stored **AES-256-GCM-encrypted** (`lib/crypto.js`,
-   key derived from `CONFIG_SECRET`, fallback `NEXTAUTH_SECRET`) and decrypted on read.
+1. **DB first:** the `AiConfig` singleton row (`provider`, `model`, `apiKey`, `baseUrl`,
+   `timeoutMs`, `maxTokens`) maintained via `/admin/ai`. The API key is stored
+   **AES-256-GCM-encrypted** (`lib/crypto.js`, key derived from `CONFIG_SECRET`, fallback
+   `NEXTAUTH_SECRET`) and decrypted on read. Ollama rows store no key (just `baseUrl`).
 2. **Env fallback** (initial setup / CI): `AI_PROVIDER`, `AI_CLAUDE_API_KEY` / `AI_OPENAI_API_KEY`,
-   `AI_TIMEOUT_MS`, `AI_MAX_TOKENS`. Default models: `claude-sonnet-4-6` (Claude) / `gpt-5.4` (OpenAI).
-3. `isAiAvailable(config)` is false when provider is `"disabled"` or no key is set —
-   AI routes then return 503 and the UI buttons surface the error instead of crashing.
+   `AI_OLLAMA_BASE_URL` / `AI_OLLAMA_MODEL`, `AI_TIMEOUT_MS`, `AI_MAX_TOKENS`. Default models:
+   `claude-sonnet-4-6` (Claude) / `gpt-5.4` (OpenAI); Ollama has no default (user-installed).
+3. `isAiAvailable(config)` is false when provider is `"disabled"`; cloud providers require an
+   API key, **ollama requires only a base URL** (always satisfied via the default). When
+   unavailable, AI routes return 503 and the UI buttons surface the error instead of crashing.
 
 ---
 
@@ -176,16 +191,20 @@ merges evidence, and rewrites relation ids accordingly.
 ## 5. Configuration reference
 
 ```env
-AI_PROVIDER="claude"            # "claude" | "openai" | "disabled" (env fallback only)
+AI_PROVIDER="claude"            # "claude" | "openai" | "ollama" | "disabled" (env fallback only)
 AI_CLAUDE_API_KEY="sk-ant-…"    # env fallback; the admin UI stores keys encrypted in the DB
 AI_OPENAI_API_KEY="sk-…"
+AI_OLLAMA_BASE_URL="http://localhost:11434"  # local Ollama server (no key)
+AI_OLLAMA_MODEL="llama3.2"      # which installed model to use
 AI_TIMEOUT_MS=30000
 AI_MAX_TOKENS=2048
 CONFIG_SECRET="…"               # optional dedicated encryption secret (default: NEXTAUTH_SECRET)
 ```
 
-DB config (admin UI) takes precedence over env. Provider `"disabled"` or a missing key turns
-all AI endpoints into clean 503s; the UI keeps working without AI.
+DB config (admin UI) takes precedence over env. Provider `"disabled"`, a missing cloud key, or
+an unreachable Ollama server turns all AI endpoints into clean 503s; the UI keeps working
+without AI. **Ollama** runs models locally — no API key and no data leaves the machine; the
+admin page lists installed models live and lets the admin pick one.
 
 ---
 

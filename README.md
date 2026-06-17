@@ -1582,3 +1582,21 @@ threaded through the API into the prompt and a confidence-sorted post-filter.
 **Tests:** 10 new tests — suite at 228 Vitest tests, all passing.
 
 ---
+
+### Extension Step 42 — Local Ollama Provider ✅
+
+**Goal:** Run the AI features against a **local Ollama installation** — no API key, no data leaving the machine — with the model chosen from those actually installed on the server.
+
+**What changed:**
+- **Third provider:** „Ollama (lokal)" alongside Claude and OpenAI. Ollama exposes an OpenAI-compatible API, so the new `OllamaAdapter` reuses the OpenAI SDK with a custom `baseURL` (JSON mode, language-aware suggestions, token tracking — same as the cloud adapters).
+- **Live model picker:** the admin page (`/admin/ai`) shows a server-address field and a „Modelle laden" button that queries the running Ollama server (`/api/tags`) and populates a dropdown with the **installed models** (manual entry as a fallback). No API key field for Ollama.
+- **Config:** new `AiConfig.baseUrl` column (migration `add_ai_base_url`); `getAiConfig`/`isAiAvailable` treat Ollama as key-less, available as long as the server URL is set (default `http://localhost:11434`).
+- **API:** `POST /api/admin/ai/ollama-models` lists installed models; the config save/test routes handle Ollama without a key.
+
+**Setup:** install [Ollama](https://ollama.com), `ollama pull llama3.2` (or any model), then pick provider „Ollama (lokal)" in `/admin/ai`, click „Modelle laden", choose a model, and save.
+
+**Env vars (optional):** `AI_OLLAMA_BASE_URL`, `AI_OLLAMA_MODEL`.
+
+**Tests:** 10 new tests — suite at 237 Vitest tests, all passing.
+
+---

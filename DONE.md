@@ -856,13 +856,56 @@ suggestion schema). Suite now 228 Vitest tests — all passing.
 
 ---
 
+### Extension Step 42 — Local Ollama Provider with Live Model Picker ✅
+
+**Goal:** Add a third AI provider — a local Ollama installation — with the model chosen from the
+list of models actually installed on the server. No API key, no data leaving the machine.
+
+**Why it fits cleanly:** Ollama exposes an OpenAI-compatible API at `/v1`, so the new
+`OllamaAdapter` reuses the OpenAI SDK with a custom `baseURL` and a placeholder key, and
+mirrors the OpenAI JSON-mode path (sanitizing parsers stay the safety net). Token usage maps
+to the same `{ inputTokens, outputTokens }` shape.
+
+**Schema:** `AiConfig.baseUrl` column (migration `add_ai_base_url`) — Ollama server URL;
+empty = default `http://localhost:11434`. Ollama rows store no API key.
+
+**Adapter (`lib/ai/ollama-adapter.js`):**
+- `OllamaAdapter` — `suggest` / `extractFromDocument` (JSON mode, language-aware, token-tracked)
+- `testConnection()` checks reachability + that the chosen model is installed (via `/api/tags`),
+  avoiding a slow cold-load timeout
+- `listOllamaModels(baseUrl)` — enumerates installed models from Ollama's native `/api/tags`
+- `normalizeBaseUrl()` — default + trailing-slash strip
+
+**Provider factory:** `getAiConfig` resolves Ollama (no key, `baseUrl` with default) from DB and
+env (`AI_OLLAMA_BASE_URL` / `AI_OLLAMA_MODEL`); `isAiAvailable` treats Ollama as available with a
+base URL (no key); `getAiProvider` adds the `ollama` case.
+
+**API:**
+- `PATCH /api/admin/ai` accepts/validates `baseUrl` (http/https), allows provider `ollama`,
+  stores no key for it; `GET` returns `baseUrl`
+- `POST /api/admin/ai/test` tests Ollama without a key
+- **new** `POST /api/admin/ai/ollama-models` — admin-only; returns installed models (friendly
+  502 when the server is unreachable / times out)
+
+**Admin UI (`AiProviderConfig.jsx`):** new „Ollama (lokal)" provider card; for Ollama it shows a
+server-address field + „Modelle laden" button that fetches the live model list into a dropdown
+(manual entry as fallback), hides the API-key section, and allows testing without a key. API-key
+section is now cloud-only; advanced settings (timeout/max tokens) shared.
+
+**Tests:** new `ollama.test.js` (10 tests — base-URL normalization, `/api/tags` parsing,
+`isAiAvailable`/`getAiProvider` for Ollama). Suite now 237 Vitest tests — all passing.
+
+**New env vars (optional):** `AI_OLLAMA_BASE_URL`, `AI_OLLAMA_MODEL`.
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 41)
-- Tests: 228 Vitest (20 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 42)
+- Tests: 237 Vitest (21 files) + 17 Playwright E2E — all passing
 - **AI review (docs/AI.md) fully implemented** — backlog A1–A7 / findings E1–E10 all closed
-- Migrations: 9 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`, `ai_session_import_logging`)
+- Migrations: 10 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`, `ai_session_import_logging`, `add_ai_base_url`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
 - **All security-review findings (Rounds 1–3) resolved.** Note: self-registration is now OFF by default — set `REGISTRATION_ENABLED="true"` to re-enable.

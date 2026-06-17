@@ -53,6 +53,7 @@ export default async function AdminAiPage() {
     provider: config.provider,
     model: config.model,
     apiKeySet: config.apiKey.length > 0,
+    baseUrl: config.baseUrl ?? "",
     timeoutMs: config.timeoutMs,
     maxTokens: config.maxTokens,
   };

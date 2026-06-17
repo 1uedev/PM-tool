@@ -177,9 +177,10 @@ model ArtifactTag {
 
 model AiConfig {
   id        String   @id @default("singleton")
-  provider  String   @default("disabled") // "claude" | "openai" | "disabled"
+  provider  String   @default("disabled") // "claude" | "openai" | "ollama" | "disabled"
   model     String   @default("")
   apiKey    String   @default("")
+  baseUrl   String   @default("") // Ollama server URL; empty = default localhost:11434
   timeoutMs Int      @default(30000)
   maxTokens Int      @default(2048)
   updatedAt DateTime @updatedAt
