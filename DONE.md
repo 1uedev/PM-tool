@@ -236,6 +236,7 @@ Expanded from 6 original types to 35 across 8 groups:
 | `dc728ed` | `FieldHelpers` dual API + missing PRD Q5 coverage |
 | `a2b3fde` | `pdf-parse` v2 class-based API update |
 | _(post-Step 42)_ | Saving Ollama config failed: Prisma client not regenerated after the `baseUrl` migration → bodyless 500 surfaced as „Unexpected end of JSON input". Regenerated client + restart; hardened `PATCH /api/admin/ai` with `try/catch` (like all other routes) and made `AiProviderConfig` parse responses defensively (`readJson`) so a bodyless error shows a real message. |
+| _(post-Step 42)_ | PRD-Starter: die 10 Fragen (`label`/`hint`/`placeholder` in `starterContext.js`) waren noch englisch, obwohl die UI sonst deutsch ist (Spec: UI-Texte deutsch). Ins Deutsche übersetzt; `key`-Werte unverändert (Speicher-/Kontext-Schlüssel). Wirkt in `StarterForm` und `StarterContextPanel`. |
 
 ---
 
