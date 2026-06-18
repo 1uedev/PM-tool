@@ -106,5 +106,25 @@
   "languagePicker": {
     "label": "Sprache",
     "tooltip": "Anzeigesprache ändern"
+  },
+  "aiChat": {
+    "trigger": "Mit KI besprechen",
+    "title": "KI-Chat",
+    "subtitle": "Verstehen & verbessern",
+    "close": "Schließen",
+    "empty": "Stelle eine Frage, z. B. „Warum wurde dieser Inhalt so erzeugt?“",
+    "placeholder": "Frage etwas zu diesem Inhalt…",
+    "send": "Senden",
+    "thinking": "KI denkt nach…",
+    "titleField": "Titel",
+    "proposalTitle": "Änderungsvorschlag",
+    "before": "Aktuell",
+    "after": "Vorschlag",
+    "apply": "Übernehmen",
+    "dismiss": "Verwerfen",
+    "appliedShort": "Übernommen",
+    "applied": "Änderung an {field} übernommen — neue Version erstellt.",
+    "applyError": "Übernehmen fehlgeschlagen — bitte erneut versuchen.",
+    "error": "KI-Anfrage fehlgeschlagen — bitte erneut versuchen."
   }
 }

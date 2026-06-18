@@ -1600,3 +1600,19 @@ threaded through the API into the prompt and a confidence-sorted post-filter.
 **Tests:** 10 new tests — suite at 237 Vitest tests, all passing.
 
 ---
+
+### Extension Step 43 — Content Chat for AI-Generated Artifacts ✅
+
+**Goal:** Talk to the AI about any artifact — understand *why* its content was generated and apply confirmed improvements — like a ChatGPT side panel.
+
+**What changed:**
+- **„Mit KI besprechen"** button in the artifact editor opens a chat panel (message list, typing indicator). The chat is grounded in the artifact's real content, the *reconstructed* original generation prompt, related-artifact context and how it was created — so it can explain its reasoning.
+- **Confirmed, versioned changes:** when the AI proposes a change, the panel shows a before/after card; on confirm, the field (or title) is updated and a **version is recorded** (`source = AI_CHAT`, shown with a „KI-Chat" badge in the version history, fully restorable). No separate revision model — it reuses the existing version history.
+- **Same provider/model** as every other AI feature (Claude / OpenAI / local Ollama); no streaming, request/response. Project-scoped auth (anyone may discuss, editors may apply); rate-limited; logged in the admin AI usage stats.
+- Chat history is session-only (not persisted), but the message/proposal shapes are prepared for easy future DB persistence.
+
+**Schema:** `ArtifactVersion.source` + `note` (migration `add_version_source`).
+
+**Tests:** new unit tests (chat lib + chat/apply routes) and a Playwright E2E (open → propose → apply → verify field + AI_CHAT version). Suite at **260 Vitest + 18 Playwright**, all green.
+
+---

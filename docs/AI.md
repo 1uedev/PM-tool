@@ -14,6 +14,7 @@ PM Copilot uses AI in exactly **two user-facing features**, plus an admin config
 |---|---|---|---|
 | **Field suggestions** | „KI-Vorschläge" button in the artifact form | `POST /api/projects/:id/artifacts/:aid/ai` | Improves/completes the fields of **one existing artifact**, using linked artifacts as context |
 | **Document import** | `/projects/:id/import` upload page | `POST /api/projects/:id/import` | Reads uploaded documents (PDF/DOCX/TXT/MD) and **proposes new artifacts + relations** for review |
+| **Content chat** | „Mit KI besprechen" button in the artifact editor | `POST …/artifacts/:aid/chat`, `…/chat/apply` | Conversational chat to **understand why** an artifact was generated and **apply confirmed field changes** (versioned) |
 | Admin: AI settings | `/admin/ai` | `GET/PATCH /api/admin/ai`, `POST /api/admin/ai/test`, `POST /api/admin/ai/ollama-models` | Configure provider/model/key (or local Ollama server + model), run a live connection test |
 
 The AI **never writes to the database on its own**. Every output is a proposal that a human
@@ -42,6 +43,7 @@ and a placeholder key). Every adapter implements:
 |---|---|---|---|
 | `suggest(artifact, context)` | field suggestions | from config (default 2048) | from config (default 30 s) |
 | `extractFromDocument(prompt, { schema })` | document import + relation pass | 4096 (hard-coded) | from config |
+| `chat(messages, schema)` | content chat | from config | from config |
 | `testConnection()` | admin test button | 10 (cloud) | 10 s (hard-coded) |
 
 Cloud adapters enforce **structured output** (Step 41): Claude via forced tool use with a JSON
@@ -187,6 +189,32 @@ deduplicates across chunks by `(type, lowercased title)` keeping the higher-conf
 merges evidence, and rewrites relation ids accordingly.
 
 ---
+
+## 4b. Feature 3 — Content chat (per artifact)
+
+A ChatGPT-style side panel on every persisted artifact, opened via „Mit KI besprechen" in the
+artifact editor (`ArtifactForm` → `components/ai/AiContentChat.jsx`). Lets the user understand
+why/how the content was generated and apply confirmed improvements.
+
+- **Provider/model:** the same configured provider as every other AI feature (`getAiConfig` →
+  `provider.chat(messages, CHAT_RESULT_SCHEMA)`). Claude uses forced tool use; OpenAI/Ollama use
+  JSON mode. No streaming — request/response with a typing indicator.
+- **Grounding (`lib/ai/chat.js` → `buildChatSystemPrompt`):** the system prompt contains the
+  artifact's current fields, the **reconstructed original generation prompt**
+  (`buildPrompt(type, fields, context, language)`), related-artifact context
+  (`lib/ai/artifact-context.js`), and the provenance (earliest `AiSession.mode`). Output language
+  follows the user's `preferredLanguage`.
+- **Structured proposals:** each turn returns `{ reply, proposal }` where `proposal` is
+  `{ field, newValue, rationale }` (`field` ∈ the type's field keys ∪ `title`) or `null`.
+  `parseChatResult` sanitizes and drops out-of-schema proposals.
+- **Apply + history:** the UI shows a before/after card; confirming calls
+  `POST …/chat/apply` (EDITOR-gated) which writes the change via `updateArtifactWithVersion` with
+  `source: "AI_CHAT"` — so it appears in the **existing** version history (badged „KI-Chat") and is
+  restorable. No new revision model; no parallel history.
+- **History persistence:** chat history lives only in React state (not persisted); message/proposal
+  shapes are documented in `lib/ai/chat.js` for easy future DB persistence.
+- **Auth/limits:** project-scoped via `withProjectRoute` (VIEWER may chat, EDITOR may apply);
+  60 chat turns/hour per user; logged as `AiSession` (`mode: "chat"`, tokens).
 
 ## 5. Configuration reference
 

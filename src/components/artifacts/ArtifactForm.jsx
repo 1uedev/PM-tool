@@ -9,6 +9,7 @@ import { FIELD_COMPONENTS } from "@/components/artifacts/fields/index.js";
 import { useDirtyForm } from "@/lib/DirtyFormContext.js";
 import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
 import AiSuggestButton from "@/components/ai/AiSuggestButton.jsx";
+import AiContentChat from "@/components/ai/AiContentChat.jsx";
 import Input from "@/components/ui/Input.jsx";
 import Select from "@/components/ui/Select.jsx";
 import Button from "@/components/ui/Button.jsx";
@@ -74,6 +75,19 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
     setFields((f) => ({ ...f, [key]: value }));
     markDirty();
   }
+
+  // Applied AI-chat change: the server already persisted it and created a
+  // version. Reflect the new persisted state in the form and SWR caches.
+  const handleApplied = useCallback((updated) => {
+    setTitle(updated.title);
+    setStatus(updated.status);
+    setFields(updated.fields);
+    setDirty(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+    onSaved?.(updated);
+    mutate(`/api/projects/${projectId}/artifacts`);
+  }, [onSaved, projectId, setDirty]);
 
   const validate = useCallback(() => {
     const errs = {};
@@ -176,16 +190,29 @@ export default function ArtifactForm({ artifact, type, projectId, onSaved }) {
         </div>
       )}
 
-      {/* AI suggestions — only in edit mode for EDITOR+ */}
-      {isEdit && canEdit && (
-        <AiSuggestButton
-          projectId={projectId}
-          artifactId={artifact.id}
-          artifactType={artifactType}
-          onAccept={(key, value) => {
-            handleFieldChange(key, value);
-          }}
-        />
+      {/* AI tools — suggestions are EDITOR+, the chat is open to all roles
+          (read-only discussion); applying a chat change is editor-gated. */}
+      {isEdit && (
+        <div className="flex flex-wrap items-center gap-2">
+          {canEdit && (
+            <AiSuggestButton
+              projectId={projectId}
+              artifactId={artifact.id}
+              artifactType={artifactType}
+              onAccept={(key, value) => {
+                handleFieldChange(key, value);
+              }}
+            />
+          )}
+          <AiContentChat
+            projectId={projectId}
+            artifactId={artifact.id}
+            artifactType={artifactType}
+            artifact={artifact}
+            canEdit={canEdit}
+            onApplied={handleApplied}
+          />
+        </div>
       )}
 
       {/* Type-specific field component */}

@@ -6,6 +6,10 @@ Last updated: 2026-06-17. All items are unstarted unless noted.
 
 ## Recently shipped
 
+- **Content chat for AI-generated artifacts** ✅ (DONE.md Step 43) — „Mit KI besprechen" on every
+  artifact: understand why the content was generated, and apply confirmed field changes that are
+  versioned (`source = AI_CHAT`). Same provider/model as generation; history is session-only but
+  the shapes are prepared for later DB persistence.
 - **Local Ollama support** ✅ (DONE.md Step 42) — third AI provider, runs models on the user's
   own machine with no API key; admin picks from the live list of installed models.
 

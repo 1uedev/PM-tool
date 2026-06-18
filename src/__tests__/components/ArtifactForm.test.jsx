@@ -24,6 +24,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/components/ai/AiSuggestButton.jsx", () => ({ default: () => null }));
+vi.mock("@/components/ai/AiContentChat.jsx", () => ({ default: () => null }));
 
 // Minimal field stub — avoids Tiptap/browser deps, gives us something to interact with
 vi.mock("@/components/artifacts/fields/index.js", () => ({

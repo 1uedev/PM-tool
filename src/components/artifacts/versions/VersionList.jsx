@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { mutate as globalMutate } from "swr";
-import { History, RotateCcw, ChevronDown, ChevronRight } from "lucide-react";
+import { History, RotateCcw, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 import { ARTIFACT_STATUS_LABELS } from "@/lib/constants.js";
 import { useProjectRole, hasRole } from "@/lib/ProjectRoleContext.js";
 import Spinner from "@/components/ui/Spinner.jsx";
@@ -80,6 +80,14 @@ function VersionRow({ version, index, isLatest, projectId, artifactId, onRestore
               {isLatest && (
                 <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-xs text-blue-600 font-medium">
                   Aktuell
+                </span>
+              )}
+              {version.source === "AI_CHAT" && (
+                <span
+                  title={version.note || "Per KI-Chat geändert"}
+                  className="inline-flex items-center gap-0.5 rounded-full bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-600"
+                >
+                  <Sparkles className="h-3 w-3" /> KI-Chat
                 </span>
               )}
               <span className="text-xs text-gray-400">{ARTIFACT_STATUS_LABELS[version.status]}</span>

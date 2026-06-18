@@ -106,5 +106,25 @@
   "languagePicker": {
     "label": "Language",
     "tooltip": "Change display language"
+  },
+  "aiChat": {
+    "trigger": "Discuss with AI",
+    "title": "AI chat",
+    "subtitle": "Understand & improve",
+    "close": "Close",
+    "empty": "Ask a question, e.g. \"Why was this content generated this way?\"",
+    "placeholder": "Ask something about this content…",
+    "send": "Send",
+    "thinking": "AI is thinking…",
+    "titleField": "Title",
+    "proposalTitle": "Proposed change",
+    "before": "Current",
+    "after": "Proposed",
+    "apply": "Apply",
+    "dismiss": "Dismiss",
+    "appliedShort": "Applied",
+    "applied": "Change to {field} applied — new version created.",
+    "applyError": "Apply failed — please try again.",
+    "error": "AI request failed — please try again."
   }
 }

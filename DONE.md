@@ -901,13 +901,54 @@ section is now cloud-only; advanced settings (timeout/max tokens) shared.
 
 ---
 
+### Extension Step 43 — Content Chat for AI-Generated Artifacts ✅
+
+**Goal:** Let users open a ChatGPT-style chat on any persisted artifact to understand why/how its
+content was generated and apply confirmed, versioned improvements. Generic + reusable, docked at the
+single artifact-editor surface (covers all AI-origin content — suggestions and import alike).
+
+**Decisions (clarified with user):** reuse existing `ArtifactVersion` + a `source` column (no
+separate `ContentRevision`); no streaming (request/response); scope = persisted artifacts only.
+
+**Schema (migration `add_version_source`):** `ArtifactVersion.source` (`MANUAL` | `AI_CHAT`) +
+`note`. `updateArtifactWithVersion(...)` extended with `source`/`note` (default `MANUAL`, existing
+callers unchanged).
+
+**Backend:**
+- `lib/ai/artifact-context.js` — shared related-artifact context helper (the ai-suggest route now
+  reuses it; duplicate removed).
+- `lib/ai/chat.js` — `CHAT_RESULT_SCHEMA`, `buildChatSystemPrompt` (grounds the chat in current
+  fields + the reconstructed generation prompt + context + provenance + language), `parseChatResult`
+  (sanitizes; drops out-of-schema proposals). Message/proposal shapes documented for future DB
+  persistence.
+- `chat(messages, schema)` added to `AiProvider` + all 3 adapters (Claude forced tool use;
+  OpenAI/Ollama JSON mode; normalized token usage).
+- `POST …/artifacts/:aid/chat` (VIEWER, rate-limited 60/h, logs `AiSession` mode `chat`) returns
+  `{ reply, proposal }`. `POST …/chat/apply` (EDITOR) applies one field/title change via
+  `updateArtifactWithVersion(source: "AI_CHAT", note: rationale)` in a transaction.
+
+**Frontend:** generic `components/ai/AiContentChat.jsx` (slide-over panel, message list, typing
+indicator, before/after proposal card with confirm/dismiss; history in React state only). Trigger
+„Mit KI besprechen" in `ArtifactForm` (chat open to all roles; apply editor-gated); applied change
+updates form state + SWR caches, TipTap reflects it automatically. `VersionList` shows a „KI-Chat"
+badge for `source === "AI_CHAT"`. New `aiChat` i18n namespace in `messages/de.json` + `en.json`.
+
+**Tests:** `lib/ai/chat.test.js` (prompt grounding, proposal sanitizing, context helper),
+`api/artifact-chat.test.js` (chat + apply routes, 503/401/400/403, AI_CHAT version recorded),
+`e2e/ai-chat.spec.js` (open → send → proposal → apply → field + AI_CHAT version verified; chat
+turn stubbed via `page.route`, apply hits the real DB). **260 Vitest + 18 Playwright — all green.**
+(`npm run lint` is not configured in this repo — interactive setup prompt, pre-existing; the
+production build is the gate and is clean.)
+
+---
+
 ## Current State
 
 - Branch: `main`, clean (only `.claude/settings.local.json` uncommitted)
 - Database: `./dev.db` (root-level) — `./prisma/dev.db` is 0 bytes and unused
-- Build: last verified clean (Step 42)
-- Tests: 237 Vitest (21 files) + 17 Playwright E2E — all passing
+- Build: last verified clean (Step 43)
+- Tests: 260 Vitest (23 files) + 18 Playwright E2E — all passing
 - **AI review (docs/AI.md) fully implemented** — backlog A1–A7 / findings E1–E10 all closed
-- Migrations: 10 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`, `ai_session_import_logging`, `add_ai_base_url`)
+- Migrations: 11 applied (`init`, `add_user_admin_fields`, `add_language_model`, `add_ai_config`, `add_prd_starter`, `add_audit_log`, `add_notifications`, `add_project_templates`, `ai_session_import_logging`, `add_ai_base_url`, `add_version_source`)
 - All 17 UX audit items (UX-0 through UX-16) resolved
 - **All security-review findings (Rounds 1–3) resolved.** Note: self-registration is now OFF by default — set `REGISTRATION_ENABLED="true"` to re-enable.
