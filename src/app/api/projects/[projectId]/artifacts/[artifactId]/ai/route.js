@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma.js";
 import { withProjectRoute } from "@/lib/middleware/with-project-route.js";
 import { getAiConfig, getAiProvider, isAiAvailable } from "@/lib/ai/provider-factory.js";
 import { hasPromptBuilder } from "@/lib/ai/prompts/index.js";
+import { ARTIFACT_CONTEXT_INCLUDE, buildRelatedContext } from "@/lib/ai/artifact-context.js";
 import { errorResponse, successResponse } from "@/lib/errors.js";
 import { consumeRateLimit } from "@/lib/rate-limit.js";
 
@@ -45,36 +46,14 @@ export const POST = withProjectRoute(
     // Load artifact with related artifacts as context
     const artifact = await prisma.artifact.findUnique({
       where: { id: artifactId },
-      include: {
-        relationsFrom: {
-          include: { target: { select: { type: true, title: true, fields: true } } },
-        },
-        relationsTo: {
-          include: { source: { select: { type: true, title: true, fields: true } } },
-        },
-      },
+      include: ARTIFACT_CONTEXT_INCLUDE,
     });
 
     if (!artifact) {
       return errorResponse("NOT_FOUND", "Artefakt nicht gefunden", 404);
     }
 
-    // Build context string from related artifacts — capped so heavily linked
-    // artifacts cannot blow up the prompt (max 10 relations, 300 chars each)
-    const MAX_CONTEXT_ARTIFACTS = 10;
-    const MAX_CONTEXT_CHARS_PER_ARTIFACT = 300;
-    const relatedArtifacts = [
-      ...artifact.relationsFrom.map((r) => r.target),
-      ...artifact.relationsTo.map((r) => r.source),
-    ].slice(0, MAX_CONTEXT_ARTIFACTS);
-    const context = relatedArtifacts.length > 0
-      ? relatedArtifacts.map((a) => {
-          const fields = typeof a.fields === "string" ? JSON.parse(a.fields) : a.fields;
-          const values = Object.values(fields).filter(Boolean).join(" | ")
-            .slice(0, MAX_CONTEXT_CHARS_PER_ARTIFACT);
-          return `[${a.type}] ${a.title}: ${values}`;
-        }).join("\n")
-      : "";
+    const context = buildRelatedContext(artifact);
 
     const parsedFields = typeof artifact.fields === "string"
       ? JSON.parse(artifact.fields)

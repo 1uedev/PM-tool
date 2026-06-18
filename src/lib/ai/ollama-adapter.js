@@ -86,6 +86,28 @@ export class OllamaAdapter extends AiProvider {
     };
   }
 
+  // Conversational turn returning structured JSON ({ reply, proposal }).
+  // schema is described in the system prompt; JSON mode guarantees valid JSON.
+  async chat(messages, _schema) {
+    const response = await this.client.chat.completions.create(
+      {
+        model: this.model,
+        max_tokens: this.maxTokens,
+        response_format: { type: "json_object" },
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      },
+      { timeout: this.timeoutMs }
+    );
+    const text = response.choices[0]?.message?.content ?? "";
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = { reply: text, proposal: null };
+    }
+    return { json, usage: extractUsage(response) };
+  }
+
   async testConnection() {
     // Fast, meaningful check: server reachable + chosen model installed.
     // Avoids a cold model load (which can exceed the test timeout).

@@ -85,6 +85,41 @@ export class ClaudeAdapter extends AiProvider {
     };
   }
 
+  // Conversational turn returning structured JSON ({ reply, proposal }).
+  // System-role messages are lifted into Anthropic's top-level `system` param.
+  async chat(messages, schema) {
+    const system = messages
+      .filter((m) => m.role === "system")
+      .map((m) => m.content)
+      .join("\n\n");
+    const turns = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({ role: m.role, content: m.content }));
+
+    const response = await this.client.messages.create(
+      {
+        model: this.model,
+        max_tokens: this.maxTokens,
+        ...(system ? { system } : {}),
+        tools: [toolFor(schema)],
+        tool_choice: { type: "tool", name: "deliver_result" },
+        messages: turns,
+      },
+      { timeout: this.timeoutMs }
+    );
+
+    const usage = extractUsage(response);
+    const structured = toolInput(response);
+    if (structured) return { json: structured, usage };
+    // Defensive fallback: parse free text as JSON
+    const text = response.content.find((b) => b.type === "text")?.text ?? "";
+    try {
+      return { json: JSON.parse(text), usage };
+    } catch {
+      return { json: { reply: text, proposal: null }, usage };
+    }
+  }
+
   async testConnection() {
     const response = await this.client.messages.create(
       {

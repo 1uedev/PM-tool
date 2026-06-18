@@ -8,8 +8,16 @@
  * @@unique([artifactId, version]) constraint.
  *
  * `fields` is the JSON-stringified fields payload (as stored on the model).
+ *
+ * `source` records the change provenance ("MANUAL" by default, "AI_CHAT" for
+ * changes applied from the AI content chat); `note` optionally stores a short
+ * rationale for the change.
  */
-export async function updateArtifactWithVersion(tx, artifactId, { title, status, fields, authorId }) {
+export async function updateArtifactWithVersion(
+  tx,
+  artifactId,
+  { title, status, fields, authorId, source = "MANUAL", note = null }
+) {
   const lastVersion = await tx.artifactVersion.findFirst({
     where: { artifactId },
     orderBy: { version: "desc" },
@@ -30,6 +38,8 @@ export async function updateArtifactWithVersion(tx, artifactId, { title, status,
           fields,
           status,
           authorId,
+          source,
+          note,
         },
       },
     },

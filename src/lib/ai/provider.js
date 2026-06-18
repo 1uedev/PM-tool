@@ -9,4 +9,10 @@ export class AiProvider {
   async extractFromDocument(prompt) {
     throw new Error("Not implemented");
   }
+
+  // Used by the AI content chat: sends a message array and a JSON schema,
+  // returns { json, usage } where json is one structured turn.
+  async chat(messages, schema) {
+    throw new Error("Not implemented");
+  }
 }

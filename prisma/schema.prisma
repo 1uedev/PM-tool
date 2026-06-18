@@ -124,6 +124,8 @@ model ArtifactVersion {
   title      String
   fields     String   // JSON stored as text
   status     String
+  source     String   @default("MANUAL") // "MANUAL" | "AI_CHAT"
+  note       String?  // optional change rationale (e.g. from AI chat)
   authorId   String
   artifactId String
   createdAt  DateTime @default(now())
